@@ -6,13 +6,13 @@ import { WeatherWidget } from "@/components/WeatherWidget";
 import { DigestFeed } from "@/components/DigestFeed";
 import { PreferencesModal } from "@/components/PreferencesModal";
 import { N8nIntegrationGuide } from "@/components/N8nIntegrationGuide";
+import { LandingPage } from "@/components/LandingPage";
 import {
   WeatherData,
   DigestNewsItem,
   UserPreferences,
-  TopicCategory,
 } from "@/lib/types";
-import { RefreshCw, Sparkles, MapPin, Tag } from "lucide-react";
+import { MapPin, Tag, ArrowLeft } from "lucide-react";
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   name: "Subscriber",
@@ -27,6 +27,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
 };
 
 export default function Home() {
+  const [currentView, setCurrentView] = useState<"landing" | "dashboard">("landing");
   const [activeTab, setActiveTab] = useState<"digest" | "n8n">("digest");
   const [preferences, setPreferences] =
     useState<UserPreferences>(DEFAULT_PREFERENCES);
@@ -102,8 +103,33 @@ export default function Home() {
     loadDigest(updated);
   };
 
+  // If viewing landing page
+  if (currentView === "landing") {
+    return (
+      <LandingPage
+        initialPreferences={preferences}
+        onPreferencesChange={handleSavePreferences}
+        onEnterDashboard={() => setCurrentView("dashboard")}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50/50 font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-50">
+      {/* Return to Landing Page navigation bar banner */}
+      <div className="border-b border-zinc-200/80 bg-zinc-100/80 px-4 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/80">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <button
+            onClick={() => setCurrentView("landing")}
+            className="flex items-center gap-1.5 font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>← Back to Bio-Responsive Landing Page</span>
+          </button>
+          <span className="text-zinc-500">Reader Dashboard View</span>
+        </div>
+      </div>
+
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
