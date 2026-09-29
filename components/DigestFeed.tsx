@@ -11,6 +11,7 @@ import {
   TrendingUp,
   FlaskConical,
   Globe,
+  Trophy,
 } from "lucide-react";
 
 interface DigestFeedProps {
@@ -54,6 +55,11 @@ const CATEGORY_META: Record<
     label: "World News",
     icon: <Globe className="h-3.5 w-3.5 text-rose-500" />,
     color: "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300",
+  },
+  sports: {
+    label: "Sports",
+    icon: <Trophy className="h-3.5 w-3.5 text-orange-500" />,
+    color: "bg-orange-50 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300",
   },
 };
 

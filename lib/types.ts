@@ -3,6 +3,7 @@ export type TopicCategory =
   | "ai"
   | "startups"
   | "business"
+  | "sports"
   | "science"
   | "world";
 
@@ -13,6 +14,9 @@ export interface WeatherData {
   longitude: number;
   temperature: number;
   apparentTemperature: number;
+  highTemp?: number;
+  lowTemp?: number;
+  precipitationProbability?: number;
   weatherCode: number;
   conditionText: string;
   windSpeed: number;
@@ -28,6 +32,35 @@ export interface WeatherData {
   lifestyleAdvice?: string;
 }
 
+export interface BriefingStory {
+  id: string;
+  number: string;
+  category: TopicCategory;
+  categoryLabel: string;
+  categoryIcon: string;
+  title: string;
+  summary: string;
+  whyItMatters: string;
+  source: string;
+  publishedAt: string;
+  readingTime: string;
+  url: string;
+  isBookmarked?: boolean;
+}
+
+export interface MorningBriefing {
+  id: string;
+  date: string;
+  dateFormatted: string;
+  dayOfWeek: string;
+  recipientName: string;
+  storiesCount: number;
+  estimatedReadTime: string;
+  weather: WeatherData;
+  stories: BriefingStory[];
+  generatedAt: string;
+}
+
 export interface DigestNewsItem {
   id: string;
   title: string;
@@ -37,6 +70,7 @@ export interface DigestNewsItem {
   category: TopicCategory;
   publishedAt: string;
   aiTakeaway?: string;
+  whyItMatters?: string;
 }
 
 export interface DailyDigest {

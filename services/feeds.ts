@@ -30,6 +30,9 @@ const TOPIC_FEEDS: Record<TopicCategory, { name: string; url: string }[]> = {
   world: [
     { name: "BBC Top Stories", url: "https://feeds.bbci.co.uk/news/rss.xml" },
   ],
+  sports: [
+    { name: "ESPN Top Headlines", url: "https://www.espn.com/espn/rss/news" },
+  ],
 };
 
 // Fallback curated mock items in case of network timeouts during dev
@@ -114,6 +117,18 @@ const MOCK_ITEMS: Record<TopicCategory, DigestNewsItem[]> = {
       category: "world",
       publishedAt: new Date().toISOString(),
       aiTakeaway: "Grid-scale battery costs have crossed economic tipping points in major developing economies.",
+    },
+  ],
+  sports: [
+    {
+      id: "sports-1",
+      title: "Champions League Quarterfinals Draw Confirmed with Key Continental Matchups",
+      summary: "UEFA reveals the definitive knockout bracket with reigning title holders facing top contenders in April.",
+      source: "BBC Sport",
+      url: "https://bbc.com/sport",
+      category: "sports",
+      publishedAt: new Date().toISOString(),
+      aiTakeaway: "Tactical rotations and continental fixture congestion will test squad depths over the next month.",
     },
   ],
 };

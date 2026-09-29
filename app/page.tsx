@@ -15,12 +15,12 @@ import {
 import { MapPin, Tag, ArrowLeft } from "lucide-react";
 
 const DEFAULT_PREFERENCES: UserPreferences = {
-  name: "Subscriber",
-  email: "reader@betadigest.app",
-  city: "San Francisco",
-  latitude: 37.7749,
-  longitude: -122.4194,
-  topics: ["tech", "ai", "startups"],
+  name: "Emeka",
+  email: "emeka@betadigest.app",
+  city: "Port Harcourt",
+  latitude: 4.8156,
+  longitude: 7.0498,
+  topics: ["tech", "ai", "business", "startups"],
   deliveryTime: "07:00",
   emailEnabled: true,
   pushEnabled: false,
@@ -124,7 +124,7 @@ export default function Home() {
             className="flex items-center gap-1.5 font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            <span>← Back to Bio-Responsive Landing Page</span>
+            <span>← Back to Morning Briefing</span>
           </button>
           <span className="text-zinc-500">Reader Dashboard View</span>
         </div>
