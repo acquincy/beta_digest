@@ -1,69 +1,196 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { Header } from "@/components/Header";
+import { WeatherWidget } from "@/components/WeatherWidget";
+import { DigestFeed } from "@/components/DigestFeed";
+import { PreferencesModal } from "@/components/PreferencesModal";
+import { N8nIntegrationGuide } from "@/components/N8nIntegrationGuide";
+import {
+  WeatherData,
+  DigestNewsItem,
+  UserPreferences,
+  TopicCategory,
+} from "@/lib/types";
+import { RefreshCw, Sparkles, MapPin, Tag } from "lucide-react";
+
+const DEFAULT_PREFERENCES: UserPreferences = {
+  name: "Subscriber",
+  email: "reader@betadigest.app",
+  city: "San Francisco",
+  latitude: 37.7749,
+  longitude: -122.4194,
+  topics: ["tech", "ai", "startups"],
+  deliveryTime: "07:00",
+  emailEnabled: true,
+  pushEnabled: false,
+};
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<"digest" | "n8n">("digest");
+  const [preferences, setPreferences] =
+    useState<UserPreferences>(DEFAULT_PREFERENCES);
+  const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
+
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [newsItems, setNewsItems] = useState<DigestNewsItem[]>([]);
+  const [overview, setOverview] = useState<string>("");
+  const [source, setSource] = useState<string>("local_pipeline");
+
+  const [loadingWeather, setLoadingWeather] = useState(false);
+  const [loadingDigest, setLoadingDigest] = useState(false);
+
+  // Load weather data
+  const loadWeather = useCallback(async (lat: number, lon: number, city: string) => {
+    setLoadingWeather(true);
+    try {
+      const res = await fetch(
+        `/api/weather?lat=${lat}&lon=${lon}&city=${encodeURIComponent(city)}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setWeather(data);
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setLoadingWeather(false);
+    }
+  }, []);
+
+  // Load digest
+  const loadDigest = useCallback(
+    async (prefs: UserPreferences) => {
+      setLoadingDigest(true);
+      try {
+        const res = await fetch("/api/digest/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            city: prefs.city,
+            latitude: prefs.latitude,
+            longitude: prefs.longitude,
+            topics: prefs.topics,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.digest) {
+            setNewsItems(data.digest.newsItems);
+            setOverview(data.digest.overview);
+            setSource(data.digest.generatedBy);
+          }
+        }
+      } catch {
+        // Fallback
+      } finally {
+        setLoadingDigest(false);
+      }
+    },
+    []
+  );
+
+  // Initial load
+  useEffect(() => {
+    loadWeather(preferences.latitude, preferences.longitude, preferences.city);
+    loadDigest(preferences);
+  }, [loadWeather, loadDigest, preferences]);
+
+  const handleSavePreferences = (updated: UserPreferences) => {
+    setPreferences(updated);
+    loadWeather(updated.latitude, updated.longitude, updated.city);
+    loadDigest(updated);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen bg-zinc-50/50 font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-50">
+      <Header
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenPreferences={() => setIsPreferencesOpen(true)}
+        onOpenN8nGuide={() => setActiveTab("n8n")}
+      />
+
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        {activeTab === "digest" ? (
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+            {/* Left Sidebar: Weather Widget + User Context */}
+            <div className="space-y-6 lg:col-span-4">
+              <WeatherWidget
+                weather={weather}
+                loading={loadingWeather}
+                onRefresh={() =>
+                  loadWeather(
+                    preferences.latitude,
+                    preferences.longitude,
+                    preferences.city
+                  )
+                }
+                onOpenLocationChange={() => setIsPreferencesOpen(true)}
+              />
+
+              {/* Active Profile Context Card */}
+              <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                    Active Digest Profile
+                  </h3>
+                  <button
+                    onClick={() => setIsPreferencesOpen(true)}
+                    className="text-xs font-medium text-orange-600 hover:text-orange-700 dark:text-orange-400"
+                  >
+                    Edit
+                  </button>
+                </div>
+
+                <div className="mt-4 space-y-3 text-xs">
+                  <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                    <MapPin className="h-4 w-4 text-orange-500" />
+                    <span>{preferences.city}</span>
+                  </div>
+
+                  <div className="flex items-start gap-2 text-zinc-600 dark:text-zinc-300">
+                    <Tag className="mt-0.5 h-4 w-4 text-orange-500" />
+                    <div className="flex flex-wrap gap-1">
+                      {preferences.topics.map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                        >
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Main Column: Digest Feed */}
+            <div className="lg:col-span-8">
+              <DigestFeed
+                newsItems={newsItems}
+                overview={
+                  overview ||
+                  "Generating your curated morning digest based on selected feeds and live weather..."
+                }
+                source={source}
+                onRefresh={() => loadDigest(preferences)}
+                loading={loadingDigest}
+              />
+            </div>
+          </div>
+        ) : (
+          <N8nIntegrationGuide />
+        )}
       </main>
+
+      <PreferencesModal
+        isOpen={isPreferencesOpen}
+        onClose={() => setIsPreferencesOpen(false)}
+        preferences={preferences}
+        onSave={handleSavePreferences}
+      />
     </div>
   );
 }

@@ -1,0 +1,148 @@
+{
+  "name": "Beta Digest - Daily Weather & AI News Ingestion Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "e4f80ad2-1111-4000-8000-000000000001",
+      "name": "Daily Morning Schedule (07:00 AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=37.7749&longitude=-122.4194&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto&forecast_days=3",
+        "options": {}
+      },
+      "id": "e4f80ad2-1111-4000-8000-000000000002",
+      "name": "Fetch Weather (Open-Meteo)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://news.ycombinator.com/rss",
+        "options": {}
+      },
+      "id": "e4f80ad2-1111-4000-8000-000000000003",
+      "name": "Read Tech RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate weather and top news items for AI synthesis\nconst weatherData = $('Fetch Weather (Open-Meteo)').first().json;\nconst rssItems = $('Read Tech RSS Feed').all().slice(0, 5);\n\nconst formattedArticles = rssItems.map(item => ({\n  id: item.json.guid || item.json.link,\n  title: item.json.title,\n  summary: item.json.contentSnippet || item.json.summary || 'Summary unavailable',\n  source: 'Hacker News',\n  url: item.json.link,\n  category: 'tech',\n  publishedAt: item.json.pubDate || new Date().toISOString(),\n  aiTakeaway: 'Notable technology momentum update'\n}));\n\nconst current = weatherData.current || {};\nconst weatherSummary = {\n  city: 'San Francisco',\n  temperature: Math.round(current.temperature_2m || 18),\n  apparentTemperature: Math.round(current.apparent_temperature || 18),\n  weatherCode: current.weather_code || 1,\n  conditionText: 'Mainly Clear',\n  windSpeed: Math.round(current.wind_speed_10m || 10),\n  humidity: current.relative_humidity_2m || 65,\n  lifestyleAdvice: 'Great conditions for an early commute or morning walk.'\n};\n\nconst today = new Date().toISOString().split('T')[0];\n\nreturn [{\n  json: {\n    date: today,\n    overview: `Your Beta Digest for ${today}: Crisp weather and top developments in technology.`,\n    weatherSummary: weatherSummary,\n    newsSummary: formattedArticles,\n    source: 'n8n_automated_workflow'\n  }\n}];"
+      },
+      "id": "e4f80ad2-1111-4000-8000-000000000004",
+      "name": "Synthesize Digest Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/webhooks/n8n",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-n8n-signature",
+              "value": "beta-digest-secure-key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "e4f80ad2-1111-4000-8000-000000000005",
+      "name": "Post to Beta Digest Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Daily Morning Schedule (07:00 AM)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Weather (Open-Meteo)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Tech RSS Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Weather (Open-Meteo)": {
+      "main": [
+        [
+          {
+            "node": "Synthesize Digest Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Tech RSS Feed": {
+      "main": [
+        [
+          {
+            "node": "Synthesize Digest Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Synthesize Digest Payload": {
+      "main": [
+        [
+          {
+            "node": "Post to Beta Digest Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
