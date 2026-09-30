@@ -7,6 +7,16 @@ export type TopicCategory =
   | "science"
   | "world";
 
+export interface HourlyForecastPoint {
+  time: string; // e.g., "07:00", "08:00"
+  fullTime: string; // ISO string
+  temperature: number;
+  precipitationProbability: number;
+  weatherCode: number;
+  conditionText: string;
+  isCommuteWindow: boolean;
+}
+
 export interface WeatherData {
   city: string;
   country?: string;
@@ -22,6 +32,10 @@ export interface WeatherData {
   windSpeed: number;
   humidity: number;
   uvIndex?: number;
+  sunrise?: string;
+  sunset?: string;
+  commuteAdvice?: string;
+  hourlyTimeline?: HourlyForecastPoint[];
   dailyForecast: {
     date: string;
     maxTemp: number;
@@ -54,6 +68,8 @@ export interface MorningBriefing {
   dateFormatted: string;
   dayOfWeek: string;
   recipientName: string;
+  overview: string;
+  commuteSnippet: string;
   storiesCount: number;
   estimatedReadTime: string;
   weather: WeatherData;

@@ -113,12 +113,17 @@ export function generateMorningBriefing(
     day: "numeric",
   }).toUpperCase();
 
+  const commuteSnippet = weather.commuteAdvice || `${weather.conditionText}, ${weather.temperature}°C morning conditions.`;
+  const overview = `Good morning, ${recipientName}. In ${weather.city}, expect ${weather.conditionText.toLowerCase()} (${weather.temperature}°C). ${commuteSnippet} Today's essential briefing covers ${stories.length} critical developments across ${activeTopics.join(", ")}.`;
+
   return {
     id: `briefing-${now.toISOString().split("T")[0]}`,
     date: now.toISOString().split("T")[0],
     dateFormatted: `${dayOfWeek} · ${dateFormatted}`,
     dayOfWeek,
     recipientName,
+    overview,
+    commuteSnippet,
     storiesCount: stories.length,
     estimatedReadTime: `${Math.max(2, Math.round(stories.length * 0.9))} min read`,
     weather,

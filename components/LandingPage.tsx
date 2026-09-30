@@ -65,6 +65,7 @@ export function LandingPage({
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
   const [showForecastDetails, setShowForecastDetails] = useState(false);
+  const [weatherTab, setWeatherTab] = useState<"commute" | "forecast">("commute");
 
   // Stories & Bookmarks state
   const [stories, setStories] = useState<BriefingStory[]>(INITIAL_STORIES);
@@ -293,7 +294,7 @@ export function LandingPage({
 
       {/* MAIN CONTAINER (Centered Editorial Layout, Max Width 4xl) */}
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
-        {/* 2. HERO — MAKE IT THE PRODUCT */}
+        {/* 2. HERO — MAKE IT THE PRODUCT (DEEP NARRATIVE FUSION) */}
         <section className="mb-8">
           <div className="text-xs font-semibold tracking-widest text-zinc-400 uppercase">
             {dateFormatted}
@@ -309,9 +310,17 @@ export function LandingPage({
           <p className="mt-2.5 max-w-2xl text-sm sm:text-base text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed">
             Your weather, the stories worth knowing, and the context behind them — in one short morning briefing.
           </p>
+
+          {/* Deep narrative weather context callout */}
+          {weather?.commuteAdvice && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-orange-50/80 px-3.5 py-1.5 text-xs text-orange-900 dark:bg-orange-950/40 dark:text-orange-200 border border-orange-200/60 dark:border-orange-900/60">
+              <span className="font-semibold">Commute & Weather Brief:</span>
+              <span>{weather.commuteAdvice}</span>
+            </div>
+          )}
         </section>
 
-        {/* 3. WEATHER — CORE PART OF THE HERO */}
+        {/* 3. WEATHER — CORE PART OF THE HERO (HYBRID 8-HOUR COMMUTE & MACRO OUTLOOK) */}
         <section className="mb-12">
           {loadingWeather ? (
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900 animate-pulse">
@@ -334,7 +343,7 @@ export function LandingPage({
               {/* Primary Weather Bar */}
               <div className="p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  {/* Left: Icon + Temperature + Condition + Location */}
+                  {/* Left: Icon + Temperature + Condition + Location + Sunrise/Sunset */}
                   <div className="flex items-center gap-4">
                     <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-orange-50/70 p-2 text-amber-500 dark:bg-zinc-800">
                       {renderWeatherIcon(weather.weatherCode)}
@@ -348,8 +357,20 @@ export function LandingPage({
                           {weather.conditionText}
                         </span>
                       </div>
-                      <div className="text-xs text-zinc-400 font-medium">
-                        {weather.city}{weather.country ? `, ${weather.country}` : ""}
+                      <div className="text-xs text-zinc-400 font-medium flex items-center gap-2 mt-0.5">
+                        <span>{weather.city}{weather.country ? `, ${weather.country}` : ""}</span>
+                        {weather.sunrise && (
+                          <>
+                            <span>·</span>
+                            <span>Sunrise {weather.sunrise}</span>
+                          </>
+                        )}
+                        {weather.sunset && (
+                          <>
+                            <span>·</span>
+                            <span>Sunset {weather.sunset}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -385,40 +406,110 @@ export function LandingPage({
                   </div>
                 </div>
 
-                {/* Advisory / Forecast Action */}
-                <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-zinc-100 pt-3 text-xs dark:border-zinc-800/80">
+                {/* Advisory / Forecast Tabs Toggle */}
+                <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-zinc-100 pt-3 text-xs dark:border-zinc-800/80">
                   <div className="text-zinc-600 dark:text-zinc-400">
                     {weather.lifestyleAdvice || "Warm and bright morning. High UV around midday, light afternoon rain possible."}
                   </div>
-                  <button
-                    onClick={() => setShowForecastDetails(!showForecastDetails)}
-                    className="inline-flex items-center gap-1 font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400"
-                  >
-                    <span>{showForecastDetails ? "Hide forecast" : "View forecast →"}</span>
-                    {showForecastDetails ? <ChevronUp className="h-3.5 w-3.5" /> : null}
-                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setShowForecastDetails(true);
+                        setWeatherTab("commute");
+                      }}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                        showForecastDetails && weatherTab === "commute"
+                          ? "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300"
+                          : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                      }`}
+                    >
+                      8h Commute Timeline
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowForecastDetails(true);
+                        setWeatherTab("forecast");
+                      }}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                        showForecastDetails && weatherTab === "forecast"
+                          ? "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300"
+                          : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                      }`}
+                    >
+                      3-Day Outlook
+                    </button>
+                    {showForecastDetails && (
+                      <button
+                        onClick={() => setShowForecastDetails(false)}
+                        className="p-1 text-zinc-400 hover:text-zinc-600"
+                        title="Collapse"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Collapsible 3-day forecast */}
-              {showForecastDetails && weather.dailyForecast && (
+              {/* Collapsible Content: 8-Hour Commute Timeline OR 3-Day Forecast */}
+              {showForecastDetails && (
                 <div className="border-t border-zinc-100 bg-zinc-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {weather.dailyForecast.slice(0, 3).map((day, idx) => (
-                      <div
-                        key={idx}
-                        className="rounded-xl border border-zinc-200/80 bg-white p-3 text-xs dark:border-zinc-800 dark:bg-zinc-900"
-                      >
-                        <div className="font-semibold text-zinc-500 dark:text-zinc-400">
-                          {day.date}
-                        </div>
-                        <div className="my-1 text-base font-bold text-zinc-900 dark:text-zinc-100">
-                          {day.maxTemp}° / {day.minTemp}°
-                        </div>
-                        <div className="text-[11px] text-zinc-500">{day.conditionText}</div>
+                  {weatherTab === "commute" && weather.hourlyTimeline ? (
+                    <div>
+                      <div className="mb-2.5 flex items-center justify-between text-[11px] text-zinc-500">
+                        <span className="font-semibold uppercase tracking-wider text-zinc-400">
+                          Next 8 Hours · Commute & Precipitation Horizon
+                        </span>
+                        <span>Rain risk peak highlighted</span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
+                        {weather.hourlyTimeline.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className={`rounded-xl border p-2 text-center text-xs transition-colors ${
+                              item.isCommuteWindow
+                                ? "border-orange-200 bg-white shadow-2xs dark:border-orange-900/60 dark:bg-zinc-900"
+                                : "border-zinc-200/70 bg-white/70 dark:border-zinc-800 dark:bg-zinc-900/60"
+                            }`}
+                          >
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="font-mono text-[11px] font-bold text-zinc-700 dark:text-zinc-300">
+                                {item.time}
+                              </span>
+                              {item.isCommuteWindow && (
+                                <span className="h-1.5 w-1.5 rounded-full bg-orange-500" title="Commute hour" />
+                              )}
+                            </div>
+                            <div className="my-1 text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                              {item.temperature}°
+                            </div>
+                            <div className="flex items-center justify-center gap-1 text-[10px] text-blue-600 dark:text-blue-400">
+                              <CloudRain className="h-2.5 w-2.5" />
+                              <span>{item.precipitationProbability}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : weather.dailyForecast ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {weather.dailyForecast.slice(0, 3).map((day, idx) => (
+                        <div
+                          key={idx}
+                          className="rounded-xl border border-zinc-200/80 bg-white p-3 text-xs dark:border-zinc-800 dark:bg-zinc-900"
+                        >
+                          <div className="font-semibold text-zinc-500 dark:text-zinc-400">
+                            {day.date}
+                          </div>
+                          <div className="my-1 text-base font-bold text-zinc-900 dark:text-zinc-100">
+                            {day.maxTemp}° / {day.minTemp}°
+                          </div>
+                          <div className="text-[11px] text-zinc-500">{day.conditionText}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               )}
             </div>
