@@ -250,12 +250,14 @@ export function LandingPage({
       {/* ── Main content ── */}
       <main className="mx-auto max-w-3xl px-5 py-8 sm:py-10">
         {/* ── Greeting + Date ── */}
-        <section className="mb-6">
-          <p className="text-xs text-zinc-400 font-medium">{todayLabel}</p>
-          <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight leading-snug">
+        <section className="mb-8 sm:mb-10">
+          <p className="text-xs sm:text-sm font-semibold text-zinc-500 uppercase tracking-wider">
+            {todayLabel}
+          </p>
+          <h1 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 text-balance leading-[1.15]">
             {greeting}, {preferences.name || "there"}.
           </h1>
-          <p className="mt-1 text-zinc-500 text-sm leading-relaxed max-w-lg">
+          <p className="mt-3 sm:mt-4 text-base sm:text-lg text-zinc-600 leading-relaxed max-w-xl text-pretty">
             Your weather and the stories worth knowing — summarized in a few
             minutes.
           </p>
