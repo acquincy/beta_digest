@@ -27,11 +27,17 @@ import {
 import { FALLBACK_WEATHER_PORT_HARCOURT } from "@/services/weather";
 import { EDITORIAL_STORIES as INITIAL_STORIES } from "@/services/briefing";
 
-interface LandingPageProps {
-  onEnterDashboard: () => void;
-  initialPreferences: UserPreferences;
-  onPreferencesChange: (prefs: UserPreferences) => void;
-}
+const DEFAULT_PREFERENCES: UserPreferences = {
+  name: "Emeka",
+  email: "emeka@betadigest.app",
+  city: "Port Harcourt",
+  latitude: 4.8156,
+  longitude: 7.0498,
+  topics: ["tech", "ai", "business", "startups"],
+  deliveryTime: "07:00",
+  emailEnabled: true,
+  pushEnabled: false,
+};
 
 interface TopicOption {
   id: TopicCategory;
@@ -49,13 +55,9 @@ const ALL_TOPICS: TopicOption[] = [
   { id: "science", label: "Science", emoji: "🔬" },
 ];
 
-export function LandingPage({
-  onEnterDashboard,
-  initialPreferences,
-  onPreferencesChange,
-}: LandingPageProps) {
+export function LandingPage() {
   const [preferences, setPreferences] =
-    useState<UserPreferences>(initialPreferences);
+    useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
   const [email, setEmail] = useState("");
@@ -145,7 +147,6 @@ export function LandingPage({
     }
     const updated = { ...preferences, topics: next };
     setPreferences(updated);
-    onPreferencesChange(updated);
     try {
       localStorage.setItem("beta_digest_topics", JSON.stringify(next));
     } catch {
@@ -184,7 +185,6 @@ export function LandingPage({
       longitude: city.longitude,
     };
     setPreferences(updated);
-    onPreferencesChange(updated);
     setShowCitySearch(false);
     setSearchQuery("");
     setSearchResults([]);
@@ -234,14 +234,6 @@ export function LandingPage({
             >
               <MapPin className="h-3 w-3 text-orange-600" />
               {preferences.city}
-            </button>
-
-            <button
-              onClick={onEnterDashboard}
-              className="hidden sm:flex items-center gap-1 rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
-            >
-              Open Dashboard
-              <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         </div>
@@ -435,13 +427,6 @@ export function LandingPage({
                 <strong className="text-zinc-700">{email}</strong> tomorrow
                 morning.
               </p>
-              <button
-                onClick={onEnterDashboard}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-5 py-2 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
-              >
-                Explore the dashboard
-                <ArrowRight className="h-3 w-3" />
-              </button>
             </div>
           ) : (
             <div>
@@ -526,12 +511,6 @@ export function LandingPage({
             <span>·</span>
             <span>Your daily briefing, summarized.</span>
           </div>
-          <button
-            onClick={onEnterDashboard}
-            className="text-orange-600 font-medium hover:text-orange-700 transition-colors"
-          >
-            Open Dashboard →
-          </button>
         </footer>
       </main>
 
