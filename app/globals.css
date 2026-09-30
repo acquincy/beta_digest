@@ -1,26 +1,268 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Prompt Tokens — Never pure white or pure black */
+  --cream: #f3f2ee;
+  --cream-2: #e8e6e0;
+  --ink: #141414;
+  --ink-2: #5d5a54;
+  --purple: #5722CB;
+  --purple-hover: #4818b0;
+  --line: rgba(20, 20, 20, 0.12);
+
+  /* Semantic Variables (Light Mode) */
+  --bg-page: var(--cream);
+  --bg-panel: var(--cream-2);
+  --bg-panel-subtle: #dedcd4;
+  --bg-glass: rgba(243, 242, 238, 0.82);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-2);
+  --border-wireframe: var(--line);
+  --border-wireframe-hover: rgba(20, 20, 20, 0.24);
+  --pill-highlight: inset 0 1px 0 0 rgba(243, 242, 238, 0.85);
+
+  /* Typography Fallbacks */
+  --font-editorial: "Hanken Grotesk", "Inter Tight", var(--font-hanken), var(--font-inter-tight), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root.dark {
+  /* Dark Mode Tokens: ink background, cream text, same purple */
+  --bg-page: #141414;
+  --bg-panel: #1e1d1a;
+  --bg-panel-subtle: #272521;
+  --bg-glass: rgba(20, 20, 20, 0.84);
+  --text-primary: #f3f2ee;
+  --text-secondary: #b5b1a8;
+  --border-wireframe: rgba(243, 242, 238, 0.12);
+  --border-wireframe-hover: rgba(243, 242, 238, 0.28);
+  --pill-highlight: inset 0 1px 0 0 rgba(243, 242, 238, 0.18);
+  --line: rgba(243, 242, 238, 0.12);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not(.light) {
+    --bg-page: #141414;
+    --bg-panel: #1e1d1a;
+    --bg-panel-subtle: #272521;
+    --bg-glass: rgba(20, 20, 20, 0.84);
+    --text-primary: #f3f2ee;
+    --text-secondary: #b5b1a8;
+    --border-wireframe: rgba(243, 242, 238, 0.12);
+    --border-wireframe-hover: rgba(243, 242, 238, 0.28);
+    --pill-highlight: inset 0 1px 0 0 rgba(243, 242, 238, 0.18);
+    --line: rgba(243, 242, 238, 0.12);
   }
 }
 
+html {
+  font-family: var(--font-editorial);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Tabular Numerals per prompt */
+.tabular-nums,
+[data-tabular] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Headings Typography: h1/h2 clamp(44px, 7vw, 96px), letter-spacing -0.04em, line-height 0.98, weight 500 */
+.editorial-heading {
+  font-size: clamp(44px, 7vw, 96px);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+.editorial-body {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.editorial-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+/* 1px Wireframe Bento Panels: cream-2 with 1px --line border and 20px radius, no shadows */
+.bento-panel {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-wireframe);
+  border-radius: 20px;
+  box-shadow: none;
+  transition: border-color 0.2s ease, background-color 0.3s ease;
+}
+
+.bento-panel:hover {
+  border-color: var(--border-wireframe-hover);
+}
+
+/* Floating Glass Pill Navigation */
+.floating-glass-pill {
+  background-color: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--pill-highlight);
+  border: 1px solid var(--border-wireframe);
+  border-radius: 9999px;
+}
+
+/* Primary Button Styling: 200ms color shift and 2px lift */
+.btn-primary-purple {
+  background-color: var(--purple);
+  color: var(--cream);
+  font-weight: 500;
+  transition: transform 200ms ease-out, background-color 200ms ease-out;
+}
+
+@media (hover: hover) {
+  .btn-primary-purple:hover {
+    background-color: var(--purple-hover);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-primary-purple:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.btn-cream {
+  background-color: var(--cream);
+  color: var(--purple);
+  font-weight: 600;
+  transition: transform 200ms ease-out, background-color 200ms ease-out, color 200ms ease-out;
+}
+
+@media (hover: hover) {
+  .btn-cream:hover {
+    background-color: var(--cream-2);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-cream:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Flip Cards 3D Mechanics: perspective 1600px and preserve-3d */
+.flip-card-perspective {
+  perspective: 1600px;
+}
+
+.flip-card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.2, 0, 0, 1);
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+@media (hover: hover) {
+  .flip-card-container:hover .flip-card-inner {
+    transform: rotateY(180deg);
+  }
+}
+
+.flip-card-container.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Proof Infinite Marquee */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 38s linear infinite;
+}
+
+.animate-marquee:hover,
+.marquee-container:hover .animate-marquee,
+.marquee-container:focus-within .animate-marquee {
+  animation-play-state: paused;
+}
+
+/* Visible Focus Rings in Purple per prompt & better-accessibility */
+:focus-visible {
+  outline: 2px solid var(--purple) !important;
+  outline-offset: 2px !important;
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-marquee {
+    animation: none !important;
+    transform: none !important;
+  }
+  .flip-card-container:hover .flip-card-inner,
+  .flip-card-container.is-flipped .flip-card-inner {
+    transform: none !important;
+  }
+  .flip-card-inner {
+    transform-style: flat !important;
+  }
+  .flip-card-back {
+    position: relative !important;
+    transform: none !important;
+    display: none;
+  }
+  .flip-card-container.is-flipped .flip-card-front {
+    display: none;
+  }
+  .flip-card-container.is-flipped .flip-card-back {
+    display: flex !important;
+  }
+  .svg-clarity-path,
+  .svg-dusk-path {
+    opacity: 0.22 !important;
+    stroke-dashoffset: 0 !important;
+  }
 }
