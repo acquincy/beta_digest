@@ -4,17 +4,15 @@ import Script from "next/script";
 import "./globals.css";
 
 const hankenGrotesk = Hanken_Grotesk({
-  variable: "--font-hanken",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
+  variable: "--font-hanken",
 });
 
 const interTight = Inter_Tight({
-  variable: "--font-inter-tight",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
+  variable: "--font-inter-tight",
 });
 
 export const metadata: Metadata = {
