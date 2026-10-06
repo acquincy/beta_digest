@@ -54,6 +54,10 @@ export function generateLifestyleAdvice(
     advice += "Pleasant temperatures for your morning commute.";
   }
 
+  if (windSpeed > 30) {
+    advice += " Breezy conditions; hold onto lightweight gear.";
+  }
+
   return advice.trim();
 }
 

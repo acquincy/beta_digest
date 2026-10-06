@@ -1,268 +1,172 @@
 @import "tailwindcss";
 
 :root {
-  /* Prompt Tokens — Never pure white or pure black */
-  --cream: #f3f2ee;
-  --cream-2: #e8e6e0;
-  --ink: #141414;
-  --ink-2: #5d5a54;
-  --purple: #5722CB;
-  --purple-hover: #4818b0;
-  --line: rgba(20, 20, 20, 0.12);
+  /* Visual System Tokens — Exact Specs */
+  --lime: #D0FE54;
+  --lime-hover: #C3F043;
+  --lime-tint: #F6FFDD;
+  --lilac: #D586CE;
+  --lilac-bright: #E074D7;
+  --spring: #98FDCA;
+  --black: #000000;
+  --text: #292B2D;
+  --text-muted: #8E9096;
+  --text-muted-sm: #6B6F76;
+  --canvas: #F4F5F9;
+  --chip-off: #F7F7F7;
+  --white: #FFFFFF;
+  --line: rgba(0, 0, 0, 0.10);
+  --track: #E8E8E8;
+  --error: #E64D51;
+  --success: #3CE07E;
+  --sms-green: linear-gradient(228deg, #54F270 -0.07%, #13C332 96.6%);
+  --accent-gradient: linear-gradient(80deg, #E074D7 0.84%, #D586CE 99.38%);
 
-  /* Semantic Variables (Light Mode) */
-  --bg-page: var(--cream);
-  --bg-panel: var(--cream-2);
-  --bg-panel-subtle: #dedcd4;
-  --bg-glass: rgba(243, 242, 238, 0.82);
-  --text-primary: var(--ink);
-  --text-secondary: var(--ink-2);
-  --border-wireframe: var(--line);
-  --border-wireframe-hover: rgba(20, 20, 20, 0.24);
-  --pill-highlight: inset 0 1px 0 0 rgba(243, 242, 238, 0.85);
+  /* Shadows */
+  --shadow-tile: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --shadow-extrude: 0 15px 0 rgba(0, 0, 0, 0.10);
+  --shadow-float: 0 0 30px rgba(0, 0, 0, 0.10);
 
-  /* Typography Fallbacks */
-  --font-editorial: "Hanken Grotesk", "Inter Tight", var(--font-hanken), var(--font-inter-tight), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Radii */
+  --radius-card-xl: 40px;
+  --radius-card-lg: 32px;
+  --radius-card: 24px;
+  --radius-tile: 16px;
+  --radius-input-box: 16px;
+  --radius-chip: 9999px;
+  --radius-sm-rect: 8px;
+
+  /* Font Families */
+  --font-display: var(--font-red-hat-display), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-:root.dark {
-  /* Dark Mode Tokens: ink background, cream text, same purple */
-  --bg-page: #141414;
-  --bg-panel: #1e1d1a;
-  --bg-panel-subtle: #272521;
-  --bg-glass: rgba(20, 20, 20, 0.84);
-  --text-primary: #f3f2ee;
-  --text-secondary: #b5b1a8;
-  --border-wireframe: rgba(243, 242, 238, 0.12);
-  --border-wireframe-hover: rgba(243, 242, 238, 0.28);
-  --pill-highlight: inset 0 1px 0 0 rgba(243, 242, 238, 0.18);
-  --line: rgba(243, 242, 238, 0.12);
-}
+@theme {
+  --color-lime: var(--lime);
+  --color-lime-hover: var(--lime-hover);
+  --color-lime-tint: var(--lime-tint);
+  --color-lilac: var(--lilac);
+  --color-lilac-bright: var(--lilac-bright);
+  --color-spring: var(--spring);
+  --color-black: var(--black);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-muted-sm: var(--text-muted-sm);
+  --color-canvas: var(--canvas);
+  --color-chip-off: var(--chip-off);
+  --color-white: var(--white);
+  --color-line: var(--line);
+  --color-track: var(--track);
+  --color-error: var(--error);
+  --color-success: var(--success);
 
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --bg-page: #141414;
-    --bg-panel: #1e1d1a;
-    --bg-panel-subtle: #272521;
-    --bg-glass: rgba(20, 20, 20, 0.84);
-    --text-primary: #f3f2ee;
-    --text-secondary: #b5b1a8;
-    --border-wireframe: rgba(243, 242, 238, 0.12);
-    --border-wireframe-hover: rgba(243, 242, 238, 0.28);
-    --pill-highlight: inset 0 1px 0 0 rgba(243, 242, 238, 0.18);
-    --line: rgba(243, 242, 238, 0.12);
-  }
+  --font-display: var(--font-display);
+  --font-sans: var(--font-body);
+
+  --radius-card-xl: 40px;
+  --radius-card-lg: 32px;
+  --radius-card: 24px;
+  --radius-tile: 16px;
+  --radius-input-box: 16px;
+  --radius-chip: 9999px;
+  --radius-sm-rect: 8px;
 }
 
 html {
-  font-family: var(--font-editorial);
-  background-color: var(--bg-page);
-  color: var(--text-primary);
+  font-family: var(--font-body);
+  background-color: var(--canvas);
+  color: var(--text);
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background-color: var(--bg-page);
-  color: var(--text-primary);
+  background-color: var(--canvas);
+  color: var(--text);
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  min-height: 100%;
 }
 
-/* Tabular Numerals per prompt */
+/* Tabular Numerals applied to all times, temps, percentages, dates and counters */
 .tabular-nums,
 [data-tabular] {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
 
-/* Headings Typography: h1/h2 clamp(44px, 7vw, 96px), letter-spacing -0.04em, line-height 0.98, weight 500 */
-.editorial-heading {
-  font-size: clamp(44px, 7vw, 96px);
-  letter-spacing: -0.04em;
-  line-height: 0.98;
-  font-weight: 500;
-  text-wrap: balance;
+/* Typography Utility Classes */
+.font-display {
+  font-family: var(--font-display);
 }
 
-.editorial-body {
-  font-size: 20px;
-  line-height: 1.5;
-  color: var(--text-secondary);
-  text-wrap: pretty;
+.font-body {
+  font-family: var(--font-body);
 }
 
-.editorial-label {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 500;
+/* Strict Focus Ring */
+:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
 }
 
-/* 1px Wireframe Bento Panels: cream-2 with 1px --line border and 20px radius, no shadows */
-.bento-panel {
-  background-color: var(--bg-panel);
-  border: 1px solid var(--border-wireframe);
-  border-radius: 20px;
-  box-shadow: none;
-  transition: border-color 0.2s ease, background-color 0.3s ease;
+/* Transitions: 150-200ms on background-color, border-color, transform, opacity only */
+button,
+a,
+input,
+select,
+.chip-transition {
+  transition-property: background-color, border-color, transform, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.bento-panel:hover {
-  border-color: var(--border-wireframe-hover);
+/* Step transition */
+.step-enter {
+  animation: stepFadeIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Floating Glass Pill Navigation */
-.floating-glass-pill {
-  background-color: var(--bg-glass);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: var(--pill-highlight);
-  border: 1px solid var(--border-wireframe);
+@keyframes stepFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Scrollbar per spec */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #000000 #D9D9D9;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: #D9D9D9;
   border-radius: 9999px;
 }
 
-/* Primary Button Styling: 200ms color shift and 2px lift */
-.btn-primary-purple {
-  background-color: var(--purple);
-  color: var(--cream);
-  font-weight: 500;
-  transition: transform 200ms ease-out, background-color 200ms ease-out;
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #000000;
+  border-radius: 9999px;
 }
 
-@media (hover: hover) {
-  .btn-primary-purple:hover {
-    background-color: var(--purple-hover);
-    transform: translateY(-2px);
-  }
-}
-
-.btn-primary-purple:active {
-  transform: translateY(0) scale(0.96);
-}
-
-.btn-cream {
-  background-color: var(--cream);
-  color: var(--purple);
-  font-weight: 600;
-  transition: transform 200ms ease-out, background-color 200ms ease-out, color 200ms ease-out;
-}
-
-@media (hover: hover) {
-  .btn-cream:hover {
-    background-color: var(--cream-2);
-    transform: translateY(-2px);
-  }
-}
-
-.btn-cream:active {
-  transform: translateY(0) scale(0.96);
-}
-
-/* Flip Cards 3D Mechanics: perspective 1600px and preserve-3d */
-.flip-card-perspective {
-  perspective: 1600px;
-}
-
-.flip-card-inner {
-  transform-style: preserve-3d;
-  transition: transform 0.65s cubic-bezier(0.2, 0, 0, 1);
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-@media (hover: hover) {
-  .flip-card-container:hover .flip-card-inner {
-    transform: rotateY(180deg);
-  }
-}
-
-.flip-card-container.is-flipped .flip-card-inner {
-  transform: rotateY(180deg);
-}
-
-.flip-card-front,
-.flip-card-back {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 20px;
-}
-
-.flip-card-back {
-  transform: rotateY(180deg);
-}
-
-/* Proof Infinite Marquee */
-@keyframes marqueeScroll {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marqueeScroll 38s linear infinite;
-}
-
-.animate-marquee:hover,
-.marquee-container:hover .animate-marquee,
-.marquee-container:focus-within .animate-marquee {
-  animation-play-state: paused;
-}
-
-/* Visible Focus Rings in Purple per prompt & better-accessibility */
-:focus-visible {
-  outline: 2px solid var(--purple) !important;
-  outline-offset: 2px !important;
-}
-
-/* Reduced Motion Mode */
+/* Reduced Motion Fallback */
 @media (prefers-reduced-motion: reduce) {
   *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-  .animate-marquee {
-    animation: none !important;
-    transform: none !important;
-  }
-  .flip-card-container:hover .flip-card-inner,
-  .flip-card-container.is-flipped .flip-card-inner {
-    transform: none !important;
-  }
-  .flip-card-inner {
-    transform-style: flat !important;
-  }
-  .flip-card-back {
-    position: relative !important;
-    transform: none !important;
-    display: none;
-  }
-  .flip-card-container.is-flipped .flip-card-front {
-    display: none;
-  }
-  .flip-card-container.is-flipped .flip-card-back {
-    display: flex !important;
-  }
-  .svg-clarity-path,
-  .svg-dusk-path {
-    opacity: 0.22 !important;
-    stroke-dashoffset: 0 !important;
   }
 }

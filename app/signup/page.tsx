@@ -1,18 +1,26 @@
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
-import { SignupForm } from "@/components/SignupForm";
+import { SignupFlow } from "@/components/SignupFlow";
+import { Skeleton } from "@/components/primitives/Skeleton";
 
 export const metadata: Metadata = {
-  title: "Subscribe — BetaDigest Morning Edition",
-  description: "Subscribe to the five-minute morning news and hyperlocal weather digest.",
+  title: "Subscribe — BetaDigest",
+  description: "Configure your five-minute daily news and hyperlocal weather briefing.",
 };
 
-export default async function SignupPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ email?: string }>;
-}) {
-  const params = await searchParams;
-  const initialEmail = typeof params.email === "string" ? params.email : "";
-
-  return <SignupForm initialEmail={initialEmail} />;
+export default function SignupPage() {
+  return (
+    <main className="min-h-screen bg-[var(--canvas)] text-[var(--text)] flex flex-col justify-center">
+      <Suspense
+        fallback={
+          <div className="w-full max-w-[666px] mx-auto px-4 py-20">
+            <div className="w-full h-[400px] bg-white rounded-[40px] animate-pulse" />
+          </div>
+        }
+      >
+        <SignupFlow />
+      </Suspense>
+    </main>
+  );
 }
+

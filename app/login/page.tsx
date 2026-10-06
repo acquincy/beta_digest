@@ -2,7 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, Check, Mail } from "lucide-react";
+import { CanvasA } from "@/components/CanvasA";
+import { Header } from "@/components/Header";
+import { IconTile } from "@/components/primitives/IconTile";
+import { UnderlineInput } from "@/components/primitives/UnderlineInput";
+import { DarkButton } from "@/components/primitives/Button";
+import { Footer } from "@/components/Footer";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,7 +20,6 @@ export default function LoginPage() {
     const trimmed = email.trim();
     if (!trimmed || !trimmed.includes("@")) {
       setError("Enter the email address linked to your BetaDigest subscription.");
-      document.getElementById("login-email")?.focus();
       return;
     }
     setError("");
@@ -22,51 +27,34 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] flex flex-col justify-between px-5 sm:px-8 py-10">
-      <header className="mx-auto w-full max-w-[1280px] flex items-center justify-between">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          <span>Back to BetaDigest</span>
-        </Link>
+    <div className="relative min-h-screen text-[var(--text)] flex flex-col justify-between overflow-x-hidden">
+      <CanvasA />
+      <Header />
 
-        <Link
-          href="/signup"
-          className="text-xs font-medium underline underline-offset-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-        >
-          New reader? Subscribe free →
-        </Link>
-      </header>
-
-      <main className="mx-auto w-full max-w-[520px] my-12">
-        <div className="bento-panel p-7 sm:p-11">
+      <main className="flex-grow flex items-center justify-center p-4 py-8">
+        <div className="w-full max-w-[540px] bg-white rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-[var(--shadow-float)] step-enter">
           {sentMagicLink ? (
-            <div role="status" aria-live="polite" className="space-y-5">
+            <div role="status" aria-live="polite" className="flex flex-col items-center text-center">
               <div
-                className="inline-flex size-11 items-center justify-center rounded-full"
-                style={{ backgroundColor: "var(--purple)", color: "var(--cream)" }}
+                className="w-12 h-12 rounded-full flex items-center justify-center mb-6"
+                style={{ backgroundColor: "var(--lime)" }}
               >
-                <Check className="size-5" aria-hidden="true" />
+                <Check className="w-6 h-6 text-black stroke-[3]" aria-hidden="true" />
               </div>
-              <p className="editorial-label text-[var(--text-secondary)]">
-                SIGN-IN DISPATCH SENT
-              </p>
-              <h1 className="text-3xl sm:text-4xl font-medium tracking-[-0.03em]">
+              <h1 className="font-display font-[700] text-[32px] leading-tight text-black">
                 Check your inbox.
               </h1>
-              <p className="text-base text-[var(--text-secondary)] leading-relaxed">
+              <p className="font-sans font-[400] text-[16px] text-[var(--text)] leading-relaxed mt-3">
                 We sent a one-click reader key to{" "}
-                <strong className="text-[var(--text-primary)] font-medium">
+                <strong className="text-black font-semibold">
                   {email.trim()}
                 </strong>
-                . Use it to manage your cities, topics, and delivery window.
+                . Use it to manage your topics, delivery window, and digest settings.
               </p>
-              <div className="pt-4 border-t border-[var(--border-wireframe)]">
+              <div className="pt-6 mt-6 border-t border-[var(--line)] w-full">
                 <Link
                   href="/"
-                  className="text-xs font-medium underline underline-offset-4 text-[var(--text-primary)]"
+                  className="font-sans font-[600] text-[15px] underline text-black hover:opacity-80"
                 >
                   Return to front page →
                 </Link>
@@ -74,69 +62,60 @@ export default function LoginPage() {
             </div>
           ) : (
             <div>
-              <p className="editorial-label text-[var(--text-secondary)] mb-3">
-                READER ACCESS · SUBSCRIBER PORTAL
-              </p>
-              <h1 className="text-3xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.02]">
+              <div className="flex items-center gap-3 mb-6">
+                <IconTile icon={Mail} size={48} radius={14} iconSize={26} />
+                <span className="font-sans font-[600] text-[13px] tracking-wider text-[var(--text-muted-sm)] uppercase">
+                  SUBSCRIBER PORTAL
+                </span>
+              </div>
+
+              <h1 className="font-display font-[700] text-[32px] md:text-[36px] leading-tight text-black">
                 Welcome back.
               </h1>
-              <p className="mt-3 text-base text-[var(--text-secondary)] leading-relaxed">
+              <p className="font-sans font-[400] text-[16px] text-[var(--text)] leading-relaxed mt-2">
                 Enter your subscriber email to receive an instant sign-in link
-                and manage your morning edition settings.
+                and manage your daily digest preferences.
               </p>
 
-              <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
-                <div>
-                  <label
-                    htmlFor="login-email"
-                    className="editorial-label text-[var(--text-primary)] block mb-2"
-                  >
-                    SUBSCRIBER EMAIL
-                  </label>
-                  <input
-                    id="login-email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    spellCheck={false}
-                    required
-                    placeholder="name@company.com"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (error) setError("");
-                    }}
-                    aria-invalid={error ? "true" : "false"}
-                    aria-describedby={error ? "login-email-error" : undefined}
-                    className="w-full rounded-[12px] border border-[var(--border-wireframe)] bg-[var(--bg-page)] px-4 py-3.5 text-base text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
-                  />
-                  {error && (
-                    <p
-                      id="login-email-error"
-                      role="alert"
-                      className="mt-2 text-xs font-medium text-[#5722CB]"
-                    >
-                      {error}
-                    </p>
-                  )}
-                </div>
+              <form onSubmit={handleSubmit} noValidate className="mt-8 flex flex-col gap-6">
+                <UnderlineInput
+                  label="Subscriber email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError("");
+                  }}
+                  error={error}
+                  required
+                />
 
-                <button
-                  type="submit"
-                  className="btn-primary-purple w-full inline-flex items-center justify-center gap-2 rounded-full py-4 px-6 text-base cursor-pointer"
-                >
-                  <span>Send sign-in link</span>
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </button>
+                <DarkButton type="submit" className="w-full h-[56px] mt-2">
+                  Send sign-in link
+                </DarkButton>
               </form>
+
+              <div className="mt-6 pt-6 border-t border-[var(--line)] flex items-center justify-between text-[14px]">
+                <Link
+                  href="/"
+                  className="font-sans text-[var(--text-muted-sm)] hover:text-black"
+                >
+                  ← Back to home
+                </Link>
+                <Link
+                  href="/signup"
+                  className="font-sans font-semibold text-black underline"
+                >
+                  New subscriber? Join free
+                </Link>
+              </div>
             </div>
           )}
         </div>
       </main>
 
-      <footer className="mx-auto w-full max-w-[1280px] text-center text-xs text-[var(--text-secondary)]">
-        BetaDigest Subscriber Services · Edition #1,408
-      </footer>
+      <Footer className="py-12" />
     </div>
   );
 }
