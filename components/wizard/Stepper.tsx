@@ -2,15 +2,12 @@ import React from "react";
 import { Check } from "lucide-react";
 
 export interface StepperProps {
-  currentStep: 1 | 2;
+  currentStep: 1 | 2 | 3;
 }
 
 export const Stepper: React.FC<StepperProps> = ({ currentStep }) => {
-  // 4-dot Stepper centered: 32px circles joined by 40px x 2px connectors with 8px side margins
-  // Active dot: bg #000, white 14px/700 number
-  // Upcoming: bg --track, number #9A9A9A 14px/700
-  // Completed: bg --lime with a black Check 14px, and the connector after it is --lime
-  const steps = [1, 2, 3, 4];
+  // 3-dot Stepper: 32px dots, 40x2px connectors; completed dots lime with a check
+  const steps: (1 | 2 | 3)[] = [1, 2, 3];
 
   return (
     <div

@@ -1,79 +1,47 @@
 import { z } from "zod";
+import { WEATHER_TOPIC_ORDER, NEWS_TOPIC_ORDER, WeatherTopicId, NewsTopicId } from "./types";
 
-export const step1Schema = z.object({
-  city: z
-    .string()
-    .trim()
-    .min(2, "City name must be at least 2 characters.")
-    .max(80, "City name is too long."),
-  timezone: z
-    .string()
-    .trim()
-    .min(3, "Please select a valid timezone."),
-});
-
-export const step2Schema = z
-  .object({
-    channel: z.enum(["email", "sms"], {
-      message: "Select a delivery channel (Email or SMS).",
-    }),
-    email: z
-      .string()
-      .trim()
-      .email("Please provide a valid email address."),
-    phone: z.string().trim().optional(),
-    dialCode: z.string().default("+1"),
-    dispatchTime: z
-      .string()
-      .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Dispatch time must be in HH:mm format.")
-      .default("06:00"),
-  })
-  .superRefine((data, ctx) => {
-    if (data.channel === "sms") {
-      if (!data.phone || data.phone.replace(/\D/g, "").length < 7) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["phone"],
-          message: "Please enter a valid mobile number for SMS delivery.",
-        });
-      }
-    }
-  });
-
-export const step3Schema = z.object({
-  editions: z
-    .object({
-      morning: z.boolean(),
-      midday: z.boolean(),
-      evening: z.boolean(),
-    })
-    .refine(
-      (ed) => ed.morning || ed.midday || ed.evening,
-      "Please select at least one daily edition."
-    ),
-  activeMetrics: z
-    .array(
-      z.enum([
-        "high_low",
-        "rain_prob",
-        "commute_wind",
-        "uv_index",
-        "air_quality",
-        "humidity",
-        "sun_events",
-        "hourly_breakdown",
-        "three_day_forecast",
-      ])
-    )
-    .min(1, "Select at least one weather metric to include."),
-});
-
-export const fullSignupSchema = z.intersection(
-  step1Schema,
-  z.intersection(step2Schema, step3Schema)
+export const weatherTopicIdSchema = z.enum(
+  WEATHER_TOPIC_ORDER as [WeatherTopicId, ...WeatherTopicId[]]
 );
 
-export type Step1FormData = z.infer<typeof step1Schema>;
-export type Step2FormData = z.infer<typeof step2Schema>;
-export type Step3FormData = z.infer<typeof step3Schema>;
-export type FullSignupFormData = z.infer<typeof fullSignupSchema>;
+export const newsTopicIdSchema = z.enum(
+  NEWS_TOPIC_ORDER as [NewsTopicId, ...NewsTopicId[]]
+);
+
+export const cityRegex = /^[\p{L}\s\-'.]{2,60}$/u;
+
+export const preferencesSchema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required."),
+    email: z.string().trim().email("Please provide a valid email address."),
+    countryCode: z.string().trim().min(2, "Please select a valid country."),
+    city: z
+      .string()
+      .trim()
+      .min(2, "City name must be at least 2 characters.")
+      .max(60, "City name must be at most 60 characters.")
+      .regex(cityRegex, "City contains invalid characters."),
+    cityIsCustom: z.boolean().default(false),
+    deliveryHour: z
+      .number()
+      .int()
+      .min(0, "Hour must be between 0 and 23.")
+      .max(23, "Hour must be between 0 and 23.")
+      .default(7),
+    weatherTopics: z
+      .array(weatherTopicIdSchema)
+      .max(3, "Select up to 3 weather details."),
+    newsTopics: z
+      .array(newsTopicIdSchema)
+      .max(5, "Select up to 5 news topics."),
+  })
+  .refine(
+    (data) => data.weatherTopics.length + data.newsTopics.length >= 1,
+    {
+      message: "Please select at least 1 topic in total.",
+      path: ["weatherTopics"],
+    }
+  );
+
+export type PreferencesFormData = z.infer<typeof preferencesSchema>;

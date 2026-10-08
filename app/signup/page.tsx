@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { SignupFlow } from "@/components/SignupFlow";
-import { Skeleton } from "@/components/primitives/Skeleton";
 
 export const metadata: Metadata = {
   title: "Subscribe — BetaDigest",

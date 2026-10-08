@@ -1,86 +1,162 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { step1Schema, step2Schema, step3Schema, fullSignupSchema } from "../lib/schemas";
+import { preferencesSchema } from "../lib/schemas";
+import { sanitizePreferences, INITIAL_PREFERENCES } from "../lib/wizard-store";
 
-test("step1Schema validates city and timezone", () => {
-  const valid = step1Schema.safeParse({
+test("preferencesSchema validates a valid preference payload", () => {
+  const valid = preferencesSchema.safeParse({
+    name: "Alex",
+    email: "alex@example.com",
+    countryCode: "US",
     city: "Seattle",
-    timezone: "America/Los_Angeles",
+    cityIsCustom: false,
+    deliveryHour: 7,
+    weatherTopics: ["current-temperature", "rain-chance", "uv-index"],
+    newsTopics: ["economy", "technology", "science", "health", "environment"],
   });
+
   assert.equal(valid.success, true);
-
-  const invalidCity = step1Schema.safeParse({
-    city: "A",
-    timezone: "America/Los_Angeles",
-  });
-  assert.equal(invalidCity.success, false);
 });
 
-test("step2Schema handles email channel without requiring phone", () => {
-  const emailValid = step2Schema.safeParse({
-    channel: "email",
-    email: "reader@betadigest.com",
-    dispatchTime: "06:00",
+test("preferencesSchema enforces weather cap of 3 topics", () => {
+  const overCap = preferencesSchema.safeParse({
+    name: "Alex",
+    email: "alex@example.com",
+    countryCode: "US",
+    city: "Seattle",
+    cityIsCustom: false,
+    deliveryHour: 7,
+    weatherTopics: ["current-temperature", "high-low", "rain-chance", "uv-index"],
+    newsTopics: ["economy"],
   });
-  assert.equal(emailValid.success, true);
 
-  const invalidEmail = step2Schema.safeParse({
-    channel: "email",
-    email: "not-an-email",
-    dispatchTime: "06:00",
-  });
-  assert.equal(invalidEmail.success, false);
+  assert.equal(overCap.success, false);
 });
 
-test("step2Schema enforces valid phone number when channel is SMS", () => {
-  const smsWithoutPhone = step2Schema.safeParse({
-    channel: "sms",
-    email: "reader@betadigest.com",
-    phone: "",
-    dispatchTime: "06:00",
+test("preferencesSchema enforces news cap of 5 topics", () => {
+  const overCap = preferencesSchema.safeParse({
+    name: "Alex",
+    email: "alex@example.com",
+    countryCode: "US",
+    city: "Seattle",
+    cityIsCustom: false,
+    deliveryHour: 7,
+    weatherTopics: ["current-temperature"],
+    newsTopics: ["economy", "technology", "science", "health", "environment", "politics"],
   });
-  assert.equal(smsWithoutPhone.success, false);
 
-  const smsWithValidPhone = step2Schema.safeParse({
+  assert.equal(overCap.success, false);
+});
+
+test("preferencesSchema requires at least 1 topic in total", () => {
+  const zeroTopics = preferencesSchema.safeParse({
+    name: "Alex",
+    email: "alex@example.com",
+    countryCode: "US",
+    city: "Seattle",
+    cityIsCustom: false,
+    deliveryHour: 7,
+    weatherTopics: [],
+    newsTopics: [],
+  });
+
+  assert.equal(zeroTopics.success, false);
+
+  const weatherOnly = preferencesSchema.safeParse({
+    name: "Alex",
+    email: "alex@example.com",
+    countryCode: "US",
+    city: "Seattle",
+    cityIsCustom: false,
+    deliveryHour: 7,
+    weatherTopics: ["current-temperature"],
+    newsTopics: [],
+  });
+
+  assert.equal(weatherOnly.success, true);
+
+  const newsOnly = preferencesSchema.safeParse({
+    name: "Alex",
+    email: "alex@example.com",
+    countryCode: "US",
+    city: "Seattle",
+    cityIsCustom: false,
+    deliveryHour: 7,
+    weatherTopics: [],
+    newsTopics: ["economy"],
+  });
+
+  assert.equal(newsOnly.success, true);
+});
+
+test("preferencesSchema validates deliveryHour within 0-23 range", () => {
+  const valid0 = preferencesSchema.safeParse({
+    ...INITIAL_PREFERENCES,
+    deliveryHour: 0,
+  });
+  assert.equal(valid0.success, true);
+
+  const valid23 = preferencesSchema.safeParse({
+    ...INITIAL_PREFERENCES,
+    deliveryHour: 23,
+  });
+  assert.equal(valid23.success, true);
+
+  const invalidNegative = preferencesSchema.safeParse({
+    ...INITIAL_PREFERENCES,
+    deliveryHour: -1,
+  });
+  assert.equal(invalidNegative.success, false);
+
+  const invalid24 = preferencesSchema.safeParse({
+    ...INITIAL_PREFERENCES,
+    deliveryHour: 24,
+  });
+  assert.equal(invalid24.success, false);
+});
+
+test("sanitizePreferences cleans legacy fields, unknown topics, and enforces caps", () => {
+  const legacyData = {
+    name: "Jordan",
+    email: "jordan@example.com",
     channel: "sms",
-    email: "reader@betadigest.com",
-    phone: "2065550192",
+    phone: "2065551234",
     dialCode: "+1",
-    dispatchTime: "06:00",
-  });
-  assert.equal(smsWithValidPhone.success, true);
-});
+    zipCode: "98101",
+    sportsConfig: { teams: ["Lakers"] },
+    stocksConfig: { symbols: ["AAPL"] },
+    horoscopeConfig: { sign: "Aries" },
+    weatherTopics: [
+      "current-temperature",
+      "rain-chance",
+      "uv-index",
+      "wind",
+      "unknown-weather-metric",
+    ],
+    newsTopics: [
+      "economy",
+      "technology",
+      "science",
+      "health",
+      "environment",
+      "politics",
+      "fake-news-topic",
+    ],
+  };
 
-test("step3Schema requires at least one active edition and metric", () => {
-  const invalidNoEditions = step3Schema.safeParse({
-    editions: { morning: false, midday: false, evening: false },
-    activeMetrics: ["high_low"],
-  });
-  assert.equal(invalidNoEditions.success, false);
+  const sanitized = sanitizePreferences(legacyData);
 
-  const invalidNoMetrics = step3Schema.safeParse({
-    editions: { morning: true, midday: false, evening: false },
-    activeMetrics: [],
-  });
-  assert.equal(invalidNoMetrics.success, false);
+  // Legacy fields are dropped
+  assert.equal("channel" in sanitized, false);
+  assert.equal("phone" in sanitized, false);
+  assert.equal("zipCode" in sanitized, false);
+  assert.equal("sportsConfig" in sanitized, false);
 
-  const valid = step3Schema.safeParse({
-    editions: { morning: true, midday: false, evening: false },
-    activeMetrics: ["high_low", "rain_prob"],
-  });
-  assert.equal(valid.success, true);
-});
+  // Weather capped at 3 and unknown removed
+  assert.equal(sanitized.weatherTopics.length, 3);
+  assert.ok(!(sanitized.weatherTopics as string[]).includes("unknown-weather-metric"));
 
-test("fullSignupSchema validates complete multi-step payload", () => {
-  const fullValid = fullSignupSchema.safeParse({
-    city: "Tokyo",
-    timezone: "Asia/Tokyo",
-    channel: "email",
-    email: "reader@tokyo.jp",
-    dispatchTime: "06:00",
-    dialCode: "+81",
-    editions: { morning: true, midday: false, evening: false },
-    activeMetrics: ["high_low", "uv_index", "air_quality"],
-  });
-  assert.equal(fullValid.success, true);
+  // News capped at 5 and unknown removed
+  assert.equal(sanitized.newsTopics.length, 5);
+  assert.ok(!(sanitized.newsTopics as string[]).includes("fake-news-topic"));
 });

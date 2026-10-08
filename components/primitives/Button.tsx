@@ -33,10 +33,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           disabled
           aria-disabled="true"
           className={clsx(
-            "inline-flex items-center justify-center font-sans font-[500] rounded-full select-none cursor-not-allowed",
+            "inline-flex items-center justify-center font-sans font-[500] rounded-full select-none cursor-not-allowed whitespace-nowrap min-w-max",
             "bg-[#858585] text-white",
             size === "cta"
-              ? "h-[76px] min-w-[312px] px-8 text-[20px]"
+              ? "h-[76px] px-8 text-[20px]"
               : size === "sm"
               ? "h-[44px] px-6 text-[15px]"
               : "h-[57px] px-8 text-[18px]",
@@ -61,7 +61,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <button
           ref={ref}
           className={clsx(
-            "inline-flex items-center justify-center font-sans font-[500] text-[18px] text-black bg-white border border-black rounded-full select-none cursor-pointer",
+            "inline-flex items-center justify-center font-sans font-[500] text-[18px] text-black bg-white border border-black rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
             "h-[58px] px-[28px] gap-2 active:scale-[0.98] transition-transform duration-150",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
             className
@@ -89,11 +89,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <button
           ref={ref}
           className={clsx(
-            "inline-flex items-center justify-center font-sans font-[500] text-white bg-black hover:bg-[#222222] rounded-full select-none cursor-pointer",
+            "inline-flex items-center justify-center font-sans font-[500] text-white bg-black hover:bg-[#222222] rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
             "active:scale-[0.98] transition-all duration-150",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
             isCta
-              ? "h-[76px] min-w-[312px] px-8 text-[20px]"
+              ? "h-[76px] px-8 text-[20px]"
               : size === "sm"
               ? "h-[44px] px-6 text-[15px]"
               : "h-[57px] px-[32px] text-[18px]",
@@ -121,11 +121,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={clsx(
-          "inline-flex items-center justify-center font-sans font-[500] text-black rounded-full select-none cursor-pointer",
+          "inline-flex items-center justify-center font-sans font-[500] text-black rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
           "active:scale-[0.98] transition-all duration-150",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
           isCta
-            ? "h-[76px] min-w-[312px] px-8 text-[20px]"
+            ? "h-[76px] px-8 text-[20px]"
             : size === "sm"
             ? "h-[44px] px-6 text-[15px]"
             : "h-[57px] px-[32px] text-[18px]",

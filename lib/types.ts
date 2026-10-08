@@ -1,38 +1,106 @@
-export type MetricKey =
-  | "high_low"
-  | "rain_prob"
-  | "commute_wind"
-  | "uv_index"
-  | "air_quality"
+export type WeatherTopicId =
+  | "current-temperature"
+  | "high-low"
+  | "hourly-3h"
+  | "forecast-3day"
+  | "rain-chance"
+  | "thunderstorm-chance"
+  | "cloudiness"
+  | "uv-index"
+  | "air-quality"
+  | "wind"
   | "humidity"
-  | "sun_events"
-  | "hourly_breakdown"
-  | "three_day_forecast";
+  | "sun-times";
 
-export interface MetricDefinition {
-  key: MetricKey;
-  label: string;
-  defaultActive: boolean;
-}
+export type NewsTopicId =
+  | "politics"
+  | "economy"
+  | "health"
+  | "environment"
+  | "crime"
+  | "international"
+  | "education"
+  | "science"
+  | "society"
+  | "disasters"
+  | "technology"
+  | "sports";
 
-export const AVAILABLE_METRICS: MetricDefinition[] = [
-  { key: "high_low", label: "High/Low", defaultActive: true },
-  { key: "rain_prob", label: "Rain probability", defaultActive: true },
-  { key: "commute_wind", label: "Commute wind", defaultActive: false },
-  { key: "uv_index", label: "UV index", defaultActive: true },
-  { key: "air_quality", label: "Air quality", defaultActive: true },
-  { key: "humidity", label: "Humidity", defaultActive: false },
-  { key: "sun_events", label: "Sunrise/Sunset", defaultActive: false },
-  { key: "hourly_breakdown", label: "3-hour breakdown", defaultActive: false },
-  { key: "three_day_forecast", label: "3-day forecast", defaultActive: false },
+export const WEATHER_TOPIC_ORDER: WeatherTopicId[] = [
+  "current-temperature",
+  "high-low",
+  "hourly-3h",
+  "forecast-3day",
+  "rain-chance",
+  "thunderstorm-chance",
+  "cloudiness",
+  "uv-index",
+  "air-quality",
+  "wind",
+  "humidity",
+  "sun-times",
 ];
+
+export const NEWS_TOPIC_ORDER: NewsTopicId[] = [
+  "politics",
+  "economy",
+  "health",
+  "environment",
+  "crime",
+  "international",
+  "education",
+  "science",
+  "society",
+  "disasters",
+  "technology",
+  "sports",
+];
+
+export const WEATHER_TOPIC_LABELS: Record<WeatherTopicId, string> = {
+  "current-temperature": "Current temperature",
+  "high-low": "Day's high/low",
+  "hourly-3h": "3-hour breakdown",
+  "forecast-3day": "3-day forecast",
+  "rain-chance": "Rain chance",
+  "thunderstorm-chance": "Thunderstorm chance",
+  "cloudiness": "Cloudiness",
+  "uv-index": "UV index",
+  "air-quality": "Air quality",
+  wind: "Wind",
+  humidity: "Humidity",
+  "sun-times": "Sunrise & sunset",
+};
+
+export const NEWS_TOPIC_LABELS: Record<NewsTopicId, string> = {
+  politics: "Politics & Government",
+  economy: "Economy & Business",
+  health: "Health & Medicine",
+  environment: "Environment & Climate",
+  crime: "Crime & Justice",
+  international: "International Relations",
+  education: "Education & Academia",
+  science: "Science & Innovation",
+  society: "Society & Culture",
+  disasters: "Disasters & Emergencies",
+  technology: "Technology",
+  sports: "Sports",
+};
+
+export interface Preferences {
+  name: string;
+  email: string;
+  countryCode: string;
+  city: string;
+  cityIsCustom: boolean;
+  deliveryHour: number; // integer 0-23, default 7
+  weatherTopics: WeatherTopicId[]; // 0-3
+  newsTopics: NewsTopicId[]; // 0-5
+}
 
 export interface HourlyForecastItem {
   time: string;
   temp: number;
   condition: string;
-  rainProb: number;
-  windSpeed: number;
 }
 
 export interface DailyForecastItem {
@@ -44,17 +112,22 @@ export interface DailyForecastItem {
   rainProb: number;
 }
 
-export interface CityData {
+export interface CityWeatherData {
   city: string;
   country: string;
-  timezone: string;
+  isUS: boolean;
+  tempUnit: "°F" | "°C";
+  windUnit: "mph" | "km/h";
   currentTemp: number;
   condition: string;
   high: number;
   low: number;
   rainProb: number;
-  rainPeriod: string;
-  wind: string;
+  thunderstormProb: number;
+  cloudiness: number;
+  windSpeed: number;
+  windDirection: string;
+  windFormatted: string;
   uvIndex: number;
   uvDescription: string;
   airQuality: number;
@@ -68,150 +141,19 @@ export interface CityData {
 
 export interface EditorialStory {
   id: string;
+  topic: NewsTopicId;
+  topicLabel: string;
   headline: string;
   summary: string;
   source: string;
   timestamp: string;
-  category: "markets" | "transit" | "infrastructure" | "policy" | "climate";
   url: string;
-}
-
-export type DeliveryChannel = "email" | "sms";
-
-export interface EditionSelection {
-  morning: boolean;
-  midday: boolean;
-  evening: boolean;
-}
-
-export interface UserPreferences {
-  city: string;
-  timezone: string;
-  channel: DeliveryChannel;
-  email: string;
-  phone?: string;
-  dispatchTime: string;
-  editions: EditionSelection;
-  activeMetrics: MetricKey[];
-  isPaused: boolean;
-  pausedAt?: string | null;
 }
 
 export interface DigestPayload {
   previewText: string;
   weatherSummary: string;
   stories: EditorialStory[];
-  city: CityData;
+  city: CityWeatherData;
   formattedTime: string;
-}
-
-export interface ServiceResponse<T> {
-  data: T;
-  status: "success" | "error";
-  message?: string;
-}
-
-/* -------------------------------------------------------------
-   Backwards-Compatible Types for Existing Weather & Feeds Stack
-------------------------------------------------------------- */
-export type TopicCategory =
-  | "tech"
-  | "ai"
-  | "startups"
-  | "business"
-  | "sports"
-  | "science"
-  | "world";
-
-export interface HourlyForecastPoint {
-  time: string;
-  fullTime: string;
-  temperature: number;
-  precipitationProbability: number;
-  weatherCode: number;
-  conditionText: string;
-  isCommuteWindow: boolean;
-}
-
-export interface WeatherData {
-  city: string;
-  country?: string;
-  latitude: number;
-  longitude: number;
-  temperature: number;
-  apparentTemperature: number;
-  highTemp?: number;
-  lowTemp?: number;
-  precipitationProbability?: number;
-  weatherCode: number;
-  conditionText: string;
-  windSpeed: number;
-  humidity: number;
-  uvIndex?: number;
-  sunrise?: string;
-  sunset?: string;
-  commuteAdvice?: string;
-  hourlyTimeline?: HourlyForecastPoint[];
-  dailyForecast: {
-    date: string;
-    maxTemp: number;
-    minTemp: number;
-    conditionText: string;
-    weatherCode: number;
-  }[];
-  lifestyleAdvice?: string;
-}
-
-export interface BriefingStory {
-  id: string;
-  number: string;
-  category: TopicCategory;
-  categoryLabel: string;
-  categoryIcon: string;
-  title: string;
-  summary: string;
-  whyItMatters: string;
-  source: string;
-  publishedAt: string;
-  readingTime: string;
-  url: string;
-  isBookmarked?: boolean;
-}
-
-export interface MorningBriefing {
-  id: string;
-  date: string;
-  dateFormatted: string;
-  dayOfWeek: string;
-  recipientName: string;
-  overview: string;
-  commuteSnippet: string;
-  storiesCount: number;
-  estimatedReadTime: string;
-  weather: WeatherData;
-  stories: BriefingStory[];
-  generatedAt: string;
-}
-
-export interface DigestNewsItem {
-  id: string;
-  title: string;
-  summary: string;
-  source: string;
-  url: string;
-  category: TopicCategory;
-  publishedAt: string;
-  aiTakeaway?: string;
-  whyItMatters?: string;
-}
-
-export interface DailyDigest {
-  id: string;
-  date: string;
-  title: string;
-  weather: WeatherData;
-  newsItems: DigestNewsItem[];
-  overview: string;
-  generatedBy: "n8n_workflow" | "local_pipeline";
-  createdAt: string;
 }

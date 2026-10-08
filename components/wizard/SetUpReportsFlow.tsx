@@ -1,310 +1,208 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
+  Mail,
   CloudSun,
-  Newspaper,
+  Thermometer,
+  ArrowUpDown,
+  Clock,
+  Calendar,
+  CloudRain,
+  CloudLightning,
+  Cloud,
+  Sun,
+  Wind,
+  Compass,
+  Droplets,
+  Sunrise,
+  Landmark,
+  TrendingUp,
+  HeartPulse,
+  Leaf,
+  Scale,
+  Globe,
+  GraduationCap,
+  Atom,
+  Users,
+  AlertTriangle,
+  Cpu,
   Trophy,
-  Aperture,
-  CandlestickChart,
-  Check,
-  Pencil,
-  Search,
-  MessageSquare,
+  type LucideIcon,
 } from "lucide-react";
 import { CanvasA } from "../CanvasA";
 import { CardShell } from "../primitives/CardShell";
 import { SectionCard } from "../primitives/SectionCard";
-import { IconTile, GradientIcon } from "../primitives/IconTile";
-import { PrimaryButton, OutlineButton, Button } from "../primitives/Button";
+import { GradientIcon } from "../primitives/IconTile";
+import { PrimaryButton, OutlineButton } from "../primitives/Button";
 import { Chip } from "../primitives/Chip";
 import { Stepper } from "./Stepper";
-import { ProgressHeader } from "./ProgressHeader";
 import {
-  loadWizardState,
-  saveWizardState,
-  TopicId,
-  WizardState,
-} from "@/lib/wizard-store";
-import { digestService } from "@/lib/mock-service";
+  Preferences,
+  WeatherTopicId,
+  NewsTopicId,
+  WEATHER_TOPIC_ORDER,
+  NEWS_TOPIC_ORDER,
+  WEATHER_TOPIC_LABELS,
+  NEWS_TOPIC_LABELS,
+} from "@/lib/types";
+import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
+import { mockService } from "@/lib/mock-service";
+import { HOURLY_OPTIONS, formatHourOption } from "@/lib/time-utils";
+import { COUNTRIES } from "@/lib/geo";
 
-const ALL_TOPICS: { id: TopicId; title: string; desc: string; icon: any }[] = [
-  {
-    id: "Weather",
-    title: "Weather",
-    desc: "Get today's weather insights at a glance.",
-    icon: CloudSun,
-  },
-  {
-    id: "News",
-    title: "News",
-    desc: "Pick your favorite topics and get the top 3 news stories.",
-    icon: Newspaper,
-  },
-  {
-    id: "Sports",
-    title: "Sports",
-    desc: "Select your sport and team for daily highlights and scores.",
-    icon: Trophy,
-  },
-  {
-    id: "Horoscope",
-    title: "Horoscope",
-    desc: "Choose your zodiac sign for personalized daily horoscope insights.",
-    icon: Aperture,
-  },
-  {
-    id: "Stocks",
-    title: "Stocks",
-    desc: "Track up to 3 stocks with brief, daily updates on their performance.",
-    icon: CandlestickChart,
-  },
-];
+export const WEATHER_ICONS: Record<WeatherTopicId, LucideIcon> = {
+  "current-temperature": Thermometer,
+  "high-low": ArrowUpDown,
+  "hourly-3h": Clock,
+  "forecast-3day": Calendar,
+  "rain-chance": CloudRain,
+  "thunderstorm-chance": CloudLightning,
+  cloudiness: Cloud,
+  "uv-index": Sun,
+  "air-quality": Wind,
+  wind: Compass,
+  humidity: Droplets,
+  "sun-times": Sunrise,
+};
 
-const WEATHER_METRICS = [
-  "Current temperature",
-  "3-hour breakdown",
-  "3-day forecast",
-  "Day's high/low temp",
-  "Cloudiness",
-  "Rain chance",
-  "Thunderstorm chance",
-  "UV index",
-  "Air quality",
-  "Wind",
-  "Humidity",
-  "Pressure",
-  "Dew point",
-  "Visibility",
-  "Sunrise time",
-  "Sunset time",
-  "Moon phase",
-];
-
-const FOCUS_AREAS = [
-  "Politics & Government",
-  "Economy & Business",
-  "Health & Medicine",
-  "Environment & Climate",
-  "Crime & Justice",
-  "International Relations",
-  "Education & Academia",
-  "Science & Innovation",
-  "Society & Culture",
-  "Disasters & Emergencies",
-];
-
-const NFL_TEAMS = [
-  "Dallas Cowboys",
-  "Kansas City Chiefs",
-  "San Francisco 49ers",
-  "Philadelphia Eagles",
-  "Buffalo Bills",
-  "Green Bay Packers",
-  "Seattle Seahawks",
-  "Miami Dolphins",
-  "Detroit Lions",
-  "Baltimore Ravens",
-];
-
-const POPULAR_TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META"];
-
-const ZODIAC_SIGNS = [
-  "Aries",
-  "Taurus",
-  "Gemini",
-  "Cancer",
-  "Leo",
-  "Virgo",
-  "Libra",
-  "Scorpio",
-  "Sagittarius",
-  "Capricorn",
-  "Aquarius",
-  "Pisces",
-];
+export const NEWS_ICONS: Record<NewsTopicId, LucideIcon> = {
+  politics: Landmark,
+  economy: TrendingUp,
+  health: HeartPulse,
+  environment: Leaf,
+  crime: Scale,
+  international: Globe,
+  education: GraduationCap,
+  science: Atom,
+  society: Users,
+  disasters: AlertTriangle,
+  technology: Cpu,
+  sports: Trophy,
+};
 
 export const SetUpReportsFlow: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Wizard persistent state
-  const [state, setState] = useState<WizardState>(loadWizardState());
+  const [hydrated, setHydrated] = useState(false);
+  const [prefs, setPrefs] = useState<Preferences>(INITIAL_PREFERENCES);
 
-  // Selected topics list
-  const selectedTopics = state.selectedTopics;
-  // total = 2 + selectedTopics + 1
-  const totalSteps = 2 + selectedTopics.length + 1;
-
-  // URL step param
-  const urlStepParam = searchParams?.get("step");
-  const isReviewParam = urlStepParam === "review";
-  const parsedStep = parseInt(urlStepParam || "1", 10);
-  const currentStep = isReviewParam
-    ? totalSteps
-    : isNaN(parsedStep)
-    ? 1
-    : parsedStep;
-  const isReviewStep = currentStep === totalSteps || isReviewParam;
-
-
-  // Calculate current topic for steps 3 to 2 + selectedTopics.length
-  const topicIndex = currentStep - 3;
-  const currentTopicId =
-    topicIndex >= 0 && topicIndex < selectedTopics.length
-      ? selectedTopics[topicIndex]
-      : null;
-
-  // Search filter states
-  const [sportsSearch, setSportsSearch] = useState("");
-  const [tickerSearch, setTickerSearch] = useState("");
-
-  // Sync state changes to storage
+  // Load preferences strictly after mount
   useEffect(() => {
-    saveWizardState(state);
-  }, [state]);
+    setPrefs(loadPreferences());
+    setHydrated(true);
+  }, []);
 
-  const updateUrlStep = (nextStep: number) => {
+  // Sync state to storage only after hydration
+  useEffect(() => {
+    if (hydrated) {
+      savePreferences(prefs);
+    }
+  }, [prefs, hydrated]);
+
+  // Current step 1, 2, or 3
+  const rawStepParam = searchParams?.get("step");
+  const parsedStep = parseInt(rawStepParam || "1", 10);
+  const currentStep: 1 | 2 | 3 =
+    parsedStep === 1 ? 1 : parsedStep === 2 ? 2 : 3;
+
+  // Update step in URL
+  const setStep = (stepNumber: 1 | 2 | 3) => {
     const url = new URL(window.location.href);
-    url.searchParams.set("step", nextStep.toString());
+    url.searchParams.set("step", stepNumber.toString());
     window.history.pushState({}, "", url.toString());
   };
 
-  const goToNextStep = () => {
-    const next = currentStep + 1;
-    if (next <= totalSteps) {
-      updateUrlStep(next);
-    }
-  };
+  const weatherTopics = prefs.weatherTopics;
+  const newsTopics = prefs.newsTopics;
+  const totalTopics = weatherTopics.length + newsTopics.length;
 
-  const goToPrevStep = () => {
-    if (currentStep > 1) {
-      updateUrlStep(currentStep - 1);
-    } else {
-      router.push("/basic-info");
-    }
-  };
-
-  // Toggle topics in step 2
-  const toggleTopic = (id: TopicId) => {
-    const exists = selectedTopics.includes(id);
-    let updated: TopicId[];
-    if (exists) {
-      // Keep at least 1 topic selected if possible
-      if (selectedTopics.length > 1) {
-        updated = selectedTopics.filter((t) => t !== id);
-      } else {
-        updated = selectedTopics;
-      }
-    } else {
-      updated = [...selectedTopics, id];
-    }
-    setState((prev) => ({ ...prev, selectedTopics: updated }));
-  };
-
-  // Weather chip toggle
-  const toggleWeatherDetail = (metric: string) => {
-    const exists = state.weatherDetails.includes(metric);
-    const updated = exists
-      ? state.weatherDetails.filter((m) => m !== metric)
-      : [...state.weatherDetails, metric];
-    setState((prev) => ({ ...prev, weatherDetails: updated }));
-  };
-
-  // Focus areas toggle (max 3)
-  const toggleFocusArea = (area: string) => {
-    const current = state.newsConfig.focusAreas;
-    if (current.includes(area)) {
-      setState((prev) => ({
+  // Step 2 toggle handlers
+  const toggleWeatherTopic = (topic: WeatherTopicId) => {
+    if (weatherTopics.includes(topic)) {
+      setPrefs((prev) => ({
         ...prev,
-        newsConfig: {
-          ...prev.newsConfig,
-          focusAreas: current.filter((a) => a !== area),
-        },
+        weatherTopics: prev.weatherTopics.filter((t) => t !== topic),
       }));
-    } else if (current.length < 3) {
-      setState((prev) => ({
+    } else if (weatherTopics.length < 3) {
+      setPrefs((prev) => ({
         ...prev,
-        newsConfig: {
-          ...prev.newsConfig,
-          focusAreas: [...current, area],
-        },
+        weatherTopics: WEATHER_TOPIC_ORDER.filter(
+          (t) => prev.weatherTopics.includes(t) || t === topic
+        ).slice(0, 3),
       }));
     }
   };
 
-  // Stock ticker toggle (max 3)
-  const toggleTicker = (ticker: string) => {
-    const current = state.stocksConfig.tickers;
-    if (current.includes(ticker)) {
-      setState((prev) => ({
+  const toggleNewsTopic = (topic: NewsTopicId) => {
+    if (newsTopics.includes(topic)) {
+      setPrefs((prev) => ({
         ...prev,
-        stocksConfig: {
-          ...prev.stocksConfig,
-          tickers: current.filter((t) => t !== ticker),
-        },
+        newsTopics: prev.newsTopics.filter((t) => t !== topic),
       }));
-    } else if (current.length < 3) {
-      setState((prev) => ({
+    } else if (newsTopics.length < 5) {
+      setPrefs((prev) => ({
         ...prev,
-        stocksConfig: {
-          ...prev.stocksConfig,
-          tickers: [...current, ticker],
-        },
+        newsTopics: NEWS_TOPIC_ORDER.filter(
+          (t) => prev.newsTopics.includes(t) || t === topic
+        ).slice(0, 5),
       }));
     }
   };
 
-  const handleFinish = async () => {
-    try {
-      await digestService.savePreferences({
-        city: state.locationValue || "Seattle",
-        timezone: "America/Los_Angeles",
-        channel: state.channel,
-        email: state.email,
-        phone: state.phone,
-        dispatchTime: "07:00",
-        editions: { morning: true, midday: false, evening: false },
-        activeMetrics: ["high_low", "uv_index", "air_quality"],
-        isPaused: false,
-      });
-    } catch {
-      // continue
-    }
+  const handleFinish = () => {
+    savePreferences(prefs);
     router.push("/dashboard");
   };
+
+  // Country name lookup
+  const countryObj = COUNTRIES.find((c) => c.code === prefs.countryCode);
+  const countryName = countryObj ? countryObj.name : "United States";
+  const locationLabel = `${prefs.city}, ${countryName}`;
+
+  // Deterministic weather and news data
+  const weatherData = mockService.getWeather(prefs.city, prefs.countryCode);
+  const stories = mockService.getStories(prefs.newsTopics);
+  if (!hydrated) {
+    return (
+      <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8 md:py-12 overflow-x-hidden">
+        <CanvasA />
+        <div className="w-full max-w-[768px] h-[520px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+      </div>
+    );
+  }
+
+  const deliveryTimeFormatted = formatHourOption(prefs.deliveryHour);
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8 md:py-12 overflow-x-hidden">
       <CanvasA />
 
-      {/* S4 / Step 1: Delivery time & Location */}
-      {currentStep === 1 && !isReviewStep && (
+      {/* STEP 1: Delivery time only */}
+      {currentStep === 1 && (
         <CardShell
           footer={
             <div className="w-full flex justify-end">
-              <PrimaryButton onClick={goToNextStep}>Continue</PrimaryButton>
+              <PrimaryButton onClick={() => setStep(2)}>Continue</PrimaryButton>
             </div>
           }
         >
-          {/* Stepper (dot 1 active, 2, 3, 4 upcoming) */}
           <Stepper currentStep={1} />
 
-          {/* H1 "When do you want your digest?" 32px */}
           <h1 className="font-display font-[600] text-[26px] md:text-[32px] leading-[37px] text-black">
             When do you want your digest?
           </h1>
 
-          {/* Subtitle */}
           <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1">
-            Choose the time and location for your daily digest.
+            Choose the time you would like to receive your daily digest.
           </p>
 
-          {/* 40px gap before sections */}
           <div className="h-10" />
 
-          {/* SectionCard "Delivery time" */}
+          {/* SectionCard "Delivery time" with 24 hourly options */}
           <SectionCard>
             <h2 className="font-sans font-[600] text-[18px] leading-[24px] text-black">
               Delivery time
@@ -312,97 +210,44 @@ export const SetUpReportsFlow: React.FC = () => {
             <p className="font-sans font-[400] text-[14px] leading-[20px] text-[var(--text-muted-sm)] mt-1">
               What time would you like to receive your daily digest?
             </p>
-            <div className="mt-4 flex items-center gap-2 font-sans text-[16px] text-black">
+            <div className="mt-6 flex items-center gap-2 font-sans text-[16px] text-black">
               <span>Receive digests at</span>
               <select
-                value={state.dispatchTime}
+                value={prefs.deliveryHour}
                 onChange={(e) =>
-                  setState((prev) => ({ ...prev, dispatchTime: e.target.value }))
+                  setPrefs((prev) => ({
+                    ...prev,
+                    deliveryHour: parseInt(e.target.value, 10),
+                  }))
                 }
                 className="bg-transparent border-0 border-b border-black font-semibold text-black p-0 pr-4 pb-0.5 outline-none focus:outline-none focus:border-b-2 cursor-pointer tabular-nums"
               >
-                <option value="6:00 AM">6:00 AM</option>
-                <option value="6:30 AM">6:30 AM</option>
-                <option value="7:00 AM">7:00 AM</option>
-                <option value="7:30 AM">7:30 AM</option>
-                <option value="8:00 AM">8:00 AM</option>
-                <option value="8:30 AM">8:30 AM</option>
-                <option value="9:00 AM">9:00 AM</option>
+                {HOURLY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
               </select>
-            </div>
-          </SectionCard>
-
-          {/* 16px gap */}
-          <div className="h-4" />
-
-          {/* SectionCard "Your location" */}
-          <SectionCard>
-            <h2 className="font-sans font-[600] text-[18px] leading-[24px] text-black">
-              Your location
-            </h2>
-            <p className="font-sans font-[400] text-[14px] leading-[20px] text-[var(--text-muted-sm)] mt-1">
-              We use your location for weather and local information.
-            </p>
-
-            {/* Row: UnderlineInput (155px wide) with Pencil icon, then chips "ZIP Code" and "City" */}
-            <div className="mt-8 flex items-center gap-6 flex-wrap">
-              <div className="relative w-[155px]">
-                <input
-                  type="text"
-                  value={state.locationValue}
-                  onChange={(e) =>
-                    setState((prev) => ({
-                      ...prev,
-                      locationValue: e.target.value,
-                    }))
-                  }
-                  className="w-full bg-transparent border-0 border-b border-black font-sans font-[400] text-[18px] text-black p-0 pr-6 outline-none focus:outline-none focus:border-b-2 tabular-nums"
-                />
-                <Pencil
-                  className="w-4 h-4 text-black absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none"
-                  aria-hidden="true"
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Chip
-                  active={state.locationType === "ZIP Code"}
-                  onToggle={() =>
-                    setState((prev) => ({ ...prev, locationType: "ZIP Code" }))
-                  }
-                >
-                  ZIP Code
-                </Chip>
-                <Chip
-                  active={state.locationType === "City"}
-                  onToggle={() =>
-                    setState((prev) => ({ ...prev, locationType: "City" }))
-                  }
-                >
-                  City
-                </Chip>
-              </div>
             </div>
           </SectionCard>
         </CardShell>
       )}
 
-      {/* S5 / Step 2: Topics */}
+      {/* STEP 2: Topics with caps 3 and 5 */}
       {currentStep === 2 && (
         <CardShell
           footer={
             <div className="w-full flex items-center justify-between">
-              <OutlineButton onClick={goToPrevStep}>Back</OutlineButton>
+              <OutlineButton onClick={() => setStep(1)}>Back</OutlineButton>
               <PrimaryButton
-                onClick={goToNextStep}
-                disabled={selectedTopics.length === 0}
+                onClick={() => setStep(3)}
+                disabled={totalTopics === 0}
               >
                 Continue
               </PrimaryButton>
             </div>
           }
         >
-          {/* Stepper shows dot 1 completed, dot 2 active */}
           <Stepper currentStep={2} />
 
           <h1 className="font-display font-[600] text-[26px] md:text-[32px] leading-[37px] text-black">
@@ -410,639 +255,450 @@ export const SetUpReportsFlow: React.FC = () => {
           </h1>
 
           <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1">
-            Tap to select the topics you care about. You can always change these
-            later.
+            Pick up to 3 weather details and up to 5 news topics.
           </p>
 
-          {/* List of 5 TopicCards */}
-          <div className="mt-8 flex flex-col gap-3">
-            {ALL_TOPICS.map((topic) => {
-              const isSelected = selectedTopics.includes(topic.id);
-              return (
-                <button
-                  key={topic.id}
-                  type="button"
-                  role="checkbox"
-                  aria-checked={isSelected}
-                  onClick={() => toggleTopic(topic.id)}
-                  className={`w-full max-w-[672px] mx-auto min-h-[100px] rounded-[24px] p-6 flex items-center justify-between text-left transition-all cursor-pointer border ${
-                    isSelected
-                      ? "bg-[var(--lime-tint)] border-[2px] border-[var(--lime)]"
-                      : "bg-white border-[var(--line)] hover:border-[#8F8F8F] focus-visible:border-[#8F8F8F]"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <IconTile
-                      icon={topic.icon}
-                      size={48}
-                      radius={14}
-                      iconSize={26}
-                    />
-                    <div>
-                      <div className="font-sans font-[600] text-[18px] leading-[24px] text-black">
-                        {topic.title}
-                      </div>
-                      <div className="font-sans font-[400] text-[14px] leading-[20px] text-[var(--text-muted-sm)] mt-0.5">
-                        {topic.desc}
-                      </div>
-                    </div>
-                  </div>
+          <div className="h-8" />
 
-                  {/* Radio circle 24px: 2px #8E9096 border. Selected: lime filled circle with black Check */}
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ml-4 transition-colors ${
-                      isSelected
-                        ? "bg-[var(--lime)] border-0"
-                        : "border-[2px] border-[#8E9096] bg-transparent"
-                    }`}
-                  >
-                    {isSelected && (
-                      <Check className="w-3.5 h-3.5 text-black stroke-[3]" aria-hidden="true" />
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </CardShell>
-      )}
-
-      {/* Steps 3 to 2 + selectedTopics.length: Topic Customizers */}
-      {!isReviewStep && currentStep >= 3 && currentTopicId && (
-        <CardShell
-          footer={
-            <div className="w-full flex items-center justify-between">
-              <OutlineButton onClick={goToPrevStep}>Back</OutlineButton>
-              <PrimaryButton onClick={goToNextStep}>Continue</PrimaryButton>
-            </div>
-          }
-        >
-          {/* ProgressHeader */}
-          <ProgressHeader
-            currentStep={currentStep}
-            totalSteps={totalSteps}
-            topicName={currentTopicId}
-          />
-
-          {/* Page header: IconTile 56px + H1 inline, 16px gap, subtitle */}
-          <div className="flex items-center gap-4 mb-2">
-            <IconTile
-              icon={
-                currentTopicId === "Weather"
-                  ? CloudSun
-                  : currentTopicId === "News"
-                  ? Newspaper
-                  : currentTopicId === "Sports"
-                  ? Trophy
-                  : currentTopicId === "Horoscope"
-                  ? Aperture
-                  : CandlestickChart
-              }
-              size={56}
-              radius={16}
-              iconSize={30}
-            />
-            <h1 className="font-display font-[600] text-[26px] md:text-[32px] leading-[37px] text-black">
-              Customize your {currentTopicId} report
-            </h1>
-          </div>
-
-          {/* Customizer content by topic */}
-          {currentTopicId === "Weather" && (
-            <div>
-              <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1 mb-8">
-                Pick the weather details you want to see each morning.
-              </p>
-
-              <SectionCard>
-                <div className="border-t border-[rgba(0,0,0,0.06)] pt-4">
-                  <h2 className="font-sans font-[600] text-[18px] text-black mb-4">
-                    Choose your details
-                  </h2>
-                  <div
-                    role="group"
-                    aria-label="Weather indicators"
-                    className="flex flex-wrap gap-x-2 gap-y-2.5"
-                  >
-                    {WEATHER_METRICS.map((metric) => (
-                      <Chip
-                        key={metric}
-                        size="onboarding"
-                        active={state.weatherDetails.includes(metric)}
-                        onToggle={() => toggleWeatherDetail(metric)}
-                      >
-                        {metric}
-                      </Chip>
-                    ))}
-                  </div>
-                </div>
-              </SectionCard>
-            </div>
-          )}
-
-          {currentTopicId === "News" && (
-            <div>
-              <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1 mb-8">
-                Choose your preferred news category and focus areas.
-              </p>
-
-              <SectionCard className="divide-y divide-[rgba(0,0,0,0.08)]">
-                {/* 1. Include links? */}
-                <div className="pb-6">
-                  <h2 className="font-sans font-[600] text-[18px] text-black">
-                    Include links?
-                  </h2>
-                  <p className="font-sans font-[400] text-[13px] leading-[18px] text-[var(--text-muted-sm)] mt-1">
-                    Add source links to each news story so you can read the full
-                    article.
-                  </p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Chip
-                      active={state.newsConfig.includeLinks}
-                      onToggle={() =>
-                        setState((prev) => ({
-                          ...prev,
-                          newsConfig: {
-                            ...prev.newsConfig,
-                            includeLinks: true,
-                          },
-                        }))
-                      }
-                    >
-                      Yes
-                    </Chip>
-                    <Chip
-                      active={!state.newsConfig.includeLinks}
-                      onToggle={() =>
-                        setState((prev) => ({
-                          ...prev,
-                          newsConfig: {
-                            ...prev.newsConfig,
-                            includeLinks: false,
-                          },
-                        }))
-                      }
-                    >
-                      No
-                    </Chip>
-                  </div>
-                </div>
-
-                {/* 2. Choose your preferred topic */}
-                <div className="py-6">
-                  <h2 className="font-sans font-[600] text-[18px] text-black">
-                    Choose your preferred topic
-                  </h2>
-                  <div className="flex items-center gap-2 mt-3">
-                    {["General News", "Technology", "Sports"].map((cat) => (
-                      <Chip
-                        key={cat}
-                        active={state.newsConfig.category === cat}
-                        onToggle={() =>
-                          setState((prev) => ({
-                            ...prev,
-                            newsConfig: {
-                              ...prev.newsConfig,
-                              category: cat,
-                            },
-                          }))
-                        }
-                      >
-                        {cat}
-                      </Chip>
-                    ))}
-                  </div>
-                  <p className="font-sans text-[15px] text-[var(--text-muted-sm)] mt-2">
-                    Delivering top stories from {state.newsConfig.category.toLowerCase()}.
-                  </p>
-                </div>
-
-                {/* 3. Nested block: Choose your focus areas */}
-                <div className="pt-6">
-                  <div className="p-2 -m-2 rounded-[16px] bg-[#FAFAFA]">
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="font-sans font-[600] text-[18px] text-black">
-                        Choose your focus areas
-                      </h2>
-                      <span className="font-sans text-[14px] text-[var(--text-muted)] tabular-nums">
-                        ({state.newsConfig.focusAreas.length}/3)
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-x-2 gap-y-2.5">
-                      {FOCUS_AREAS.map((area) => {
-                        const isSelected =
-                          state.newsConfig.focusAreas.includes(area);
-                        const isMax =
-                          state.newsConfig.focusAreas.length >= 3 && !isSelected;
-
-                        return (
-                          <Chip
-                            key={area}
-                            active={isSelected}
-                            disabled={isMax}
-                            onToggle={() => toggleFocusArea(area)}
-                          >
-                            {area}
-                          </Chip>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </SectionCard>
-            </div>
-          )}
-
-          {currentTopicId === "Sports" && (
-            <div>
-              <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1 mb-8">
-                Select your sport and team to follow.
-              </p>
-
-              <SectionCard className="flex flex-col gap-6">
-                {/* 1. Pick your league */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center font-sans font-[700] text-[13px]">
-                      1
-                    </div>
-                    <h2 className="font-sans font-[600] text-[18px] text-black">
-                      Pick your league
-                    </h2>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {["NFL", "NBA", "MLB", "NHL", "Premier League"].map((lg) => (
-                      <Chip
-                        key={lg}
-                        active={state.sportsConfig.league === lg}
-                        onToggle={() =>
-                          setState((prev) => ({
-                            ...prev,
-                            sportsConfig: {
-                              ...prev.sportsConfig,
-                              league: lg,
-                            },
-                          }))
-                        }
-                      >
-                        {lg}
-                      </Chip>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 2. Pick your team */}
-                <div className="border-t border-[rgba(0,0,0,0.08)] pt-6">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center font-sans font-[700] text-[13px]">
-                      2
-                    </div>
-                    <h2 className="font-sans font-[600] text-[18px] text-black">
-                      Pick your team
-                    </h2>
-                  </div>
-                  <p className="font-sans font-[400] text-[13px] text-[var(--text-muted-sm)]">
-                    Choose one {state.sportsConfig.league} team to follow.
-                  </p>
-                  <p className="font-sans font-[700] text-[13px] text-black mt-1 mb-3">
-                    Currently: {state.sportsConfig.team}
-                  </p>
-
-                  {/* Search input: height 40px, border 1px --line, radius 16px */}
-                  <div className="relative w-full max-w-[340px] mb-3">
-                    <Search
-                      className="w-4 h-4 text-black absolute left-3 top-1/2 -translate-y-1/2"
-                      aria-hidden="true"
-                    />
-                    <input
-                      type="text"
-                      placeholder={`Search ${state.sportsConfig.league} teams...`}
-                      value={sportsSearch}
-                      onChange={(e) => setSportsSearch(e.target.value)}
-                      className="w-full h-10 pl-9 pr-4 rounded-[16px] border border-[var(--line)] bg-transparent font-sans text-[14px] text-black outline-none focus:border-black"
-                    />
-                  </div>
-
-                  {/* Scrollable list max-height 220px, rows 46px */}
-                  <div className="max-h-[220px] overflow-y-auto thin-scrollbar rounded-[12px] border border-[var(--line)] divide-y divide-[var(--line)]">
-                    {NFL_TEAMS.filter((t) =>
-                      t.toLowerCase().includes(sportsSearch.toLowerCase())
-                    ).map((team) => {
-                      const isSelected = state.sportsConfig.team === team;
-                      return (
-                        <button
-                          key={team}
-                          type="button"
-                          onClick={() =>
-                            setState((prev) => ({
-                              ...prev,
-                              sportsConfig: {
-                                ...prev.sportsConfig,
-                                team,
-                              },
-                            }))
-                          }
-                          className={`w-full h-[46px] px-4 flex items-center justify-between text-left font-sans text-[15px] cursor-pointer transition-colors ${
-                            isSelected
-                              ? "bg-[var(--lime-tint)] font-semibold text-black"
-                              : "hover:bg-[#F7F7F7] text-black"
-                          }`}
-                        >
-                          <span>{team}</span>
-                          {isSelected && (
-                            <Check className="w-4 h-4 text-black stroke-[3]" aria-hidden="true" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </SectionCard>
-            </div>
-          )}
-
-          {currentTopicId === "Stocks" && (
-            <div>
-              <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1 mb-8">
-                Choose stocks to track with daily market updates.
-              </p>
-
-              <SectionCard>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-sans font-[600] text-[18px] text-black">
-                    Pick up to 3 stocks
-                  </h2>
-                  <span className="font-sans text-[14px] text-[var(--text-muted)] tabular-nums">
-                    ({state.stocksConfig.tickers.length}/3)
-                  </span>
-                </div>
-
-                {/* Search input */}
-                <div className="relative w-full max-w-[340px] mb-4">
-                  <Search
-                    className="w-4 h-4 text-black absolute left-3 top-1/2 -translate-y-1/2"
-                    aria-hidden="true"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Search stock ticker (e.g. NVDA)..."
-                    value={tickerSearch}
-                    onChange={(e) => setTickerSearch(e.target.value.toUpperCase())}
-                    className="w-full h-10 pl-9 pr-4 rounded-[16px] border border-[var(--line)] bg-transparent font-sans text-[14px] text-black outline-none focus:border-black uppercase"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {POPULAR_TICKERS.filter((t) =>
-                    t.includes(tickerSearch.trim())
-                  ).map((ticker) => {
-                    const isSelected = state.stocksConfig.tickers.includes(ticker);
-                    const isMax =
-                      state.stocksConfig.tickers.length >= 3 && !isSelected;
-
-                    return (
-                      <Chip
-                        key={ticker}
-                        active={isSelected}
-                        disabled={isMax}
-                        onToggle={() => toggleTicker(ticker)}
-                      >
-                        {ticker}
-                      </Chip>
-                    );
-                  })}
-                </div>
-              </SectionCard>
-            </div>
-          )}
-
-          {currentTopicId === "Horoscope" && (
-            <div>
-              <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1 mb-8">
-                Choose your zodiac sign for personalized daily horoscope insights.
-              </p>
-
-              <SectionCard>
-                <h2 className="font-sans font-[600] text-[18px] text-black mb-4">
-                  Select your sign
+          {/* Exactly two SectionCards */}
+          <div className="flex flex-col gap-4">
+            {/* 1. Your weather */}
+            <SectionCard>
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="font-sans font-[600] text-[18px] text-black">
+                  Your weather
                 </h2>
-                <div className="flex flex-wrap gap-2">
-                  {ZODIAC_SIGNS.map((sign) => (
+                <span className="font-sans font-[600] text-[14px] text-[var(--text-muted-sm)] tabular-nums">
+                  ({weatherTopics.length}/3)
+                </span>
+              </div>
+              <p className="font-sans font-[400] text-[14px] text-[var(--text-muted-sm)] mb-4">
+                Choose up to 3 details
+              </p>
+
+              <div
+                role="group"
+                aria-label="Weather topics"
+                className="flex flex-wrap gap-2"
+              >
+                {WEATHER_TOPIC_ORDER.map((topicId) => {
+                  const isActive = weatherTopics.includes(topicId);
+                  const isMax = weatherTopics.length >= 3 && !isActive;
+
+                  return (
                     <Chip
-                      key={sign}
-                      active={state.horoscopeConfig.sign === sign}
-                      onToggle={() =>
-                        setState((prev) => ({
-                          ...prev,
-                          horoscopeConfig: { sign },
-                        }))
-                      }
+                      key={topicId}
+                      size="onboarding"
+                      active={isActive}
+                      disabled={isMax}
+                      onToggle={() => toggleWeatherTopic(topicId)}
                     >
-                      {sign}
+                      {WEATHER_TOPIC_LABELS[topicId]}
                     </Chip>
-                  ))}
-                </div>
-              </SectionCard>
-            </div>
-          )}
+                  );
+                })}
+              </div>
+
+              {weatherTopics.length >= 3 && (
+                <p className="text-[13px] text-[var(--text-muted-sm)] mt-3">
+                  You&apos;ve reached the limit. Deselect one to choose another.
+                </p>
+              )}
+            </SectionCard>
+
+            {/* 2. Your news */}
+            <SectionCard>
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="font-sans font-[600] text-[18px] text-black">
+                  Your news
+                </h2>
+                <span className="font-sans font-[600] text-[14px] text-[var(--text-muted-sm)] tabular-nums">
+                  ({newsTopics.length}/5)
+                </span>
+              </div>
+              <p className="font-sans font-[400] text-[14px] text-[var(--text-muted-sm)] mb-4">
+                Choose up to 5 topics
+              </p>
+
+              <div
+                role="group"
+                aria-label="News topics"
+                className="flex flex-wrap gap-2"
+              >
+                {NEWS_TOPIC_ORDER.map((topicId) => {
+                  const isActive = newsTopics.includes(topicId);
+                  const isMax = newsTopics.length >= 5 && !isActive;
+
+                  return (
+                    <Chip
+                      key={topicId}
+                      size="onboarding"
+                      active={isActive}
+                      disabled={isMax}
+                      onToggle={() => toggleNewsTopic(topicId)}
+                    >
+                      {NEWS_TOPIC_LABELS[topicId]}
+                    </Chip>
+                  );
+                })}
+              </div>
+
+              {newsTopics.length >= 5 && (
+                <p className="text-[13px] text-[var(--text-muted-sm)] mt-3">
+                  You&apos;ve reached the limit. Deselect one to choose another.
+                </p>
+              )}
+            </SectionCard>
+          </div>
         </CardShell>
       )}
 
-      {/* Review Step: width 1024px */}
-      {isReviewStep && (
+      {/* STEP 3: Review your digest (REDESIGNED) */}
+      {currentStep === 3 && (
         <CardShell
           width="review"
           footer={
             <div className="w-full flex items-center justify-between">
-              <OutlineButton onClick={goToPrevStep}>Back</OutlineButton>
-              <PrimaryButton onClick={handleFinish} className="w-[187px]">
-                Save &amp; finish →
-              </PrimaryButton>
+              <OutlineButton onClick={() => setStep(2)}>Back</OutlineButton>
+              <PrimaryButton onClick={handleFinish}>Save &amp; finish</PrimaryButton>
             </div>
           }
         >
-          {/* ProgressHeader at 100% */}
-          <ProgressHeader
-            currentStep={totalSteps}
-            totalSteps={totalSteps}
-            topicName="Review"
-          />
+          <Stepper currentStep={3} />
 
-          {/* Row below it: "Save & finish →" lime PrimaryButton right-aligned */}
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="font-display font-[600] text-[28px] md:text-[32px] leading-[37px] text-black">
-                Review your digest
-              </h1>
-              <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1">
-                Here&apos;s a preview of what your daily digest will look like.
-              </p>
-            </div>
-            <div className="hidden sm:block">
-              <PrimaryButton onClick={handleFinish} className="w-[187px]">
-                Save &amp; finish →
-              </PrimaryButton>
-            </div>
-          </div>
+          <h1 className="font-display font-[600] text-[28px] md:text-[32px] leading-[37px] text-black">
+            Review your digest
+          </h1>
+          <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1">
+            Here&apos;s a preview of what lands in your inbox.
+          </p>
 
-          {/* Two columns, gap 24px */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
-            {/* Left 362px SectionCard summary (5 cols on lg) */}
-            <div className="lg:col-span-5">
+          {/* Two columns, 24px gap */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8 items-start">
+            {/* Left 340px summary SectionCard */}
+            <div className="lg:col-span-4 w-full">
               <SectionCard className="divide-y divide-[rgba(0,0,0,0.08)]">
                 {/* Delivery time row */}
                 <div className="py-4 first:pt-0 flex items-center justify-between">
-                  <span className="font-sans font-[600] text-[14px] text-black">
-                    Delivery time
-                  </span>
-                  <span className="font-sans font-[400] text-[14px] text-black tabular-nums">
-                    {state.dispatchTime}
+                  <div>
+                    <span className="font-sans font-[600] text-[14px] text-black">
+                      Delivery time
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="block text-[14px] text-[var(--text-muted-sm)] underline hover:text-black cursor-pointer text-left mt-0.5"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <span className="font-sans font-[600] text-[14px] text-black tabular-nums">
+                    {deliveryTimeFormatted}
                   </span>
                 </div>
 
                 {/* Location row */}
-                <div className="py-4">
-                  <div className="font-sans font-[600] text-[14px] text-black">
-                    Location
+                <div className="py-4 flex items-center justify-between">
+                  <div>
+                    <span className="font-sans font-[600] text-[14px] text-black">
+                      Location
+                    </span>
+                    <div className="font-sans text-[13px] text-[var(--text-muted-sm)] mt-0.5">
+                      {locationLabel}
+                    </div>
                   </div>
-                  <div className="font-sans font-[400] text-[14px] text-[var(--text-muted-sm)] mt-0.5">
-                    {state.locationType}: {state.locationValue} ({state.country.name})
-                  </div>
+                  <Link
+                    href="/basic-info"
+                    className="text-[14px] text-[var(--text-muted-sm)] underline hover:text-black shrink-0 ml-3"
+                  >
+                    Edit
+                  </Link>
                 </div>
 
-                {/* Included topics */}
-                <div className="py-4 last:pb-0">
-                  <div className="font-sans font-[600] text-[14px] text-black mb-3">
-                    Included topics
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedTopics.map((topId) => {
-                      const topicObj = ALL_TOPICS.find((t) => t.id === topId);
-                      const Icon = topicObj?.icon || CloudSun;
-                      return (
-                        <div
-                          key={topId}
-                          className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-[var(--lime)] select-none"
-                          style={{ backgroundColor: "var(--lime-tint)" }}
+                {/* Weather topics row */}
+                {weatherTopics.length > 0 && (
+                  <div className="py-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-sans font-[600] text-[14px] text-black">
+                          Weather topics
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setStep(2)}
+                          className="text-[14px] text-[var(--text-muted-sm)] underline hover:text-black cursor-pointer"
                         >
-                          <GradientIcon icon={Icon} size={16} />
-                          <span className="font-sans text-[13px] text-black font-medium">
-                            {topId}
-                          </span>
-                        </div>
-                      );
-                    })}
+                          Edit
+                        </button>
+                      </div>
+                      <span className="font-sans text-[13px] text-[var(--text-muted-sm)] tabular-nums">
+                        ({weatherTopics.length}/3)
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {weatherTopics.map((topId) => {
+                        const Icon = WEATHER_ICONS[topId] || CloudSun;
+                        return (
+                          <div
+                            key={topId}
+                            className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-[var(--lime)] select-none"
+                            style={{ backgroundColor: "var(--lime-tint)" }}
+                          >
+                            <GradientIcon icon={Icon} size={16} />
+                            <span className="font-sans text-[13px] text-black font-medium">
+                              {WEATHER_TOPIC_LABELS[topId]}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* News topics row */}
+                {newsTopics.length > 0 && (
+                  <div className="py-4 last:pb-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-sans font-[600] text-[14px] text-black">
+                          News topics
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setStep(2)}
+                          className="text-[14px] text-[var(--text-muted-sm)] underline hover:text-black cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                      <span className="font-sans text-[13px] text-[var(--text-muted-sm)] tabular-nums">
+                        ({newsTopics.length}/5)
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {newsTopics.map((topId) => {
+                        const Icon = NEWS_ICONS[topId] || Landmark;
+                        return (
+                          <div
+                            key={topId}
+                            className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-[var(--lime)] select-none"
+                            style={{ backgroundColor: "var(--lime-tint)" }}
+                          >
+                            <GradientIcon icon={Icon} size={16} />
+                            <span className="font-sans text-[13px] text-black font-medium">
+                              {NEWS_TOPIC_LABELS[topId]}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </SectionCard>
             </div>
 
-            {/* Right 542px column: Message Preview (7 cols on lg) */}
-            <div className="lg:col-span-7 flex flex-col">
-              <h2 className="font-display font-[700] text-[20px] text-black mb-4">
-                Message preview
-              </h2>
-
-              {/* Preview panel bg #F2F2F2, radius 16px, padding 32px, max-height 450px, overflow auto */}
-              <div className="bg-[#F2F2F2] rounded-[16px] p-8 max-h-[450px] overflow-y-auto thin-scrollbar text-black select-none">
-                {/* Header row with 22px sms-green rounded-square icon */}
-                <div className="flex items-center justify-between pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className="w-[22px] h-[22px] rounded-[6px] flex items-center justify-center shrink-0"
-                      style={{ background: "var(--sms-green)" }}
-                    >
-                      <MessageSquare className="w-3 h-3 text-white fill-white" aria-hidden="true" />
+            {/* Right flexible email preview panel */}
+            <div className="lg:col-span-8 w-full flex flex-col">
+              <div className="w-full bg-white rounded-[24px] border border-[var(--line)] overflow-hidden">
+                {/* Header band bg #F2F2F2, padding 20px */}
+                <div className="bg-[#F2F2F2] p-5 flex flex-col gap-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center shrink-0">
+                        <Mail className="w-5 h-5 text-white stroke-[2]" aria-hidden="true" />
+                      </div>
+                      <div>
+                        <div className="font-sans font-[600] text-[15px] text-black">
+                          BetaDigest &lt;dispatch@betadigest.com&gt;
+                        </div>
+                        <div className="font-sans text-[13px] text-[#6B6F76]">
+                          To: {prefs.name}
+                        </div>
+                      </div>
                     </div>
-                    <span className="font-sans font-[600] text-[16px] text-black">
-                      BetaDigest
+
+                    <span className="font-sans text-[13px] text-[#6B6F76] tabular-nums">
+                      Thu, Oct 8 · {deliveryTimeFormatted}
                     </span>
                   </div>
-                  <span className="font-sans text-[14px] text-[#7A7A7A] tabular-nums">
-                    {state.dispatchTime}
-                  </span>
+
+                  <h3 className="font-display font-[700] text-[20px] text-black mt-2">
+                    Your BetaDigest for Thursday, October 8
+                  </h3>
                 </div>
 
-                <hr className="border-t border-[#D9D9D9] my-3" />
+                {/* Email Body padding 24px */}
+                <div className="p-6 flex flex-col gap-6">
+                  <div className="font-sans font-[500] text-[18px] text-black">
+                    Good morning, {prefs.name}
+                  </div>
 
-                {/* Greeting */}
-                <div className="font-sans font-[500] text-[18px] text-black mb-4">
-                  Good morning, {state.firstName || "Alex"}
-                </div>
+                  {/* Weather block (only if weather topics selected) */}
+                  {weatherTopics.length > 0 && (
+                    <div className="border-t border-[rgba(0,0,0,0.08)] pt-4">
+                      <h4 className="font-sans font-[700] text-[16px] text-black mb-3">
+                        Weather in {prefs.city}
+                      </h4>
 
-                {/* Per-topic blocks */}
-                <div className="space-y-4">
-                  {selectedTopics.includes("Weather") && (
-                    <div>
-                      <h3 className="font-sans font-[700] text-[16px] text-black mb-1">
-                        Weather in {state.locationValue || "Seattle"}
-                      </h3>
-                      <p className="font-sans font-[400] text-[14px] leading-[20px] text-black">
-                        Current temperature is 52°F, partly cloudy. Today&apos;s
-                        high 58°F / low 45°F. Rain chance: 30% this afternoon. UV
-                        Index: 3 (Moderate). Air Quality: 28 (Good).
-                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {weatherTopics.map((topId) => {
+                          const Icon = WEATHER_ICONS[topId] || CloudSun;
+                          if (topId === "hourly-3h") {
+                            return (
+                              <div
+                                key={topId}
+                                className="sm:col-span-3 p-3.5 rounded-[16px] bg-[var(--lime-tint)] border border-[rgba(0,0,0,0.06)] flex flex-col gap-2"
+                              >
+                                <div className="flex items-center gap-1.5 font-sans font-[600] text-[13px] text-black">
+                                  <GradientIcon icon={Icon} size={15} />
+                                  <span>3-Hour Breakdown</span>
+                                </div>
+                                <div className="grid grid-cols-4 gap-2">
+                                  {weatherData.hourly.map((h, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="text-center font-sans text-[12px] tabular-nums text-black"
+                                    >
+                                      <div className="text-[#6B6F76]">{h.time}</div>
+                                      <div className="font-bold">{h.temp}{weatherData.tempUnit}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          if (topId === "forecast-3day") {
+                            return (
+                              <div
+                                key={topId}
+                                className="sm:col-span-3 p-3.5 rounded-[16px] bg-white border border-[rgba(0,0,0,0.1)] flex flex-col gap-2"
+                              >
+                                <div className="flex items-center gap-1.5 font-sans font-[600] text-[13px] text-black">
+                                  <GradientIcon icon={Icon} size={15} />
+                                  <span>3-Day Forecast</span>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                  {weatherData.threeDay.map((d, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="p-2 rounded-[12px] bg-[#F9F9F9] text-center font-sans text-[12px] tabular-nums text-black"
+                                    >
+                                      <div className="font-semibold">{d.day}</div>
+                                      <div className="text-[11px] text-[#6B6F76] truncate">{d.condition}</div>
+                                      <div className="font-bold mt-1">
+                                        {d.high}° / {d.low}{weatherData.tempUnit}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          let labelVal = "";
+                          switch (topId) {
+                            case "current-temperature":
+                              labelVal = `${weatherData.currentTemp}${weatherData.tempUnit} (${weatherData.condition})`;
+                              break;
+                            case "high-low":
+                              labelVal = `High ${weatherData.high}° / Low ${weatherData.low}°`;
+                              break;
+                            case "rain-chance":
+                              labelVal = `${weatherData.rainProb}% chance`;
+                              break;
+                            case "thunderstorm-chance":
+                              labelVal = `${weatherData.thunderstormProb}% chance`;
+                              break;
+                            case "cloudiness":
+                              labelVal = `${weatherData.cloudiness}%`;
+                              break;
+                            case "uv-index":
+                              labelVal = `${weatherData.uvIndex} (${weatherData.uvDescription})`;
+                              break;
+                            case "air-quality":
+                              labelVal = `AQI ${weatherData.airQuality} (${weatherData.airQualityDescription})`;
+                              break;
+                            case "wind":
+                              labelVal = weatherData.windFormatted;
+                              break;
+                            case "humidity":
+                              labelVal = `${weatherData.humidity}%`;
+                              break;
+                            case "sun-times":
+                              labelVal = `↑ ${weatherData.sunrise} · ↓ ${weatherData.sunset}`;
+                              break;
+                          }
+
+                          return (
+                            <div
+                              key={topId}
+                              className="p-3 rounded-[16px] bg-[#F9F9F9] border border-[rgba(0,0,0,0.06)] flex flex-col justify-between"
+                            >
+                              <div className="flex items-center gap-1.5 font-sans font-[500] text-[12px] text-[#6B6F76]">
+                                <GradientIcon icon={Icon} size={14} />
+                                <span className="truncate">{WEATHER_TOPIC_LABELS[topId]}</span>
+                              </div>
+                              <div className="font-sans font-[700] text-[14px] text-black mt-2 tabular-nums">
+                                {labelVal}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
-                  {selectedTopics.includes("News") && (
-                    <div>
-                      <h3 className="font-sans font-[700] text-[16px] text-black mb-1">
-                        Top {state.newsConfig.category}
-                      </h3>
-                      <ul className="list-disc pl-5 font-sans font-[400] text-[14px] leading-[20px] text-black space-y-1">
-                        <li>
-                          Federal clean energy corridor funding finalized{" "}
-                          {state.newsConfig.includeLinks && (
-                            <span className="text-[#2563EB] underline">
-                              (betadigest.com/story-1)
-                            </span>
-                          )}
-                        </li>
-                        <li>
-                          Municipal rail expansion ahead of schedule{" "}
-                          {state.newsConfig.includeLinks && (
-                            <span className="text-[#2563EB] underline">
-                              (betadigest.com/story-2)
-                            </span>
-                          )}
-                        </li>
-                      </ul>
-                    </div>
-                  )}
+                  {/* News block (only if news topics selected) */}
+                  {newsTopics.length > 0 && (
+                    <div className="border-t border-[rgba(0,0,0,0.08)] pt-4">
+                      <h4 className="font-sans font-[700] text-[16px] text-black mb-3">
+                        Top 5 stories
+                      </h4>
 
-                  {selectedTopics.includes("Sports") && (
-                    <div>
-                      <h3 className="font-sans font-[700] text-[16px] text-black mb-1">
-                        {state.sportsConfig.league}: {state.sportsConfig.team}
-                      </h3>
-                      <p className="font-sans font-[400] text-[14px] leading-[20px] text-black">
-                        {state.sportsConfig.team} secure home victory 27-24. Next
-                        matchup scheduled Sunday at 1:00 PM.
-                      </p>
-                    </div>
-                  )}
+                      <div className="space-y-4">
+                        {stories.map((story, idx) => (
+                          <div
+                            key={`${story.id}-${idx}`}
+                            className="flex flex-col gap-1.5 pb-4 border-b border-[rgba(0,0,0,0.06)] last:border-0"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-sans text-[12px] font-bold text-[#8E9096] tabular-nums">
+                                0{idx + 1}
+                              </span>
+                              <span
+                                className="font-sans text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                                style={{
+                                  backgroundColor: "var(--lime-tint)",
+                                  color: "#000000",
+                                }}
+                              >
+                                {story.topicLabel}
+                              </span>
+                              <span className="text-[12px] text-[#8E9096]">
+                                · {story.source}
+                              </span>
+                            </div>
 
-                  {selectedTopics.includes("Stocks") && (
-                    <div>
-                      <h3 className="font-sans font-[700] text-[16px] text-black mb-1">
-                        Stock Watch ({state.stocksConfig.tickers.join(", ")})
-                      </h3>
-                      <p className="font-sans font-[400] text-[14px] leading-[20px] text-black tabular-nums">
-                        {state.stocksConfig.tickers.map((t) => `${t} +1.4%`).join(" · ")} · Futures indicate steady opening.
-                      </p>
-                    </div>
-                  )}
+                            <div className="font-sans font-[600] text-[16px] leading-snug text-black">
+                              {story.headline}
+                            </div>
 
-                  {selectedTopics.includes("Horoscope") && (
-                    <div>
-                      <h3 className="font-sans font-[700] text-[16px] text-black mb-1">
-                        {state.horoscopeConfig.sign} Daily Outlook
-                      </h3>
-                      <p className="font-sans font-[400] text-[14px] leading-[20px] text-black">
-                        Clear communication helps resolve a complex question early. Trust your instinct on collaborative tasks.
-                      </p>
+                            <p className="font-sans font-[400] text-[14px] leading-relaxed text-[#6B6F76]">
+                              {story.summary}
+                            </p>
+
+                            <a
+                              href={story.url}
+                              className="font-sans font-[500] text-[14px] text-black underline hover:opacity-80 self-start"
+                            >
+                              Read full story
+                            </a>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

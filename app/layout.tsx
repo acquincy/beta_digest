@@ -32,7 +32,6 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${redHatDisplay.variable} ${inter.variable} h-full antialiased`}
-      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-[var(--canvas)] text-[var(--text)] selection:bg-[var(--lime)] selection:text-black">
         {/* Hidden SVG defining linearGradient for icons */}

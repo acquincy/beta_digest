@@ -1,13 +1,33 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getTimeUntilNextDispatch, formatCurrentTimeInZone } from "../lib/time-utils";
+import {
+  HOURLY_OPTIONS,
+  formatHourOption,
+  getTimeUntilNextDispatch,
+  formatCurrentTimeInZone,
+} from "../lib/time-utils";
+
+test("HOURLY_OPTIONS contains exactly 24 hourly options from 0 to 23", () => {
+  assert.equal(HOURLY_OPTIONS.length, 24);
+  for (let i = 0; i < 24; i++) {
+    assert.equal(HOURLY_OPTIONS[i].value, i);
+  }
+});
+
+test("formatHourOption correctly formats 12-hour AM/PM values", () => {
+  assert.equal(formatHourOption(0), "12:00 AM");
+  assert.equal(formatHourOption(7), "7:00 AM");
+  assert.equal(formatHourOption(12), "12:00 PM");
+  assert.equal(formatHourOption(13), "1:00 PM");
+  assert.equal(formatHourOption(23), "11:00 PM");
+});
 
 test("getTimeUntilNextDispatch calculates exact delta before dispatch time", () => {
   // Mock current time: 03:30:00 UTC
   const mockNow = new Date(Date.UTC(2026, 9, 5, 3, 30, 0));
 
-  // Target dispatch: 06:00 UTC
-  const remaining = getTimeUntilNextDispatch("06:00", "UTC", mockNow);
+  // Target dispatch: 6 (06:00 UTC)
+  const remaining = getTimeUntilNextDispatch(6, "UTC", mockNow);
 
   // Delta between 03:30:00 and 06:00:00 is 2 hours and 30 minutes
   assert.equal(remaining.hours, 2);
@@ -20,26 +40,13 @@ test("getTimeUntilNextDispatch wraps to next day if dispatch time already passed
   // Mock current time: 08:15:30 UTC
   const mockNow = new Date(Date.UTC(2026, 9, 5, 8, 15, 30));
 
-  // Target dispatch: 06:00 UTC
-  const remaining = getTimeUntilNextDispatch("06:00", "UTC", mockNow);
+  // Target dispatch: 6 (06:00 UTC)
+  const remaining = getTimeUntilNextDispatch(6, "UTC", mockNow);
 
-  // Delta between 08:15:30 and next day 06:00:00 is (24 - 8.25833 + 6) = 21h 44m 30s
   assert.equal(remaining.hours, 21);
   assert.equal(remaining.minutes, 44);
   assert.equal(remaining.seconds, 30);
   assert.equal(remaining.formatted, "21:44:30");
-});
-
-test("getTimeUntilNextDispatch handles specific regional timezones correctly", () => {
-  // Current time: 05:00:00 UTC
-  // In Europe/London (BST / UTC+1 in summer, or UTC in winter)
-  const mockNow = new Date(Date.UTC(2026, 9, 5, 5, 0, 0));
-  const remaining = getTimeUntilNextDispatch("06:00", "UTC", mockNow);
-
-  assert.equal(remaining.hours, 1);
-  assert.equal(remaining.minutes, 0);
-  assert.equal(remaining.seconds, 0);
-  assert.equal(remaining.formatted, "01:00:00");
 });
 
 test("formatCurrentTimeInZone returns formatted HH:mm string", () => {

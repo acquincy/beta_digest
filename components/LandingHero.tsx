@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { CloudSun, MessageSquare } from "lucide-react";
+import { CloudSun, Mail } from "lucide-react";
 import { IconTile } from "./primitives/IconTile";
 import { DarkButton } from "./primitives/Button";
 import { HandDrawnEllipse } from "./HandDrawnEllipse";
@@ -38,11 +38,11 @@ export const LandingHero: React.FC = () => {
           {/* 24px gap */}
           <div className="h-6" />
 
-          {/* Subhead "Delivered daily via SMS or email" with HandDrawnEllipse around "SMS or email" */}
+          {/* Subhead "Delivered daily to your inbox" with HandDrawnEllipse around "your inbox" */}
           <p className="font-sans font-[600] text-[20px] leading-[28px] md:text-[24px] md:leading-[32px] text-[#374151]">
-            Delivered daily via{" "}
+            Delivered daily to{" "}
             <HandDrawnEllipse>
-              <span className="px-1 text-black font-[600]">SMS or email</span>
+              <span className="px-1 text-black font-[600]">your inbox</span>
             </HandDrawnEllipse>
           </p>
 
@@ -52,14 +52,14 @@ export const LandingHero: React.FC = () => {
           {/* Paragraph (max-width 500px) */}
           <p className="font-sans font-[400] text-[18px] leading-[26px] md:text-[22px] md:leading-[28px] text-[var(--text)] text-opacity-80 max-w-[500px]">
             Skip the noisy feeds and weather apps full of ads. Get a simple,
-            accurate digest on your phone every morning. Know exactly what to
+            accurate digest in your inbox every morning. Know exactly what to
             expect before you step outside.
           </p>
 
           {/* 32px gap */}
           <div className="h-8" />
 
-          {/* DarkButton "Get your daily digest" with arrow */}
+          {/* DarkButton "Get your daily digest" */}
           <div>
             <Link href="/signup" tabIndex={-1}>
               <DarkButton>Get your daily digest</DarkButton>
@@ -81,7 +81,6 @@ export const LandingHero: React.FC = () => {
             }}
             aria-hidden="true"
           >
-            {/* Radius 520px -> diameter 1040px at 18% opacity */}
             <div
               className="absolute rounded-full"
               style={{
@@ -92,7 +91,6 @@ export const LandingHero: React.FC = () => {
                 backgroundColor: "rgba(255, 255, 255, 0.18)",
               }}
             />
-            {/* Radius 380px -> diameter 760px at 22% opacity */}
             <div
               className="absolute rounded-full"
               style={{
@@ -120,17 +118,14 @@ export const LandingHero: React.FC = () => {
               {/* Header row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "var(--sms-green)" }}
-                  >
-                    <MessageSquare className="w-4 h-4 text-white fill-white" aria-hidden="true" />
+                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
                   </div>
                   <span
                     className="font-sans font-[300] text-[22px] uppercase text-black"
                     style={{ letterSpacing: "0.02em" }}
                   >
-                    MESSAGES
+                    INBOX
                   </span>
                 </div>
                 <span className="font-sans text-[16px] text-[#7A7A7A] tabular-nums">
@@ -146,12 +141,14 @@ export const LandingHero: React.FC = () => {
                 BetaDigest
               </div>
 
-              {/* Body: full text, unobstructed by Card 2 */}
-              <p className="font-sans font-[400] text-[15px] leading-[22px] text-black mt-2">
-                Weather in Seattle: Current temperature is 52°F, partly cloudy.
-                Today&apos;s high 58°F / low 45°F. Rain chance: 30% this
-                afternoon. UV Index: 3 (Moderate). Air Quality: 28 (Good).
-                Sunrise: 6:42am / Sunset: 7:15pm
+              {/* Subject */}
+              <div className="font-sans font-[600] text-[16px] text-black mt-1">
+                Your morning digest · Thu, Oct 8
+              </div>
+
+              {/* Preview body */}
+              <p className="font-sans font-[400] text-[16px] leading-[24px] text-black mt-2">
+                Weather in Seattle: 52°F, partly cloudy. High 58°F / low 45°F. Rain chance 30% this afternoon. UV index 3 (Moderate). Air quality 28 (Good).
               </p>
             </div>
 
@@ -170,17 +167,14 @@ export const LandingHero: React.FC = () => {
               {/* Header row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "var(--sms-green)" }}
-                  >
-                    <MessageSquare className="w-4 h-4 text-white fill-white" aria-hidden="true" />
+                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
                   </div>
                   <span
                     className="font-sans font-[300] text-[22px] uppercase text-black"
                     style={{ letterSpacing: "0.02em" }}
                   >
-                    MESSAGES
+                    INBOX
                   </span>
                 </div>
                 <span className="font-sans text-[16px] text-[#7A7A7A] tabular-nums">
@@ -191,24 +185,48 @@ export const LandingHero: React.FC = () => {
               {/* 16px gap */}
               <div className="h-4" />
 
-              {/* Sender */}
-              <div className="font-display font-[600] text-[24px] text-black">
-                BetaDigest
+              {/* Subject */}
+              <div className="font-display font-[600] text-[20px] text-black">
+                Top stories today
               </div>
 
-              {/* Body */}
-              <div className="font-sans font-[400] text-[16px] leading-[24px] text-black mt-2 space-y-0.5">
-                <div className="font-semibold">3-Day Forecast:</div>
-                <div className="tabular-nums">Thu: 56°F / 44°F, showers</div>
-                <div className="tabular-nums">Fri: 60°F / 46°F, partly cloudy</div>
-                <div className="tabular-nums">Sat: 63°F / 48°F, sunny</div>
-                <div className="tabular-nums">Wind: 8 mph SW</div>
-                <div className="tabular-nums">Humidity: 65%</div>
+              {/* Three headline lines each with one-line grey summary */}
+              <div className="mt-3 space-y-2.5">
+                <div>
+                  <div className="font-sans font-[600] text-[15px] leading-snug text-black">
+                    Central banks advance unified liquidity framework
+                  </div>
+                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
+                    Updated capital adequacy reserves reduce cross-border transfer friction.
+                  </div>
+                </div>
+
+                <div>
+                  <div className="font-sans font-[600] text-[15px] leading-snug text-black">
+                    Offshore clean power generation exceeds autumn benchmark
+                  </div>
+                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
+                    Utility storage clusters produce eighteen percent above projected seasonal totals.
+                  </div>
+                </div>
+
+                <div>
+                  <div className="font-sans font-[600] text-[15px] leading-snug text-black">
+                    Metropolitan transit authority deploys automated dispatch
+                  </div>
+                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
+                    Telemetry upgrades across commuter rail lines cut morning transfer delays.
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-[rgba(0,0,0,0.08)] font-sans font-[500] text-[14px] text-black">
+                Read the full digest in your inbox
               </div>
             </div>
           </div>
 
-          {/* Mobile vertical stack: no overlap, 16px gap, no clipping */}
+          {/* Mobile vertical stack */}
           <div className="flex flex-col lg:hidden gap-4 w-full max-w-[447px]">
             {/* Card 1 */}
             <div
@@ -220,17 +238,14 @@ export const LandingHero: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "var(--sms-green)" }}
-                  >
-                    <MessageSquare className="w-4 h-4 text-white fill-white" aria-hidden="true" />
+                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
                   </div>
                   <span
                     className="font-sans font-[300] text-[20px] uppercase text-black"
                     style={{ letterSpacing: "0.02em" }}
                   >
-                    MESSAGES
+                    INBOX
                   </span>
                 </div>
                 <span className="font-sans text-[15px] text-[#7A7A7A] tabular-nums">
@@ -240,11 +255,11 @@ export const LandingHero: React.FC = () => {
               <div className="font-display font-[600] text-[22px] text-black mt-4">
                 BetaDigest
               </div>
+              <div className="font-sans font-[600] text-[15px] text-black mt-1">
+                Your morning digest · Thu, Oct 8
+              </div>
               <p className="font-sans font-[400] text-[15px] leading-[22px] text-black mt-2">
-                Weather in Seattle: Current temperature is 52°F, partly cloudy.
-                Today&apos;s high 58°F / low 45°F. Rain chance: 30% this
-                afternoon. UV Index: 3 (Moderate). Air Quality: 28 (Good).
-                Sunrise: 6:42am / Sunset: 7:15pm
+                Weather in Seattle: 52°F, partly cloudy. High 58°F / low 45°F. Rain chance 30% this afternoon. UV index 3 (Moderate). Air quality 28 (Good).
               </p>
             </div>
 
@@ -258,33 +273,51 @@ export const LandingHero: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "var(--sms-green)" }}
-                  >
-                    <MessageSquare className="w-4 h-4 text-white fill-white" aria-hidden="true" />
+                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
                   </div>
                   <span
                     className="font-sans font-[300] text-[20px] uppercase text-black"
                     style={{ letterSpacing: "0.02em" }}
                   >
-                    MESSAGES
+                    INBOX
                   </span>
                 </div>
                 <span className="font-sans text-[15px] text-[#7A7A7A] tabular-nums">
                   now
                 </span>
               </div>
-              <div className="font-display font-[600] text-[22px] text-black mt-4">
-                BetaDigest
+              <div className="font-display font-[600] text-[20px] text-black mt-4">
+                Top stories today
               </div>
-              <div className="font-sans font-[400] text-[15px] leading-[22px] text-black mt-2 space-y-0.5">
-                <div className="font-semibold">3-Day Forecast:</div>
-                <div className="tabular-nums">Thu: 56°F / 44°F, showers</div>
-                <div className="tabular-nums">Fri: 60°F / 46°F, partly cloudy</div>
-                <div className="tabular-nums">Sat: 63°F / 48°F, sunny</div>
-                <div className="tabular-nums">Wind: 8 mph SW</div>
-                <div className="tabular-nums">Humidity: 65%</div>
+              <div className="mt-3 space-y-2.5">
+                <div>
+                  <div className="font-sans font-[600] text-[14px] leading-snug text-black">
+                    Central banks advance unified liquidity framework
+                  </div>
+                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
+                    Updated capital adequacy reserves reduce cross-border transfer friction.
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans font-[600] text-[14px] leading-snug text-black">
+                    Offshore clean power generation exceeds autumn benchmark
+                  </div>
+                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
+                    Utility storage clusters produce eighteen percent above projected seasonal totals.
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans font-[600] text-[14px] leading-snug text-black">
+                    Metropolitan transit authority deploys automated dispatch
+                  </div>
+                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
+                    Telemetry upgrades across commuter rail lines cut morning transfer delays.
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-[rgba(0,0,0,0.08)] font-sans font-[500] text-[14px] text-black">
+                Read the full digest in your inbox
               </div>
             </div>
           </div>

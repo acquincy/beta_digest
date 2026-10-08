@@ -37,7 +37,7 @@ export default function CreditsPage() {
               Terms, Privacy &amp; Credits
             </h1>
             <p className="font-sans text-sm mt-2 text-[var(--text-muted-sm)]">
-              BetaDigest provides daily weather, news, sports, and financial summaries. All photographic assets referenced in public previews are licensed under the Unsplash License:
+              BetaDigest provides daily weather and news summaries. All photographic assets referenced in public previews are licensed under the Unsplash License:
             </p>
           </div>
 

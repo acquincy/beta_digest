@@ -1,303 +1,478 @@
-import { CityData, EditorialStory, MetricKey, UserPreferences, DigestPayload } from "./types";
-import { deriveDigestText } from "./digest-derivation";
-import { formatCurrentTimeInZone } from "./time-utils";
+import {
+  CityWeatherData,
+  EditorialStory,
+  NewsTopicId,
+  NEWS_TOPIC_LABELS,
+  NEWS_TOPIC_ORDER,
+} from "./types";
 
-export const MOCK_STORIES: EditorialStory[] = [
-  {
-    id: "story-1",
-    headline: "Global central banks outline unified liquidity safeguards for digital settlement rails.",
-    summary:
-      "A multilateral framework sets stricter capital adequacy floors for cross-border automated clearing houses, aimed at mitigating overnight counterparty friction.",
-    source: "Financial Times",
-    timestamp: "05:14",
-    category: "markets",
-    url: "https://www.ft.com",
-  },
-  {
-    id: "story-2",
-    headline: "Regional transit authority deploys automated dispatch grid across primary commute lines.",
-    summary:
-      "Telemetry upgrades across rail switches and municipal bus routes reduce peak morning transfer delays by an average of six minutes.",
-    source: "Reuters",
-    timestamp: "05:32",
-    category: "transit",
-    url: "https://www.reuters.com",
-  },
-  {
-    id: "story-3",
-    headline: "Offshore wind installations surpass seasonal generation benchmark ahead of schedule.",
-    summary:
-      "Grid operators report high-efficiency turbine clusters produced eighteen percent above projected autumn output during sustained coastal pressure fronts.",
-    source: "Bloomberg",
-    timestamp: "05:45",
-    category: "infrastructure",
-    url: "https://www.bloomberg.com",
-  },
-  {
-    id: "story-4",
-    headline: "Municipal reservoir system completes sensor retrofit for autumn catchment cycles.",
-    summary:
-      "Automated acoustic monitors along primary aqueducts enable proactive valve throttling ahead of heavy Pacific weather systems.",
-    source: "Associated Press",
-    timestamp: "05:58",
-    category: "infrastructure",
-    url: "https://apnews.com",
-  },
-  {
-    id: "story-5",
-    headline: "Intermodal freight corridor standardizes real-time freight tracking across regional terminals.",
-    summary:
-      "Logistics operators harmonize container manifest protocols to curb interchange wait times at major inland rail heads.",
-    source: "The Wall Street Journal",
-    timestamp: "06:05",
-    category: "policy",
-    url: "https://www.wsj.com",
-  },
-];
-
-export const MOCK_CITIES: Record<string, CityData> = {
-  Seattle: {
-    city: "Seattle",
-    country: "United States",
-    timezone: "America/Los_Angeles",
-    currentTemp: 52,
-    condition: "partly cloudy",
-    high: 58,
-    low: 45,
-    rainProb: 30,
-    rainPeriod: "this afternoon",
-    wind: "8 mph SW",
-    uvIndex: 3,
-    uvDescription: "Moderate",
-    airQuality: 28,
-    airQualityDescription: "Good",
-    humidity: 65,
-    sunrise: "06:42",
-    sunset: "19:15",
-    hourly: [
-      { time: "06:00", temp: 50, condition: "Clear", rainProb: 10, windSpeed: 6 },
-      { time: "07:00", temp: 51, condition: "Partly Cloudy", rainProb: 15, windSpeed: 7 },
-      { time: "08:00", temp: 52, condition: "Partly Cloudy", rainProb: 20, windSpeed: 8 },
-      { time: "09:00", temp: 54, condition: "Cloudy", rainProb: 25, windSpeed: 9 },
-      { time: "10:00", temp: 55, condition: "Scattered Rain", rainProb: 35, windSpeed: 10 },
-      { time: "11:00", temp: 57, condition: "Light Rain", rainProb: 40, windSpeed: 11 },
-      { time: "12:00", temp: 58, condition: "Partly Cloudy", rainProb: 30, windSpeed: 8 },
-      { time: "13:00", temp: 57, condition: "Partly Cloudy", rainProb: 20, windSpeed: 7 },
-    ],
-    threeDay: [
-      { day: "Tomorrow", date: "Tue, Oct 06", high: 55, low: 44, condition: "Sunny", rainProb: 10 },
-      { day: "Wednesday", date: "Wed, Oct 07", high: 48, low: 42, condition: "Rain Likely", rainProb: 75 },
-      { day: "Thursday", date: "Thu, Oct 08", high: 52, low: 43, condition: "Overcast", rainProb: 20 },
-    ],
-  },
-  London: {
-    city: "London",
-    country: "United Kingdom",
-    timezone: "Europe/London",
-    currentTemp: 14,
-    condition: "light drizzle",
-    high: 17,
-    low: 11,
-    rainProb: 60,
-    rainPeriod: "before noon",
-    wind: "12 mph NE",
-    uvIndex: 2,
-    uvDescription: "Low",
-    airQuality: 22,
-    airQualityDescription: "Good",
-    humidity: 78,
-    sunrise: "07:08",
-    sunset: "18:29",
-    hourly: [
-      { time: "06:00", temp: 12, condition: "Overcast", rainProb: 40, windSpeed: 10 },
-      { time: "07:00", temp: 13, condition: "Light Drizzle", rainProb: 60, windSpeed: 11 },
-      { time: "08:00", temp: 14, condition: "Light Drizzle", rainProb: 65, windSpeed: 12 },
-      { time: "09:00", temp: 15, condition: "Cloudy", rainProb: 50, windSpeed: 12 },
-      { time: "10:00", temp: 16, condition: "Partly Cloudy", rainProb: 30, windSpeed: 10 },
-      { time: "11:00", temp: 17, condition: "Clear", rainProb: 15, windSpeed: 9 },
-      { time: "12:00", temp: 17, condition: "Clear", rainProb: 10, windSpeed: 8 },
-      { time: "13:00", temp: 16, condition: "Cloudy", rainProb: 20, windSpeed: 9 },
-    ],
-    threeDay: [
-      { day: "Tomorrow", date: "Tue, Oct 06", high: 16, low: 10, condition: "Breezy", rainProb: 25 },
-      { day: "Wednesday", date: "Wed, Oct 07", high: 18, low: 12, condition: "Clear", rainProb: 10 },
-      { day: "Thursday", date: "Thu, Oct 08", high: 15, low: 9, condition: "Showers", rainProb: 55 },
-    ],
-  },
-  Lagos: {
-    city: "Lagos",
-    country: "Nigeria",
-    timezone: "Africa/Lagos",
-    currentTemp: 27,
-    condition: "humid haze",
-    high: 31,
-    low: 24,
-    rainProb: 20,
-    rainPeriod: "isolated evening showers",
-    wind: "7 mph SW",
-    uvIndex: 8,
-    uvDescription: "Very High",
-    airQuality: 64,
-    airQualityDescription: "Moderate",
-    humidity: 82,
-    sunrise: "06:28",
-    sunset: "18:34",
-    hourly: [
-      { time: "06:00", temp: 25, condition: "Hazy", rainProb: 10, windSpeed: 5 },
-      { time: "07:00", temp: 26, condition: "Humid", rainProb: 10, windSpeed: 6 },
-      { time: "08:00", temp: 27, condition: "Partly Sunny", rainProb: 15, windSpeed: 7 },
-      { time: "09:00", temp: 29, condition: "Warm", rainProb: 20, windSpeed: 8 },
-      { time: "10:00", temp: 30, condition: "Sun & Haze", rainProb: 20, windSpeed: 9 },
-      { time: "11:00", temp: 31, condition: "Peak Sun", rainProb: 20, windSpeed: 9 },
-      { time: "12:00", temp: 31, condition: "High Humidity", rainProb: 25, windSpeed: 8 },
-      { time: "13:00", temp: 30, condition: "Overcast", rainProb: 30, windSpeed: 7 },
-    ],
-    threeDay: [
-      { day: "Tomorrow", date: "Tue, Oct 06", high: 32, low: 25, condition: "Partly Sunny", rainProb: 20 },
-      { day: "Wednesday", date: "Wed, Oct 07", high: 30, low: 24, condition: "Thunderstorms", rainProb: 65 },
-      { day: "Thursday", date: "Thu, Oct 08", high: 31, low: 24, condition: "Hazy", rainProb: 15 },
-    ],
-  },
-  Tokyo: {
-    city: "Tokyo",
-    country: "Japan",
-    timezone: "Asia/Tokyo",
-    currentTemp: 19,
-    condition: "crisp and clear",
-    high: 23,
-    low: 15,
-    rainProb: 5,
-    rainPeriod: "dry through midnight",
-    wind: "5 mph E",
-    uvIndex: 5,
-    uvDescription: "Moderate",
-    airQuality: 16,
-    airQualityDescription: "Excellent",
-    humidity: 52,
-    sunrise: "05:39",
-    sunset: "17:21",
-    hourly: [
-      { time: "06:00", temp: 16, condition: "Clear", rainProb: 0, windSpeed: 4 },
-      { time: "07:00", temp: 18, condition: "Sunny", rainProb: 0, windSpeed: 5 },
-      { time: "08:00", temp: 19, condition: "Clear", rainProb: 5, windSpeed: 5 },
-      { time: "09:00", temp: 21, condition: "Clear", rainProb: 5, windSpeed: 6 },
-      { time: "10:00", temp: 22, condition: "Sunny", rainProb: 5, windSpeed: 6 },
-      { time: "11:00", temp: 23, condition: "Sunny", rainProb: 5, windSpeed: 6 },
-      { time: "12:00", temp: 23, condition: "Clear", rainProb: 5, windSpeed: 5 },
-      { time: "13:00", temp: 22, condition: "Clear", rainProb: 5, windSpeed: 5 },
-    ],
-    threeDay: [
-      { day: "Tomorrow", date: "Tue, Oct 06", high: 22, low: 14, condition: "Sunny", rainProb: 0 },
-      { day: "Wednesday", date: "Wed, Oct 07", high: 20, low: 15, condition: "Partly Cloudy", rainProb: 15 },
-      { day: "Thursday", date: "Thu, Oct 08", high: 21, low: 13, condition: "Clear", rainProb: 10 },
-    ],
-  },
-  NewYork: {
-    city: "New York",
-    country: "United States",
-    timezone: "America/New_York",
-    currentTemp: 59,
-    condition: "fair skies",
-    high: 64,
-    low: 51,
-    rainProb: 15,
-    rainPeriod: "slight late drizzle",
-    wind: "10 mph NW",
-    uvIndex: 4,
-    uvDescription: "Moderate",
-    airQuality: 32,
-    airQualityDescription: "Good",
-    humidity: 58,
-    sunrise: "06:55",
-    sunset: "18:32",
-    hourly: [
-      { time: "06:00", temp: 53, condition: "Clear", rainProb: 5, windSpeed: 8 },
-      { time: "07:00", temp: 56, condition: "Sunny", rainProb: 5, windSpeed: 9 },
-      { time: "08:00", temp: 59, condition: "Fair", rainProb: 10, windSpeed: 10 },
-      { time: "09:00", temp: 61, condition: "Fair", rainProb: 10, windSpeed: 10 },
-      { time: "10:00", temp: 63, condition: "Partly Sunny", rainProb: 15, windSpeed: 11 },
-      { time: "11:00", temp: 64, condition: "Partly Sunny", rainProb: 15, windSpeed: 11 },
-      { time: "12:00", temp: 64, condition: "Fair", rainProb: 15, windSpeed: 10 },
-      { time: "13:00", temp: 63, condition: "Fair", rainProb: 20, windSpeed: 9 },
-    ],
-    threeDay: [
-      { day: "Tomorrow", date: "Tue, Oct 06", high: 62, low: 49, condition: "Sunny", rainProb: 5 },
-      { day: "Wednesday", date: "Wed, Oct 07", high: 58, low: 46, condition: "Overcast", rainProb: 30 },
-      { day: "Thursday", date: "Thu, Oct 08", high: 60, low: 48, condition: "Clear", rainProb: 10 },
-    ],
-  },
+// Neutral source labels per G7: "BetaDigest Desk", "Wire"
+// Minimum 3 stories per topic for all 12 news topics (36 stories total)
+export const FIXTURE_STORIES_BY_TOPIC: Record<NewsTopicId, Omit<EditorialStory, "topic" | "topicLabel">[]> = {
+  politics: [
+    {
+      id: "pol-1",
+      headline: "National legislative committee advances bipartisan transparency framework for executive agencies.",
+      summary: "The legislative panel approved updated open-records guidelines aimed at accelerating public document disclosure and standardizing automated cataloging.",
+      source: "BetaDigest Desk",
+      timestamp: "2h ago",
+      url: "#",
+    },
+    {
+      id: "pol-2",
+      headline: "Municipal governance coalition establishes digital petition guidelines for regional councils.",
+      summary: "Local government representatives agreed on uniform verification standards for community initiatives across suburban districts.",
+      source: "Wire",
+      timestamp: "4h ago",
+      url: "#",
+    },
+    {
+      id: "pol-3",
+      headline: "Civil service modernization initiative begins phased rollout for administrative departments.",
+      summary: "Federal personnel offices introduced streamlined procurement and talent onboarding protocols to cut operational lag times.",
+      source: "BetaDigest Desk",
+      timestamp: "6h ago",
+      url: "#",
+    },
+  ],
+  economy: [
+    {
+      id: "econ-1",
+      headline: "Central banking authorities maintain baseline interest targets amid stable wholesale pricing indicators.",
+      summary: "Monetary policy committees cited steady consumer demand and balanced employment metrics in their quarterly macroeconomic statement.",
+      source: "BetaDigest Desk",
+      timestamp: "1h ago",
+      url: "#",
+    },
+    {
+      id: "econ-2",
+      headline: "Cross-border trade volumes register quarterly expansion led by regional industrial manufacturing.",
+      summary: "Export clearing authorities reported an uptick in specialized equipment shipments and consumer electronics components.",
+      source: "Wire",
+      timestamp: "3h ago",
+      url: "#",
+    },
+    {
+      id: "econ-3",
+      headline: "Commercial credit markets report stable delinquency rates across mid-sized business portfolios.",
+      summary: "Institutional lending benchmarks showed steady debt servicing and resilient working capital reserves through the fiscal period.",
+      source: "BetaDigest Desk",
+      timestamp: "5h ago",
+      url: "#",
+    },
+  ],
+  health: [
+    {
+      id: "health-1",
+      headline: "Public health agencies update seasonal respiratory advisory following clinic surveillance data.",
+      summary: "Epidemiological teams observed manageable transmission rates alongside widespread availability of updated preventative vaccines.",
+      source: "Wire",
+      timestamp: "2h ago",
+      url: "#",
+    },
+    {
+      id: "health-2",
+      headline: "Clinical research network releases long-term nutritional study tracking metabolic health outcomes.",
+      summary: "A ten-year observational dataset links consistent whole-food dietary patterns with reduced cardiovascular inflammation markers.",
+      source: "BetaDigest Desk",
+      timestamp: "4h ago",
+      url: "#",
+    },
+    {
+      id: "health-3",
+      headline: "Regional hospitals expand automated triage diagnostics in ambulatory emergency wings.",
+      summary: "Medical center administrators reported a twenty percent reduction in non-critical emergency room wait times following telemetry integration.",
+      source: "Wire",
+      timestamp: "5h ago",
+      url: "#",
+    },
+  ],
+  environment: [
+    {
+      id: "env-1",
+      headline: "Coastal conservation alliance completes wetland restoration milestone to mitigate storm surges.",
+      summary: "Civil engineers and marine biologists finalized protective salt marsh barriers covering sixty kilometers of vulnerable shoreline.",
+      source: "BetaDigest Desk",
+      timestamp: "2h ago",
+      url: "#",
+    },
+    {
+      id: "env-2",
+      headline: "Renewable energy cooperatives achieve record distribution efficiency on regional municipal grids.",
+      summary: "Combined solar and battery storage installations supplied sixty percent of peak mid-day commercial electrical demand.",
+      source: "Wire",
+      timestamp: "3h ago",
+      url: "#",
+    },
+    {
+      id: "env-3",
+      headline: "Forestry management services deploy acoustic telemetry to track biodiversity recovery.",
+      summary: "Wildlife conservationists recorded significant resurgence in native songbird populations across revitalized woodland reserves.",
+      source: "BetaDigest Desk",
+      timestamp: "5h ago",
+      url: "#",
+    },
+  ],
+  crime: [
+    {
+      id: "crime-1",
+      headline: "Judicial task force implements modernized electronic filing across metropolitan court jurisdictions.",
+      summary: "Court clerks reported faster case scheduling and improved public access to docket summaries following the database transition.",
+      source: "Wire",
+      timestamp: "3h ago",
+      url: "#",
+    },
+    {
+      id: "crime-2",
+      headline: "Metropolitan public safety council reports decrease in property offenses across transit hubs.",
+      summary: "Targeted lighting upgrades and community ambassador patrols contributed to a double-digit decline in commercial corridor incidents.",
+      source: "BetaDigest Desk",
+      timestamp: "4h ago",
+      url: "#",
+    },
+    {
+      id: "crime-3",
+      headline: "Cybersecurity task force issues warning regarding distributed fraudulent invoicing campaigns.",
+      summary: "Financial intelligence analysts advised small businesses to verify payment accounts through out-of-band communication channels.",
+      source: "Wire",
+      timestamp: "6h ago",
+      url: "#",
+    },
+  ],
+  international: [
+    {
+      id: "intl-1",
+      headline: "Multilateral customs conference establishes harmonized documentation for maritime freight.",
+      summary: "Port directors from twenty maritime nations adopted standardized digital bills of lading to reduce container yard turnaround delays.",
+      source: "BetaDigest Desk",
+      timestamp: "2h ago",
+      url: "#",
+    },
+    {
+      id: "intl-2",
+      headline: "Diplomatic delegations conclude initial round of bilateral river basin conservation talks.",
+      summary: "Neighboring regional envoys established seasonal flow monitoring protocols to ensure equitable agricultural irrigation access.",
+      source: "Wire",
+      timestamp: "4h ago",
+      url: "#",
+    },
+    {
+      id: "intl-3",
+      headline: "International aviation council standardizes real-time high-altitude weather data sharing.",
+      summary: "Meteorological agencies and commercial airlines agreed on automated turbulence warning streams across trans-oceanic flight corridors.",
+      source: "BetaDigest Desk",
+      timestamp: "5h ago",
+      url: "#",
+    },
+  ],
+  education: [
+    {
+      id: "edu-1",
+      headline: "Regional school districts report measurable reading gains following structured phonics curricula.",
+      summary: "Early elementary literacy assessments showed steady improvements across foundational comprehension benchmarks over two academic terms.",
+      source: "Wire",
+      timestamp: "2h ago",
+      url: "#",
+    },
+    {
+      id: "edu-2",
+      headline: "University consortium establishes open-access repository for computational research datasets.",
+      summary: "Higher education libraries joined forces to guarantee free global access to peer-reviewed datasets and scientific software pipelines.",
+      source: "BetaDigest Desk",
+      timestamp: "4h ago",
+      url: "#",
+    },
+    {
+      id: "edu-3",
+      headline: "Vocational apprenticeship programs expand partnerships with regional technical manufacturing firms.",
+      summary: "State workforce boards announced subsidized apprenticeship placements for precision machining and renewable energy technician candidates.",
+      source: "Wire",
+      timestamp: "6h ago",
+      url: "#",
+    },
+  ],
+  science: [
+    {
+      id: "sci-1",
+      headline: "Astrophysical observatory detects unusual periodic radio pulses from nearby stellar cluster.",
+      summary: "Researchers analyzing telemetry from orbital antenna arrays confirmed stable emissions originating from a dense binary star system.",
+      source: "BetaDigest Desk",
+      timestamp: "1h ago",
+      url: "#",
+    },
+    {
+      id: "sci-2",
+      headline: "Materials laboratory develops resilient biodegradable polymers for electronic packaging.",
+      summary: "Chemical engineers synthesized durable cellulose-based casing alternatives that break down safely in industrial compost facilities.",
+      source: "Wire",
+      timestamp: "3h ago",
+      url: "#",
+    },
+    {
+      id: "sci-3",
+      headline: "Geological survey mapping discovers deep geothermal reservoir suitable for clean municipal heating.",
+      summary: "Subsurface seismic mapping revealed accessible subterranean thermal gradients capable of heating thousands of residential dwellings.",
+      source: "BetaDigest Desk",
+      timestamp: "5h ago",
+      url: "#",
+    },
+  ],
+  society: [
+    {
+      id: "soc-1",
+      headline: "National archive initiative completes high-resolution digitization of regional folk history records.",
+      summary: "Historians and community volunteers made thousands of oral histories and vintage photographs freely searchable online.",
+      source: "Wire",
+      timestamp: "2h ago",
+      url: "#",
+    },
+    {
+      id: "soc-2",
+      headline: "Urban planning commission highlights community garden expansion in revitalized neighborhood parks.",
+      summary: "Municipal green spaces reported record public participation as resident-managed plots supported local community food kitchens.",
+      source: "BetaDigest Desk",
+      timestamp: "4h ago",
+      url: "#",
+    },
+    {
+      id: "soc-3",
+      headline: "Public library systems register surge in community workshop attendance and tool-lending programs.",
+      summary: "Neighborhood branches expanded evening adult continuing education classes, digital literacy circles, and repair clinics.",
+      source: "Wire",
+      timestamp: "6h ago",
+      url: "#",
+    },
+  ],
+  disasters: [
+    {
+      id: "dis-1",
+      headline: "Civil protection bureaus complete annual readiness drills ahead of peak storm season.",
+      summary: "Emergency logistics teams tested municipal generator backups, redundant radio networks, and evacuation corridor transit lanes.",
+      source: "BetaDigest Desk",
+      timestamp: "2h ago",
+      url: "#",
+    },
+    {
+      id: "dis-2",
+      headline: "Early warning seismic sensors successfully installed along active geological fault zones.",
+      summary: "Geophysicists activated real-time acoustic monitors engineered to transmit rapid alert notifications to municipal transit systems.",
+      source: "Wire",
+      timestamp: "3h ago",
+      url: "#",
+    },
+    {
+      id: "dis-3",
+      headline: "Reservoir management authority implements automated flood control telemetry on major riverways.",
+      summary: "Dam operators activated synchronized spillway sensors to regulate reservoir levels before anticipated seasonal rainfall events.",
+      source: "BetaDigest Desk",
+      timestamp: "5h ago",
+      url: "#",
+    },
+  ],
+  technology: [
+    {
+      id: "tech-1",
+      headline: "Open-source developer consortium releases high-efficiency runtime for asynchronous data processing.",
+      summary: "The framework reduces memory allocation overhead and delivers deterministic latency curves across distributed server clusters.",
+      source: "BetaDigest Desk",
+      timestamp: "1h ago",
+      url: "#",
+    },
+    {
+      id: "tech-2",
+      headline: "Semiconductor foundries initiate production verification on next-generation low-power microcontrollers.",
+      summary: "Hardware engineering benchmarks indicate forty percent greater battery endurance for connected agricultural sensors.",
+      source: "Wire",
+      timestamp: "3h ago",
+      url: "#",
+    },
+    {
+      id: "tech-3",
+      headline: "Web standards organization ratifies enhanced cryptographic standards for browser credentials.",
+      summary: "The updated specification deprecates legacy password flows in favor of hardware-backed public key passkey authentication.",
+      source: "BetaDigest Desk",
+      timestamp: "5h ago",
+      url: "#",
+    },
+  ],
+  sports: [
+    {
+      id: "sports-1",
+      headline: "National athletics championship schedule finalized with expanded youth division qualifying rounds.",
+      summary: "Track and field federations announced venues and qualification standards for the upcoming summer tournament series.",
+      source: "Wire",
+      timestamp: "2h ago",
+      url: "#",
+    },
+    {
+      id: "sports-2",
+      headline: "Continental football confederation introduces biometric referee communication headsets.",
+      summary: "Match officiating crews across premier divisions will utilize low-latency encrypted audio gear to accelerate sideline reviews.",
+      source: "BetaDigest Desk",
+      timestamp: "4h ago",
+      url: "#",
+    },
+    {
+      id: "sports-3",
+      headline: "Community sports alliance opens newly renovated public swimming and gymnastics facilities.",
+      summary: "Municipal recreation authorities dedicated refurbished aquatic arenas and track complexes for local scholastic programs.",
+      source: "Wire",
+      timestamp: "5h ago",
+      url: "#",
+    },
+  ],
 };
 
-// In-memory persistent state (swappable with database/API in production)
-let currentPreferences: UserPreferences = {
-  city: "Seattle",
-  timezone: "America/Los_Angeles",
-  channel: "email",
-  email: "reader@betadigest.com",
-  dispatchTime: "06:00",
-  editions: {
-    morning: true,
-    midday: false,
-    evening: false,
-  },
-  activeMetrics: ["high_low", "rain_prob", "uv_index", "air_quality"],
-  isPaused: false,
-  pausedAt: null,
-};
-
-export interface DigestServiceInterface {
-  getForecast(city?: string): Promise<CityData>;
-  getDigest(city?: string, activeMetrics?: MetricKey[]): Promise<DigestPayload>;
-  getPreferences(): Promise<UserPreferences>;
-  savePreferences(prefs: Partial<UserPreferences>): Promise<UserPreferences>;
-  pauseDelivery(paused: boolean): Promise<{ success: boolean; paused: boolean }>;
+// Deterministic string hash helper
+function hashString(str: string): number {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+  return Math.abs(hash);
 }
 
-export const digestService: DigestServiceInterface = {
-  async getForecast(cityName: string = "Seattle"): Promise<CityData> {
-    const key = Object.keys(MOCK_CITIES).find(
-      (k) => k.toLowerCase() === cityName.toLowerCase()
-    );
-    return MOCK_CITIES[key || "Seattle"];
+// Generate realistic deterministic weather for any city and country
+export function generateCityWeather(
+  cityName: string = "Seattle",
+  countryCode: string = "US"
+): CityWeatherData {
+  const seed = hashString(cityName.trim().toLowerCase());
+  const isUS = countryCode.toUpperCase() === "US" || cityName.toLowerCase() === "seattle";
+
+  // Base temperature in Celsius (10°C to 28°C)
+  const baseC = 12 + (seed % 15);
+  const conditionList = [
+    "clear skies",
+    "partly cloudy",
+    "fair skies",
+    "overcast",
+    "scattered clouds",
+    "light breeze",
+  ];
+  const condition = conditionList[seed % conditionList.length];
+
+  // Unit conversions (G6)
+  const tempUnit = isUS ? "°F" : "°C";
+  const windUnit = isUS ? "mph" : "km/h";
+
+  const currentTemp = isUS ? Math.round((baseC * 9) / 5 + 32) : baseC;
+  const high = currentTemp + 5 + (seed % 4);
+  const low = currentTemp - 6 - (seed % 4);
+
+  const rainProb = (seed * 7) % 70;
+  const thunderstormProb = (seed * 3) % 35;
+  const cloudiness = 15 + ((seed * 11) % 65);
+
+  const baseWindSpeed = 5 + (seed % 14); // in mph
+  const windSpeed = isUS ? baseWindSpeed : Math.round(baseWindSpeed * 1.60934);
+  const directions = ["SW", "NW", "NE", "SE", "W", "E", "N", "S"];
+  const windDirection = directions[seed % directions.length];
+  const windFormatted = `${windSpeed} ${windUnit} ${windDirection}`;
+
+  const uvIndex = 2 + (seed % 6);
+  const uvDescriptions = ["Low", "Moderate", "Moderate", "High", "Very high", "Extreme"];
+  const uvDescription = uvDescriptions[Math.min(uvIndex - 1, uvDescriptions.length - 1)] || "Moderate";
+
+  const airQuality = 20 + ((seed * 13) % 55);
+  let airQualityDescription = "Good";
+  if (airQuality > 50) airQualityDescription = "Moderate";
+  if (airQuality > 100) airQualityDescription = "Unhealthy";
+
+  const humidity = 45 + ((seed * 17) % 40);
+
+  const sunriseMin = 30 + (seed % 25);
+  const sunsetMin = 10 + (seed % 35);
+  const sunrise = `06:${sunriseMin.toString().padStart(2, "0")}`;
+  const sunset = `19:${sunsetMin.toString().padStart(2, "0")}`;
+
+  // 4 blocks at 3-hour intervals: 06:00, 09:00, 12:00, 15:00
+  const hourly = [
+    { time: "06:00", temp: currentTemp - 2, condition: "Clear" },
+    { time: "09:00", temp: currentTemp, condition: "Partly Cloudy" },
+    { time: "12:00", temp: high, condition: "Sunny" },
+    { time: "15:00", temp: high - 1, condition: condition },
+  ];
+
+  // 3-day forecast
+  const threeDay = [
+    { day: "Tomorrow", date: "Fri, Oct 09", high: high + 1, low: low + 1, condition: "Partly Cloudy", rainProb: 20 },
+    { day: "Saturday", date: "Sat, Oct 10", high: high + 2, low: low, condition: "Sunny", rainProb: 10 },
+    { day: "Sunday", date: "Sun, Oct 11", high: high - 1, low: low - 2, condition: "Overcast", rainProb: 35 },
+  ];
+
+  return {
+    city: cityName,
+    country: isUS ? "United States" : "International",
+    isUS,
+    tempUnit,
+    windUnit,
+    currentTemp,
+    condition,
+    high,
+    low,
+    rainProb,
+    thunderstormProb,
+    cloudiness,
+    windSpeed,
+    windDirection,
+    windFormatted,
+    uvIndex,
+    uvDescription,
+    airQuality,
+    airQualityDescription,
+    humidity,
+    sunrise,
+    sunset,
+    hourly,
+    threeDay,
+  };
+}
+
+// Round-robin selection of stories across selected news topics (D4)
+// Always yields exactly 5 stories (including when 1 topic is selected)
+export function getTop5Stories(selectedTopics: NewsTopicId[]): EditorialStory[] {
+  if (!selectedTopics || selectedTopics.length === 0) {
+    return [];
+  }
+
+  // Filter and order selected topics according to fixed NEWS_TOPIC_ORDER
+  const orderedTopics = NEWS_TOPIC_ORDER.filter((t) => selectedTopics.includes(t));
+  if (orderedTopics.length === 0) return [];
+
+  const result: EditorialStory[] = [];
+  const topicStoryIndex: Partial<Record<NewsTopicId, number>> = {};
+  for (const t of orderedTopics) {
+    topicStoryIndex[t] = 0;
+  }
+
+  let turn = 0;
+  while (result.length < 5) {
+    const topic = orderedTopics[turn % orderedTopics.length];
+    const storiesForTopic = FIXTURE_STORIES_BY_TOPIC[topic] || [];
+    if (storiesForTopic.length > 0) {
+      const idx = (topicStoryIndex[topic] ?? 0) % storiesForTopic.length;
+      const baseStory = storiesForTopic[idx];
+      result.push({
+        ...baseStory,
+        id: `${baseStory.id}-${result.length + 1}`,
+        topic,
+        topicLabel: NEWS_TOPIC_LABELS[topic],
+      });
+      topicStoryIndex[topic] = (topicStoryIndex[topic] ?? 0) + 1;
+    }
+    turn++;
+  }
+
+  return result.slice(0, 5);
+}
+
+// Service helper
+export const mockService = {
+  getWeather(cityName: string = "Seattle", countryCode: string = "US"): CityWeatherData {
+    return generateCityWeather(cityName, countryCode);
   },
-
-  async getDigest(
-    cityName: string = "Seattle",
-    activeMetrics: MetricKey[] = ["high_low", "rain_prob", "uv_index", "air_quality"]
-  ): Promise<DigestPayload> {
-    const city = await this.getForecast(cityName);
-    const stories = MOCK_STORIES;
-    const previewText = deriveDigestText({
-      city,
-      activeMetrics,
-      stories,
-    });
-    const formattedTime = formatCurrentTimeInZone(city.timezone);
-
-    return {
-      previewText,
-      weatherSummary: `${city.currentTemp}°F, ${city.condition}. High ${city.high} / Low ${city.low}. Rain ${city.rainProb}% ${city.rainPeriod}.`,
-      stories,
-      city,
-      formattedTime,
-    };
-  },
-
-  async getPreferences(): Promise<UserPreferences> {
-    return { ...currentPreferences };
-  },
-
-  async savePreferences(prefs: Partial<UserPreferences>): Promise<UserPreferences> {
-    currentPreferences = {
-      ...currentPreferences,
-      ...prefs,
-    };
-    return { ...currentPreferences };
-  },
-
-  async pauseDelivery(paused: boolean): Promise<{ success: boolean; paused: boolean }> {
-    currentPreferences.isPaused = paused;
-    currentPreferences.pausedAt = paused ? new Date().toISOString() : null;
-    return { success: true, paused };
+  getStories(topics: NewsTopicId[]): EditorialStory[] {
+    return getTop5Stories(topics);
   },
 };

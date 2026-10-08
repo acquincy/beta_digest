@@ -54,9 +54,10 @@ export default function LoginPage() {
               <div className="pt-6 mt-6 border-t border-[var(--line)] w-full">
                 <Link
                   href="/"
-                  className="font-sans font-[600] text-[15px] underline text-black hover:opacity-80"
+                  className="font-sans font-[600] text-[15px] underline text-black hover:opacity-80 inline-flex items-center gap-1.5"
                 >
-                  Return to front page →
+                  <span>Return to front page</span>
+                  <ArrowLeft className="w-4 h-4 rotate-180" aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -99,9 +100,10 @@ export default function LoginPage() {
               <div className="mt-6 pt-6 border-t border-[var(--line)] flex items-center justify-between text-[14px]">
                 <Link
                   href="/"
-                  className="font-sans text-[var(--text-muted-sm)] hover:text-black"
+                  className="font-sans text-[var(--text-muted-sm)] hover:text-black inline-flex items-center gap-1"
                 >
-                  ← Back to home
+                  <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>Back to home</span>
                 </Link>
                 <Link
                   href="/signup"

@@ -1,4 +1,41 @@
-import { HourlyForecastPoint, WeatherData } from "@/lib/types";
+export interface HourlyForecastPoint {
+  time: string;
+  fullTime: string;
+  temperature: number;
+  precipitationProbability: number;
+  weatherCode: number;
+  conditionText: string;
+  isCommuteWindow: boolean;
+}
+
+export interface WeatherData {
+  city: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  temperature: number;
+  apparentTemperature: number;
+  highTemp: number;
+  lowTemp: number;
+  precipitationProbability: number;
+  weatherCode: number;
+  conditionText: string;
+  windSpeed: number;
+  humidity: number;
+  uvIndex: number;
+  sunrise: string;
+  sunset: string;
+  commuteAdvice: string;
+  lifestyleAdvice: string;
+  hourlyTimeline: HourlyForecastPoint[];
+  dailyForecast: {
+    date: string;
+    maxTemp: number;
+    minTemp: number;
+    conditionText: string;
+    weatherCode: number;
+  }[];
+}
 
 // WMO Weather Interpretation Codes (WW)
 const WMO_CODE_MAP: Record<number, string> = {

@@ -7,17 +7,44 @@ export interface TimeRemaining {
 }
 
 /**
+ * Returns formatted 12-hour string for an hour 0-23.
+ * e.g. 0 -> "12:00 AM", 7 -> "7:00 AM", 12 -> "12:00 PM", 23 -> "11:00 PM"
+ */
+export function formatHourOption(hour: number): string {
+  const normalized = Math.max(0, Math.min(23, Math.floor(hour)));
+  const period = normalized >= 12 ? "PM" : "AM";
+  const displayHour = normalized % 12 === 0 ? 12 : normalized % 12;
+  return `${displayHour}:00 ${period}`;
+}
+
+export const HOURLY_OPTIONS: { value: number; label: string }[] = Array.from(
+  { length: 24 },
+  (_, i) => ({
+    value: i,
+    label: formatHourOption(i),
+  })
+);
+
+/**
  * Calculates time remaining until the next scheduled dispatch in a given timezone.
  * Pure and deterministic: accepts an optional `now` timestamp for testability.
  */
 export function getTimeUntilNextDispatch(
-  targetTimeHHMM: string = "06:00",
+  targetTime: string | number = 7,
   timeZone: string = "UTC",
   now: Date = new Date()
 ): TimeRemaining {
-  const [targetH, targetM] = targetTimeHHMM
-    .split(":")
-    .map((v) => parseInt(v, 10) || 0);
+  let targetH = 7;
+  let targetM = 0;
+
+  if (typeof targetTime === "number") {
+    targetH = Math.max(0, Math.min(23, targetTime));
+    targetM = 0;
+  } else if (typeof targetTime === "string") {
+    const parts = targetTime.split(":");
+    targetH = parseInt(parts[0], 10) || 0;
+    targetM = parseInt(parts[1], 10) || 0;
+  }
 
   // Safely extract current date/time parts in the destination timezone
   let formatter: Intl.DateTimeFormat;
