@@ -13,6 +13,7 @@ import { Footer } from "./Footer";
 import { COUNTRIES, CITIES } from "@/lib/geo";
 import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { cityRegex } from "@/lib/schemas";
+import { signupViaN8n } from "@/lib/n8n";
 
 export const SignupFlow: React.FC = () => {
   const router = useRouter();
@@ -34,6 +35,7 @@ export const SignupFlow: React.FC = () => {
   const [agreed, setAgreed] = useState(false);
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   // Load preferences strictly after mount
   useEffect(() => {
@@ -148,11 +150,11 @@ export const SignupFlow: React.FC = () => {
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
     agreed;
 
-  const handleS2Submit = (e: React.FormEvent) => {
+  const handleS2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isNameOk = validateName();
     const isEmailOk = validateEmail();
-    if (!isNameOk || !isEmailOk || !agreed) return;
+    if (!isNameOk || !isEmailOk || !agreed || submitting) return;
 
     const finalPrefs = {
       ...prefs,
@@ -165,7 +167,21 @@ export const SignupFlow: React.FC = () => {
     setPrefs(finalPrefs);
     savePreferences(finalPrefs);
 
-    router.push("/basic-info");
+    setSubmitting(true);
+    try {
+      await signupViaN8n({
+        email: email.trim(),
+        name: name.trim(),
+        city: effectiveCity,
+        country_code: countryCode,
+        frontend_url: typeof window !== "undefined" ? window.location.origin : "",
+      });
+    } catch (err) {
+      console.warn("n8n signup dispatch:", err);
+    } finally {
+      setSubmitting(false);
+      router.push("/basic-info");
+    }
   };
 
   const availableCities = countryCode ? CITIES[countryCode] || [] : [];
@@ -416,7 +432,9 @@ export const SignupFlow: React.FC = () => {
                 </OutlineButton>
 
                 {isFormValid ? (
-                  <DarkButton type="submit">Join free</DarkButton>
+                  <DarkButton type="submit" disabled={submitting}>
+                    {submitting ? "Joining..." : "Join free"}
+                  </DarkButton>
                 ) : (
                   <Button disabled type="button">
                     Join free

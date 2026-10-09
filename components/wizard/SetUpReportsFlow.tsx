@@ -52,6 +52,7 @@ import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wiz
 import { mockService } from "@/lib/mock-service";
 import { HOURLY_OPTIONS, formatHourOption } from "@/lib/time-utils";
 import { COUNTRIES } from "@/lib/geo";
+import { savePreferencesViaN8n } from "@/lib/n8n";
 
 export const WEATHER_ICONS: Record<WeatherTopicId, LucideIcon> = {
   "current-temperature": Thermometer,
@@ -153,8 +154,17 @@ export const SetUpReportsFlow: React.FC = () => {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     savePreferences(prefs);
+    try {
+      await savePreferencesViaN8n({
+        city: prefs.city,
+        country_code: prefs.countryCode,
+        categories: prefs.newsTopics,
+      });
+    } catch (err) {
+      console.warn("n8n preferences dispatch:", err);
+    }
     router.push("/dashboard");
   };
 
