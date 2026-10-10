@@ -31,7 +31,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(data);
+    const responsePayload =
+      data && Object.keys(data).length > 0
+        ? data
+        : { status: "success", verified: true, message: "Account verified successfully." };
+
+    return NextResponse.json(responsePayload);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Internal Server Error";
     return NextResponse.json(

@@ -28,6 +28,7 @@ import {
 import { loadPreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
 import { getTimeUntilNextDispatch, formatHourOption, TimeRemaining } from "@/lib/time-utils";
+import { fetchDashboardViaN8n, N8nDashboardResult } from "@/lib/n8n";
 
 const SURFACES = ["#F6FFDD", "#FFFFFF", "rgba(213,134,206,0.14)"];
 
@@ -43,11 +44,28 @@ export const DashboardView: React.FC = () => {
     formatted: "02:45:30",
   });
 
+  const [n8nDigest, setN8nDigest] = useState<N8nDashboardResult | null>(null);
+
   // Load preferences strictly after mount
   useEffect(() => {
     const loaded = loadPreferences();
     setPrefs(loaded);
     setHydrated(true);
+
+    let mounted = true;
+    fetchDashboardViaN8n()
+      .then((data) => {
+        if (mounted && data && (data.weekly_digest || data.weather)) {
+          setN8nDigest(data);
+        }
+      })
+      .catch((err) => {
+        console.warn("n8n dashboard fetch:", err);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Update countdown only after hydration
@@ -423,6 +441,21 @@ export const DashboardView: React.FC = () => {
                   </div>
                 )}
               </section>
+
+              {/* Live Digest Summary from n8n Dashboard Workflow */}
+              {n8nDigest?.weekly_digest && (
+                <section className="p-5 md:p-6 rounded-[24px] bg-[#F6FFDD] border border-[rgba(0,0,0,0.08)] flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-black" aria-hidden="true" />
+                    <h3 className="font-display font-[600] text-[20px] text-black">
+                      AI Executive Summary
+                    </h3>
+                  </div>
+                  <p className="font-sans font-[400] text-[15px] leading-relaxed text-[#292B2D] whitespace-pre-line">
+                    {n8nDigest.weekly_digest}
+                  </p>
+                </section>
+              )}
 
               {/* News Section */}
               <section className="flex flex-col gap-4">

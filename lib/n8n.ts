@@ -9,11 +9,38 @@ export const N8N_BASE_URL =
   "https://n8n.srv1650803.hstgr.cloud";
 
 export const N8N_ENDPOINTS = {
-  signup: `${N8N_BASE_URL}/webhook/auth/signup`,
-  verify: `${N8N_BASE_URL}/webhook/auth/verify`,
-  preferences: `${N8N_BASE_URL}/webhook/user/preferences`,
-  dashboard: `${N8N_BASE_URL}/webhook/digest/dashboard`,
-} as const;
+  get signup(): string {
+    return (
+      process.env["AUTH/SIGNUP_URL"] ||
+      process.env.AUTH_SIGNUP_URL ||
+      process.env.NEXT_PUBLIC_AUTH_SIGNUP_URL ||
+      `${N8N_BASE_URL}/webhook/auth/signup`
+    );
+  },
+  get verify(): string {
+    return (
+      process.env["AUTH/VERIFY_URL"] ||
+      process.env.AUTH_VERIFY_URL ||
+      process.env.NEXT_PUBLIC_AUTH_VERIFY_URL ||
+      `${N8N_BASE_URL}/webhook/auth/verify`
+    );
+  },
+  get preferences(): string {
+    return (
+      process.env["USER/PREFERENCES_URL"] ||
+      process.env.USER_PREFERENCES_URL ||
+      process.env.NEXT_PUBLIC_USER_PREFERENCES_URL ||
+      `${N8N_BASE_URL}/webhook/user/preferences`
+    );
+  },
+  get dashboard(): string {
+    return (
+      process.env.DASHBOARD_URL ||
+      process.env.NEXT_PUBLIC_DASHBOARD_URL ||
+      `${N8N_BASE_URL}/webhook/digest/dashboard`
+    );
+  },
+};
 
 export interface N8nSignupPayload {
   email: string;
