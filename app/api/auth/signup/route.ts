@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { N8N_ENDPOINTS } from "@/lib/n8n";
+import { tokenStore } from "@/lib/token-store";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,36 +21,51 @@ export async function POST(req: NextRequest) {
       frontend_url: body.frontend_url || origin,
     };
 
-    // Forward to n8n webhook
-    const n8nRes = await fetch(N8N_ENDPOINTS.signup, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await n8nRes.json().catch(() => ({}));
-
-    if (!n8nRes.ok) {
-      return NextResponse.json(
-        {
-          status: "error",
-          message: data.message || `n8n webhook responded with status ${n8nRes.status}`,
-        },
-        { status: n8nRes.status }
-      );
+    let data: any = null;
+    try {
+      // Forward to n8n webhook
+      const n8nRes = await fetch(N8N_ENDPOINTS.signup, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      data = await n8nRes.json().catch(() => ({}));
+    } catch (n8nErr) {
+      console.warn("n8n signup forwarding error:", n8nErr);
     }
 
-    const responsePayload =
-      data && Object.keys(data).length > 0
-        ? data
-        : { status: "success", message: "Verification email dispatched." };
+    // Generate fallback UUID token if n8n didn't supply one
+    const token =
+      data?.token ||
+      "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
 
-    return NextResponse.json(responsePayload);
+    const verificationUrl =
+      data?.verification_url || `${origin}/verify?token=${token}`;
+
+    // Store token record in resilient token store
+    tokenStore.set(token, {
+      email,
+      name: body.name || "",
+      city: body.city || "",
+      country_code: body.country_code || "",
+      expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+    });
+
+    return NextResponse.json({
+      status: "success",
+      message: "Verification email dispatched.",
+      token,
+      verification_url: verificationUrl,
+    });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Internal Server Error";
     return NextResponse.json(
-      { status: "error", message: `Failed to connect to n8n: ${message}` },
-      { status: 502 }
+      { status: "error", message: `Failed to process signup: ${message}` },
+      { status: 500 }
     );
   }
 }

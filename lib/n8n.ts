@@ -53,6 +53,8 @@ export interface N8nSignupPayload {
 export interface N8nSignupResult {
   status: "success" | "error";
   message: string;
+  token?: string;
+  verification_url?: string;
 }
 
 export interface N8nVerifyResult {

@@ -47,6 +47,8 @@ import {
   NEWS_TOPIC_ORDER,
   WEATHER_TOPIC_LABELS,
   NEWS_TOPIC_LABELS,
+  CityWeatherData,
+  EditorialStory,
 } from "@/lib/types";
 import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { mockService } from "@/lib/mock-service";
@@ -90,11 +92,43 @@ export const SetUpReportsFlow: React.FC = () => {
 
   const [hydrated, setHydrated] = useState(false);
   const [prefs, setPrefs] = useState<Preferences>(INITIAL_PREFERENCES);
+  const [realWeather, setRealWeather] = useState<CityWeatherData | null>(null);
+  const [realStories, setRealStories] = useState<EditorialStory[]>([]);
 
   // Load preferences strictly after mount
   useEffect(() => {
-    setPrefs(loadPreferences());
+    const loaded = loadPreferences();
+    setPrefs(loaded);
     setHydrated(true);
+
+    let mounted = true;
+    const city = loaded.city || "London";
+    const country = loaded.countryCode || "GB";
+
+    fetch(`/api/weather?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&format=full`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (mounted && data && typeof data.currentTemp === "number") {
+          setRealWeather(data);
+        }
+      })
+      .catch((err) => console.warn("Setup weather fetch error:", err));
+
+    const topicsParam = loaded.newsTopics && loaded.newsTopics.length > 0
+      ? loaded.newsTopics.join(",")
+      : "technology,economy,science";
+    fetch(`/api/news?topics=${encodeURIComponent(topicsParam)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (mounted && Array.isArray(data.stories) && data.stories.length > 0) {
+          setRealStories(data.stories);
+        }
+      })
+      .catch((err) => console.warn("Setup news fetch error:", err));
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Sync state to storage only after hydration
@@ -174,9 +208,9 @@ export const SetUpReportsFlow: React.FC = () => {
   const countryName = countryObj ? countryObj.name : "United States";
   const locationLabel = `${prefs.city}, ${countryName}`;
 
-  // Deterministic weather and news data
-  const weatherData = mockService.getWeather(prefs.city, prefs.countryCode);
-  const stories = mockService.getStories(prefs.newsTopics);
+  // Real live weather and news data with fallback
+  const weatherData = realWeather || mockService.getWeather(prefs.city, prefs.countryCode);
+  const stories = realStories.length > 0 ? realStories : mockService.getStories(prefs.newsTopics);
   if (!hydrated) {
     return (
       <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8 md:py-12 overflow-x-hidden">

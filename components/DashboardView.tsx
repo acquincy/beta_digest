@@ -24,6 +24,8 @@ import {
   WeatherTopicId,
   WEATHER_TOPIC_ORDER,
   WEATHER_TOPIC_LABELS,
+  CityWeatherData,
+  EditorialStory,
 } from "@/lib/types";
 import { loadPreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
@@ -45,6 +47,8 @@ export const DashboardView: React.FC = () => {
   });
 
   const [n8nDigest, setN8nDigest] = useState<N8nDashboardResult | null>(null);
+  const [realWeather, setRealWeather] = useState<CityWeatherData | null>(null);
+  const [realStories, setRealStories] = useState<EditorialStory[]>([]);
 
   // Load preferences strictly after mount
   useEffect(() => {
@@ -53,6 +57,32 @@ export const DashboardView: React.FC = () => {
     setHydrated(true);
 
     let mounted = true;
+
+    // Fetch real live weather from Open-Meteo API
+    const city = loaded.city || "London";
+    const country = loaded.countryCode || "GB";
+    fetch(`/api/weather?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&format=full`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (mounted && data && typeof data.currentTemp === "number") {
+          setRealWeather(data);
+        }
+      })
+      .catch((err) => console.warn("Live weather fetch error:", err));
+
+    // Fetch real live news stories from RSS feeds
+    const topicsParam = loaded.newsTopics && loaded.newsTopics.length > 0
+      ? loaded.newsTopics.join(",")
+      : "technology,economy,science";
+    fetch(`/api/news?topics=${encodeURIComponent(topicsParam)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (mounted && Array.isArray(data.stories) && data.stories.length > 0) {
+          setRealStories(data.stories);
+        }
+      })
+      .catch((err) => console.warn("Live news fetch error:", err));
+
     fetchDashboardViaN8n()
       .then((data) => {
         if (mounted && data && (data.weekly_digest || data.weather)) {
@@ -87,8 +117,8 @@ export const DashboardView: React.FC = () => {
     return () => clearInterval(interval);
   }, [prefs.deliveryHour, hydrated]);
 
-  const weather = generateCityWeather(prefs.city, prefs.countryCode);
-  const stories = getTop5Stories(prefs.newsTopics);
+  const weather = realWeather || generateCityWeather(prefs.city, prefs.countryCode);
+  const stories = realStories.length > 0 ? realStories : getTop5Stories(prefs.newsTopics);
 
   const todayFormatted = hydrated
     ? new Intl.DateTimeFormat("en-US", {
@@ -506,6 +536,8 @@ export const DashboardView: React.FC = () => {
 
                         <a
                           href={story.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 font-sans font-[600] text-[13px] text-black hover:underline self-start mt-2"
                         >
                           <span>Read full story</span>

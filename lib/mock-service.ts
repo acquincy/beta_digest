@@ -467,7 +467,12 @@ export function getTop5Stories(selectedTopics: NewsTopicId[]): EditorialStory[] 
   return result.slice(0, 5);
 }
 
-// Service helper
+import { fetchCityWeatherDataLive } from "@/services/weather";
+import { getTop5StoriesLive } from "@/services/news";
+
+export { fetchCityWeatherDataLive, getTop5StoriesLive };
+
+// Service helper supporting both synchronous baseline and live asynchronous fetches
 export const mockService = {
   getWeather(cityName: string = "Seattle", countryCode: string = "US"): CityWeatherData {
     return generateCityWeather(cityName, countryCode);
@@ -475,4 +480,11 @@ export const mockService = {
   getStories(topics: NewsTopicId[]): EditorialStory[] {
     return getTop5Stories(topics);
   },
+  async getWeatherLive(cityName: string = "Seattle", countryCode: string = "US"): Promise<CityWeatherData> {
+    return fetchCityWeatherDataLive(cityName, countryCode);
+  },
+  async getStoriesLive(topics: NewsTopicId[]): Promise<EditorialStory[]> {
+    return getTop5StoriesLive(topics);
+  },
 };
+
