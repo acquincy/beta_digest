@@ -158,6 +158,7 @@ export const SetUpReportsFlow: React.FC = () => {
     savePreferences(prefs);
     try {
       await savePreferencesViaN8n({
+        email: prefs.email,
         city: prefs.city,
         country_code: prefs.countryCode,
         categories: prefs.newsTopics,

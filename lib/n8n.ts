@@ -36,6 +36,8 @@ export interface N8nVerifyResult {
 }
 
 export interface N8nPreferencesPayload {
+  email?: string;
+  userId?: string;
   city: string;
   country_code: string;
   categories: string[];
