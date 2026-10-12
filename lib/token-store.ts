@@ -4,6 +4,8 @@ export interface TokenRecord {
   city?: string;
   country_code?: string;
   expiresAt: number;
+  isVerified?: boolean;
+  userId?: string;
 }
 
 // Global in-memory token store across API route invocations

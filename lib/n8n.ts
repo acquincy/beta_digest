@@ -47,6 +47,10 @@ export interface N8nSignupPayload {
   name?: string;
   city?: string;
   country_code?: string;
+  news_categories?: string[];
+  weather_categories?: string[];
+  send_time?: string;
+  delivery_hour?: number;
   frontend_url?: string;
 }
 
@@ -69,7 +73,12 @@ export interface N8nPreferencesPayload {
   userId?: string;
   city: string;
   country_code: string;
-  categories: string[];
+  categories?: string[];
+  news_categories?: string[];
+  weather_categories?: string[];
+  send_time?: string;
+  delivery_hour?: number;
+  last_sent_date?: string | null;
 }
 
 export interface N8nPreferencesResult {
@@ -84,6 +93,16 @@ export interface N8nDashboardResult {
     feels_like?: number;
     condition?: string;
     humidity?: number;
+    weather_categories?: string[];
+  };
+  preferences?: {
+    email?: string;
+    city?: string;
+    country_code?: string;
+    news_categories?: string[];
+    weather_categories?: string[];
+    send_time?: string;
+    last_sent_date?: string | null;
   };
   weekly_digest?: string;
   generated_at?: string;

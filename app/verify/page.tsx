@@ -39,6 +39,11 @@ function VerifyContent() {
               if (result.userId) {
                 localStorage.setItem("betadigest_user_id", result.userId);
               }
+              try {
+                const bc = new BroadcastChannel("betadigest_auth");
+                bc.postMessage({ verified: true, token, userId: result.userId });
+                bc.close();
+              } catch {}
             }
           } else {
             setStatus("error");

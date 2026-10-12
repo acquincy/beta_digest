@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { N8N_ENDPOINTS } from "@/lib/n8n";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const n8nRes = await fetch(N8N_ENDPOINTS.dashboard, {
+    const search = req.nextUrl.search || "";
+    const n8nRes = await fetch(`${N8N_ENDPOINTS.dashboard}${search}`, {
       method: "GET",
       next: { revalidate: 60 },
     });

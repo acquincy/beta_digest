@@ -190,12 +190,17 @@ export const SetUpReportsFlow: React.FC = () => {
 
   const handleFinish = async () => {
     savePreferences(prefs);
+    const sendTimeFormatted = `${String(Math.max(0, Math.min(23, prefs.deliveryHour ?? 7))).padStart(2, "0")}:00:00`;
     try {
       await savePreferencesViaN8n({
         email: prefs.email,
         city: prefs.city,
         country_code: prefs.countryCode,
         categories: prefs.newsTopics,
+        news_categories: prefs.newsTopics,
+        weather_categories: prefs.weatherTopics,
+        send_time: sendTimeFormatted,
+        delivery_hour: prefs.deliveryHour,
       });
     } catch (err) {
       console.warn("n8n preferences dispatch:", err);

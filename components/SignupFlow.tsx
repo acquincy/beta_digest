@@ -14,6 +14,7 @@ import { COUNTRIES, CITIES } from "@/lib/geo";
 import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { cityRegex } from "@/lib/schemas";
 import { signupViaN8n } from "@/lib/n8n";
+import { VerificationWaitingCard } from "./VerificationWaitingCard";
 
 export const SignupFlow: React.FC = () => {
   const router = useRouter();
@@ -504,88 +505,25 @@ export const SignupFlow: React.FC = () => {
         )}
 
         {step === 3 && (
-          /* S3 Email Verification Modal */
-          <div className="relative w-full max-w-[666px] bg-white rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[var(--shadow-float)] step-enter flex flex-col items-center text-center">
-            {/* Close button */}
-            <Link
-              href="/"
-              aria-label="Close"
-              className="absolute top-5 right-5 w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F7F7F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black shadow-sm transition-colors cursor-pointer"
-            >
-              <X className="w-[22px] h-[22px] text-[#7A7A7A]" aria-hidden="true" />
-            </Link>
-
-            {/* S3: 80px IconTile (Mail) */}
-            <div className="pt-2">
-              <IconTile icon={Mail} size={80} radius={24} iconSize={40} />
-            </div>
-
-            <h1
-              className="font-display font-[700] text-[30px] leading-[36px] md:text-[38px] md:leading-[42px] text-black text-center mt-6"
-              style={{ letterSpacing: "-0.03em" }}
-            >
-              Verify your email address
-            </h1>
-
-            <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[var(--text)] text-center mt-3 max-w-md">
-              We dispatched a secure one-time verification link for{" "}
-              <span className="font-semibold text-black bg-[#F5F5F0] px-2 py-0.5 rounded-md inline-block mt-1">
-                {email}
-              </span>
-            </p>
-
-            <div className="mt-6 w-full max-w-[480px] bg-[#F9F9F6] border border-[var(--line)] rounded-[20px] p-5 text-left flex flex-col gap-2">
-              <div className="flex items-center gap-2 font-sans font-[600] text-[14px] text-black">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Next step: click the verification link</span>
-              </div>
-              <p className="font-sans font-[400] text-[13px] text-[#666] leading-relaxed">
-                Click the confirmation link sent to your inbox to activate your account. You can also verify immediately with the button below:
-              </p>
-            </div>
-
-            {resendStatus && (
-              <div className="mt-4 p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-[12px] text-sm font-sans">
-                {resendStatus}
-              </div>
-            )}
-
-            {/* Action buttons */}
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-              <Link
-                href={verificationUrl || `/verify?token=${verificationToken}`}
-                className="w-full sm:w-auto"
-              >
-                <DarkButton className="w-full sm:w-[220px] h-[54px] inline-flex items-center justify-center gap-2">
-                  <span>Verify account now</span>
-                  <ArrowRight className="w-4 h-4" />
-                </DarkButton>
-              </Link>
-
-              <OutlineButton
-                type="button"
-                onClick={handleResend}
-                disabled={resending}
-                className="w-full sm:w-[160px] h-[54px] inline-flex items-center justify-center gap-2"
-              >
-                {resending ? (
-                  <RotateCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <span>Resend link</span>
-                )}
-              </OutlineButton>
-            </div>
-
-            <div className="mt-6">
-              <button
-                type="button"
-                onClick={() => setStep(2)}
-                className="font-sans text-[14px] text-[#7A7A7A] hover:text-black underline cursor-pointer transition-colors"
-              >
-                Wrong email? Change address
-              </button>
-            </div>
-          </div>
+          <VerificationWaitingCard
+            email={email}
+            token={verificationToken}
+            name={name}
+            city={effectiveCity}
+            countryCode={countryCode}
+            onChangeEmail={() => {
+              setStep(2);
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.set("step", "2");
+                window.history.replaceState({}, "", url.toString());
+              }
+            }}
+            onVerified={() => {
+              // The page refreshes / navigates forward once completed
+              window.location.href = "/set-up-reports?step=1";
+            }}
+          />
         )}
       </main>
 

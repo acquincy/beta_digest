@@ -6,6 +6,11 @@
       "headers": {
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3NzFlNWVkYS1jNzVmLTQ2MmUtOWM3OS1iMmQxN2ZmMmQ4YmMiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6IjA1NjNlMDg2LTJjNzQtNDY5Yy1hZjJjLWNmNThmNmQ2NTU5ZSIsImlhdCI6MTc5MTQ3MzA4MX0.P0F7olkn6hqACVWo_46GCiBkUYZjpm3F2IBASO6KRkY"
       }
+    },
+    "resend": {
+      "type": "http",
+      "url": "https://mcp.resend.com/mcp",
+      "serverUrl": "https://mcp.resend.com/mcp"
     }
   }
 }

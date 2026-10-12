@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { N8N_ENDPOINTS } from "@/lib/n8n";
 import { tokenStore } from "@/lib/token-store";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +23,7 @@ export async function POST(req: NextRequest) {
     };
 
     let data: any = null;
+    let n8nSuccess = false;
     try {
       // Forward to n8n webhook
       const n8nRes = await fetch(N8N_ENDPOINTS.signup, {
@@ -30,6 +32,9 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify(payload),
       });
       data = await n8nRes.json().catch(() => ({}));
+      if (n8nRes.ok && data?.status === "success") {
+        n8nSuccess = true;
+      }
     } catch (n8nErr) {
       console.warn("n8n signup forwarding error:", n8nErr);
     }
@@ -54,6 +59,15 @@ export async function POST(req: NextRequest) {
       country_code: body.country_code || "",
       expiresAt: Date.now() + 24 * 60 * 60 * 1000,
     });
+
+    // If n8n forwarding was unsuccessful or unavailable, ensure email is sent via Resend
+    if (!n8nSuccess) {
+      await sendVerificationEmail({
+        to: email,
+        name: body.name || "",
+        verificationUrl,
+      }).catch((e) => console.warn("Fallback direct Resend dispatch:", e));
+    }
 
     return NextResponse.json({
       status: "success",

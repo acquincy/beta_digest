@@ -35,6 +35,11 @@ export async function GET(req: NextRequest) {
     }
 
     if (n8nSuccess) {
+      const entry = tokenStore.get(token);
+      if (entry) {
+        entry.isVerified = true;
+        entry.userId = n8nData?.userId || `usr_${token.slice(0, 8)}`;
+      }
       return NextResponse.json(
         n8nData || {
           status: "success",
@@ -47,10 +52,12 @@ export async function GET(req: NextRequest) {
     // 2. Resilient fallback check: check if token was issued by our signup route
     const localEntry = tokenStore.get(token);
     if (localEntry && localEntry.expiresAt > Date.now()) {
+      localEntry.isVerified = true;
+      localEntry.userId = `usr_${token.slice(0, 8)}`;
       return NextResponse.json({
         status: "success",
         verified: true,
-        userId: `usr_${token.slice(0, 8)}`,
+        userId: localEntry.userId,
         email: localEntry.email,
         message: "Account verified successfully.",
       });
