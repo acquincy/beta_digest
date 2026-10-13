@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Check, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { Check, AlertCircle, Loader2 } from "lucide-react";
 import { CanvasA } from "@/components/CanvasA";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -22,6 +22,24 @@ function VerifyContent() {
     token ? "" : "No verification token provided."
   );
   const [verifiedEmail, setVerifiedEmail] = useState("");
+  const [countdown, setCountdown] = useState(3);
+
+  useEffect(() => {
+    if (status !== "success") return;
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => (prev > 1 ? prev - 1 : 1));
+    }, 1000);
+
+    const timer = setTimeout(() => {
+      window.location.href = "/set-up-reports?step=1";
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
+  }, [status]);
 
   useEffect(() => {
     if (!token) return;
@@ -102,18 +120,9 @@ function VerifyContent() {
             Your Beta Digest account is confirmed and ready. Let&apos;s finalize your daily delivery schedule and topics.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-            <Link href="/set-up-reports?step=1" className="w-full sm:w-auto">
-              <DarkButton className="w-full sm:w-[220px] h-[56px] inline-flex items-center justify-center gap-2">
-                <span>Continue setup</span>
-                <ArrowRight className="w-4 h-4" />
-              </DarkButton>
-            </Link>
-            <Link href="/dashboard" className="w-full sm:w-auto">
-              <OutlineButton className="w-full sm:w-[160px] h-[56px]">
-                View dashboard
-              </OutlineButton>
-            </Link>
+          <div className="mt-8 flex items-center justify-center gap-2.5 text-[15px] font-[500] text-[var(--muted-text)]">
+            <Loader2 className="w-4 h-4 animate-spin text-black" />
+            <span>Continuing to onboarding in {countdown} second{countdown === 1 ? "" : "s"}...</span>
           </div>
         </div>
       )}
