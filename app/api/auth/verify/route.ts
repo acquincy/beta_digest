@@ -13,6 +13,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Direct browser visits (e.g. clicking email links) seamlessly redirect to the onboarding verification page
+    const isBrowserNavigation =
+      req.headers.get("sec-fetch-dest") === "document" ||
+      (req.headers.get("accept")?.includes("text/html") &&
+        !req.headers.get("accept")?.includes("application/json"));
+
+    if (isBrowserNavigation) {
+      const verifyPageUrl = new URL("/verify", req.nextUrl.origin);
+      verifyPageUrl.searchParams.set("token", token);
+      return NextResponse.redirect(verifyPageUrl);
+    }
+
     // 1. Attempt verification with n8n workflow
     let n8nSuccess = false;
     let n8nData: any = null;

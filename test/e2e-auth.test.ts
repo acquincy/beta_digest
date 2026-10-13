@@ -24,9 +24,28 @@ test("Signup and Verify flow end-to-end", async () => {
   assert.ok(signupData.token);
   assert.ok(signupData.verification_url);
 
-  // Now verify with the returned token
+  // Verification URL must point to the onboarding verify UI page, NOT an API route or raw localhost
+  assert.ok(signupData.verification_url.includes("/verify?token="));
+  assert.ok(!signupData.verification_url.includes("/api/auth/verify"));
+
+  // 1. Direct browser navigation to /api/auth/verify redirects to /verify UI
+  const browserNavReq = new NextRequest(
+    `http://localhost:3000/api/auth/verify?token=${signupData.token}`,
+    {
+      method: "GET",
+      headers: { Accept: "text/html,application/xhtml+xml" },
+    }
+  );
+  const browserNavRes = await verifyGet(browserNavReq);
+  assert.equal(browserNavRes.status, 307);
+  assert.ok(browserNavRes.headers.get("location")?.includes(`/verify?token=${signupData.token}`));
+
+  // 2. API fetch verification returns JSON result
   const verifyUrl = `http://localhost:3000/api/auth/verify?token=${signupData.token}`;
-  const verifyReq = new NextRequest(verifyUrl, { method: "GET" });
+  const verifyReq = new NextRequest(verifyUrl, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
   const verifyRes = await verifyGet(verifyReq);
   assert.equal(verifyRes.status, 200);
   const verifyData = await verifyRes.json();

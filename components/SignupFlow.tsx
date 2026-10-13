@@ -191,9 +191,9 @@ export const SignupFlow: React.FC = () => {
         setVerificationToken(result.token);
       }
       if (result?.verification_url) {
-        setVerificationUrl(result.verification_url);
+        setVerificationUrl(result.verification_url.replace("/api/auth/verify", "/verify"));
       } else if (result?.token) {
-        setVerificationUrl(`${originUrl}/verify?token=${result.token}`);
+        setVerificationUrl(`${originUrl || "https://betadigest.online"}/verify?token=${result.token}`);
       }
 
       setStep(3);

@@ -16,10 +16,31 @@ export async function POST(req: NextRequest) {
     }
 
     // Determine current app origin for verification URL callback
-    const origin = req.headers.get("origin") || req.nextUrl.origin;
+    const configuredAppUrl = (
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.APP_URL ||
+      "https://betadigest.online"
+    ).replace(/\/+$/, "");
+
+    const requestOrigin = req.headers.get("origin") || req.nextUrl.origin;
+    // Prefer non-localhost origin or configured public appUrl so email links work everywhere
+    const effectiveOrigin =
+      requestOrigin &&
+      !requestOrigin.includes("localhost") &&
+      !requestOrigin.includes("127.0.0.1")
+        ? requestOrigin
+        : !configuredAppUrl.includes("localhost")
+        ? configuredAppUrl
+        : requestOrigin || "https://betadigest.online";
+
     const payload = {
       ...body,
-      frontend_url: body.frontend_url || origin,
+      frontend_url:
+        body.frontend_url &&
+        !body.frontend_url.includes("localhost") &&
+        !body.frontend_url.includes("127.0.0.1")
+          ? body.frontend_url
+          : effectiveOrigin,
     };
 
     let data: any = null;
@@ -48,8 +69,16 @@ export async function POST(req: NextRequest) {
         return v.toString(16);
       });
 
-    const verificationUrl =
-      data?.verification_url || `${origin}/verify?token=${token}`;
+    let verificationUrl = data?.verification_url;
+    if (
+      !verificationUrl ||
+      verificationUrl.includes("localhost") ||
+      verificationUrl.includes("127.0.0.1")
+    ) {
+      verificationUrl = `${effectiveOrigin}/verify?token=${token}`;
+    } else if (verificationUrl.includes("/api/auth/verify")) {
+      verificationUrl = verificationUrl.replace("/api/auth/verify", "/verify");
+    }
 
     // Store token record in resilient token store
     tokenStore.set(token, {
