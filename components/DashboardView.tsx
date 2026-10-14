@@ -22,6 +22,7 @@ import { CanvasB } from "./CanvasB";
 import {
   Preferences,
   WeatherTopicId,
+  NewsTopicId,
   WEATHER_TOPIC_ORDER,
   WEATHER_TOPIC_LABELS,
   CityWeatherData,
@@ -117,8 +118,58 @@ export const DashboardView: React.FC = () => {
     return () => clearInterval(interval);
   }, [prefs.deliveryHour, hydrated]);
 
+  const digestSummary: string | null = React.useMemo(() => {
+    if (!n8nDigest) return null;
+    if (typeof n8nDigest.weekly_digest === "string" && n8nDigest.weekly_digest.trim()) {
+      return n8nDigest.weekly_digest.trim();
+    }
+    if (n8nDigest.weekly_digest && typeof n8nDigest.weekly_digest === "object") {
+      const wd = n8nDigest.weekly_digest;
+      if (typeof wd.summary === "string" && wd.summary.trim()) {
+        return wd.summary.trim();
+      }
+      if (Array.isArray(wd.articles) && wd.articles.length > 0) {
+        const topArticle = wd.articles[0];
+        const weatherPart = n8nDigest.weather?.summary ? `${n8nDigest.weather.summary}\n\n` : "";
+        const articlePart = topArticle?.title
+          ? `Top briefing: ${topArticle.title}${topArticle.summary ? ` — ${topArticle.summary}` : ""}`
+          : "";
+        const combined = `${weatherPart}${articlePart}`.trim();
+        if (combined) return combined;
+      }
+    }
+    if (typeof n8nDigest.weather?.summary === "string" && n8nDigest.weather.summary.trim()) {
+      return n8nDigest.weather.summary.trim();
+    }
+    return null;
+  }, [n8nDigest]);
+
+  const n8nStories: EditorialStory[] = React.useMemo(() => {
+    if (!n8nDigest?.weekly_digest || typeof n8nDigest.weekly_digest !== "object") return [];
+    const wd = n8nDigest.weekly_digest;
+    if (!Array.isArray(wd.articles) || wd.articles.length === 0) return [];
+    return wd.articles.map((art, idx) => {
+      const topic = (art.category?.toLowerCase() || "technology") as NewsTopicId;
+      return {
+        id: `n8n-${idx}`,
+        topic,
+        topicLabel: art.category ? art.category.toUpperCase() : "GENERAL",
+        headline: art.title || "Daily Digest Story",
+        summary: art.summary || "",
+        source: art.source || "Beta Digest Wire",
+        timestamp: art.published_at ? "Today" : "Recently",
+        url: art.url || "#",
+      };
+    });
+  }, [n8nDigest]);
+
   const weather = realWeather || generateCityWeather(prefs.city, prefs.countryCode);
-  const stories = realStories.length > 0 ? realStories : getTop5Stories(prefs.newsTopics);
+  const stories =
+    realStories.length > 0
+      ? realStories
+      : n8nStories.length > 0
+      ? n8nStories
+      : getTop5Stories(prefs.newsTopics);
 
   const todayFormatted = hydrated
     ? new Intl.DateTimeFormat("en-US", {
@@ -208,17 +259,17 @@ export const DashboardView: React.FC = () => {
         {topicId === "high-low" && (
           <div>
             <div className="font-sans font-[700] text-[24px] md:text-[28px] text-black tabular-nums">
-              High {weather.high}{weather.tempUnit} / Low {weather.low}{weather.tempUnit}
+              High {weather.high ?? "—"}{weather.tempUnit} / Low {weather.low ?? "—"}{weather.tempUnit}
             </div>
             <div className="font-sans font-[500] text-[14px] text-[#555] mt-1 tabular-nums">
-              Spread: {weather.high - weather.low}°
+              Spread: {typeof weather.high === "number" && typeof weather.low === "number" ? `${weather.high - weather.low}°` : "—"}
             </div>
           </div>
         )}
 
         {topicId === "hourly-3h" && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
-            {weather.hourly.map((h, i) => (
+            {(weather.hourly || []).map((h, i) => (
               <div
                 key={i}
                 className="bg-white/80 rounded-[18px] p-3 text-center border border-[rgba(0,0,0,0.06)]"
@@ -239,7 +290,7 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "forecast-3day" && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
-            {weather.threeDay.map((d, i) => (
+            {(weather.threeDay || []).map((d, i) => (
               <div
                 key={i}
                 className="bg-white/80 rounded-[18px] p-4 border border-[rgba(0,0,0,0.06)] flex flex-col justify-between"
@@ -473,7 +524,7 @@ export const DashboardView: React.FC = () => {
               </section>
 
               {/* Live Digest Summary from n8n Dashboard Workflow */}
-              {n8nDigest?.weekly_digest && (
+              {digestSummary && (
                 <section className="p-5 md:p-6 rounded-[24px] bg-[#F6FFDD] border border-[rgba(0,0,0,0.08)] flex flex-col gap-3">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-black" aria-hidden="true" />
@@ -482,7 +533,7 @@ export const DashboardView: React.FC = () => {
                     </h3>
                   </div>
                   <p className="font-sans font-[400] text-[15px] leading-relaxed text-[#292B2D] whitespace-pre-line">
-                    {n8nDigest.weekly_digest}
+                    {digestSummary}
                   </p>
                 </section>
               )}

@@ -87,6 +87,16 @@ export interface N8nPreferencesResult {
 }
 
 export interface N8nDashboardResult {
+  user?: {
+    email?: string;
+    name?: string;
+    city?: string;
+    country_code?: string;
+    news_categories?: string[];
+    weather_categories?: string[];
+    send_time?: string;
+    last_sent_date?: string | null;
+  };
   weather?: {
     city?: string;
     temp?: number;
@@ -94,6 +104,7 @@ export interface N8nDashboardResult {
     condition?: string;
     humidity?: number;
     weather_categories?: string[];
+    summary?: string;
   };
   preferences?: {
     email?: string;
@@ -104,7 +115,21 @@ export interface N8nDashboardResult {
     send_time?: string;
     last_sent_date?: string | null;
   };
-  weekly_digest?: string;
+  weekly_digest?:
+    | string
+    | {
+        edition_date?: string;
+        categories?: string[];
+        summary?: string;
+        articles?: Array<{
+          title?: string;
+          summary?: string;
+          url?: string;
+          source?: string;
+          published_at?: string;
+          category?: string;
+        }>;
+      };
   generated_at?: string;
 }
 
