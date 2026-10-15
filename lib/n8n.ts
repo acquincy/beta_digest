@@ -29,6 +29,13 @@ export const N8N_ENDPOINTS = {
       `${N8N_BASE_URL}/webhook/v2/auth/verify`
     );
   },
+  get sessionResolve(): string {
+    return (
+      process.env["SESSION_RESOLVE_URL"] ||
+      process.env["SESSION/RESOLVE_URL"] ||
+      `${N8N_BASE_URL}/webhook/v2/session/resolve`
+    );
+  },
   get preferences(): string {
     return (
       process.env["USER/PREFERENCES_URL"] ||
@@ -40,6 +47,20 @@ export const N8N_ENDPOINTS = {
     return (
       process.env["DASHBOARD_URL"] ||
       `${N8N_BASE_URL}/webhook/v2/digest/dashboard`
+    );
+  },
+  get sendLink(): string {
+    return (
+      process.env["AUTH_SEND_LINK_URL"] ||
+      process.env["AUTH/SEND_LINK_URL"] ||
+      `${N8N_BASE_URL}/webhook/v2/auth/send-link`
+    );
+  },
+  get logout(): string {
+    return (
+      process.env["AUTH_LOGOUT_URL"] ||
+      process.env["AUTH/LOGOUT_URL"] ||
+      `${N8N_BASE_URL}/webhook/v2/auth/logout`
     );
   },
 };
@@ -69,7 +90,7 @@ export async function n8nSignup(payload: {
   weather_categories?: string[];
   send_time?: string;
 }): Promise<Response> {
-  return fetch(`${N8N_BASE_URL}/webhook/v2/auth/signup`, {
+  return fetch(N8N_ENDPOINTS.signup, {
     method: "POST",
     headers: getN8nHeaders(),
     body: JSON.stringify(payload),
@@ -82,7 +103,7 @@ export async function n8nVerify(payload: {
   session_token_hash: string;
   user_agent?: string;
 }): Promise<Response> {
-  return fetch(`${N8N_BASE_URL}/webhook/v2/auth/verify`, {
+  return fetch(N8N_ENDPOINTS.verify, {
     method: "POST",
     headers: getN8nHeaders(),
     body: JSON.stringify(payload),
@@ -91,7 +112,7 @@ export async function n8nVerify(payload: {
 }
 
 export async function n8nResolveSession(sessionTokenHash: string): Promise<Response> {
-  return fetch(`${N8N_BASE_URL}/webhook/v2/session/resolve`, {
+  return fetch(N8N_ENDPOINTS.sessionResolve, {
     method: "POST",
     headers: getN8nHeaders(),
     body: JSON.stringify({ session_token_hash: sessionTokenHash }),
@@ -107,7 +128,7 @@ export async function n8nUpdatePreferences(payload: {
   weather_categories?: string[];
   send_time?: string;
 }): Promise<Response> {
-  return fetch(`${N8N_BASE_URL}/webhook/v2/user/preferences`, {
+  return fetch(N8N_ENDPOINTS.preferences, {
     method: "POST",
     headers: getN8nHeaders(),
     body: JSON.stringify(payload),
@@ -116,7 +137,7 @@ export async function n8nUpdatePreferences(payload: {
 }
 
 export async function n8nFetchDashboard(sessionTokenHash: string): Promise<Response> {
-  return fetch(`${N8N_BASE_URL}/webhook/v2/digest/dashboard`, {
+  return fetch(N8N_ENDPOINTS.dashboard, {
     method: "POST",
     headers: getN8nHeaders(),
     body: JSON.stringify({ session_token_hash: sessionTokenHash }),
@@ -125,7 +146,7 @@ export async function n8nFetchDashboard(sessionTokenHash: string): Promise<Respo
 }
 
 export async function n8nSendLink(email: string): Promise<Response> {
-  return fetch(`${N8N_BASE_URL}/webhook/v2/auth/send-link`, {
+  return fetch(N8N_ENDPOINTS.sendLink, {
     method: "POST",
     headers: getN8nHeaders(),
     body: JSON.stringify({ email }),
@@ -134,7 +155,7 @@ export async function n8nSendLink(email: string): Promise<Response> {
 }
 
 export async function n8nLogout(sessionTokenHash: string): Promise<Response> {
-  return fetch(`${N8N_BASE_URL}/webhook/v2/auth/logout`, {
+  return fetch(N8N_ENDPOINTS.logout, {
     method: "POST",
     headers: getN8nHeaders(),
     body: JSON.stringify({ session_token_hash: sessionTokenHash }),

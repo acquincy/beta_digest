@@ -7,10 +7,13 @@ test("N8N_BASE_URL defaults correctly", () => {
 });
 
 test("N8N_ENDPOINTS provides valid URLs for all workflows", () => {
-  assert.ok(N8N_ENDPOINTS.signup.includes("/webhook/"));
-  assert.ok(N8N_ENDPOINTS.verify.includes("/webhook/"));
-  assert.ok(N8N_ENDPOINTS.preferences.includes("/webhook/"));
-  assert.ok(N8N_ENDPOINTS.dashboard.includes("/webhook/"));
+  assert.ok(N8N_ENDPOINTS.signup.includes("/webhook/v2/auth/signup"));
+  assert.ok(N8N_ENDPOINTS.verify.includes("/webhook/v2/auth/verify"));
+  assert.ok(N8N_ENDPOINTS.preferences.includes("/webhook/v2/user/preferences"));
+  assert.ok(N8N_ENDPOINTS.dashboard.includes("/webhook/v2/digest/dashboard"));
+  assert.ok(N8N_ENDPOINTS.sessionResolve.includes("/webhook/v2/session/resolve"));
+  assert.ok(N8N_ENDPOINTS.sendLink.includes("/webhook/v2/auth/send-link"));
+  assert.ok(N8N_ENDPOINTS.logout.includes("/webhook/v2/auth/logout"));
 });
 
 test("N8N_ENDPOINTS respects environment variables dynamically", () => {
