@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Globe, X, Rocket, Mail, ArrowRight, RotateCw, CheckCircle2 } from "lucide-react";
+import { Globe, X, Rocket } from "lucide-react";
 import { CanvasA } from "./CanvasA";
 import { IconTile } from "./primitives/IconTile";
 import { DarkButton, OutlineButton, Button } from "./primitives/Button";
@@ -37,12 +37,6 @@ export const SignupFlow: React.FC = () => {
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // Step 3: Verification
-  const [verificationToken, setVerificationToken] = useState("");
-  const [verificationUrl, setVerificationUrl] = useState("");
-  const [resending, setResending] = useState(false);
-  const [resendStatus, setResendStatus] = useState<string | null>(null);
 
   // Load preferences strictly after mount
   useEffect(() => {
@@ -178,23 +172,12 @@ export const SignupFlow: React.FC = () => {
 
     setSubmitting(true);
     try {
-      const originUrl = typeof window !== "undefined" ? window.location.origin : "";
-      const result = await signupViaN8n({
+      await signupViaN8n({
         email: email.trim(),
         name: name.trim(),
         city: effectiveCity,
         country_code: countryCode,
-        frontend_url: originUrl,
       });
-
-      if (result?.token) {
-        setVerificationToken(result.token);
-      }
-      if (result?.verification_url) {
-        setVerificationUrl(result.verification_url.replace("/api/auth/verify", "/verify"));
-      } else if (result?.token) {
-        setVerificationUrl(`${originUrl || "https://betadigest.online"}/verify?token=${result.token}`);
-      }
 
       setStep(3);
       if (typeof window !== "undefined") {
@@ -203,41 +186,10 @@ export const SignupFlow: React.FC = () => {
         window.history.replaceState({}, "", url.toString());
       }
     } catch (err: unknown) {
-      console.warn("n8n signup dispatch:", err);
-      // Fallback: still show Step 3 with a generated direct token if needed
-      const fallbackToken = "bd-" + Math.random().toString(36).substring(2, 10);
-      setVerificationToken(fallbackToken);
-      setVerificationUrl(`/verify?token=${fallbackToken}`);
+      console.warn("Signup dispatch error:", err);
       setStep(3);
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleResend = async () => {
-    if (resending || !email) return;
-    setResending(true);
-    setResendStatus(null);
-    try {
-      const originUrl = typeof window !== "undefined" ? window.location.origin : "";
-      const result = await signupViaN8n({
-        email: email.trim(),
-        name: name.trim(),
-        city: effectiveCity,
-        country_code: countryCode,
-        frontend_url: originUrl,
-      });
-      if (result?.token) {
-        setVerificationToken(result.token);
-      }
-      if (result?.verification_url) {
-        setVerificationUrl(result.verification_url);
-      }
-      setResendStatus("Verification link resent successfully! Check your inbox.");
-    } catch {
-      setResendStatus("Verification email re-dispatched. Please check your inbox.");
-    } finally {
-      setResending(false);
     }
   };
 
@@ -507,7 +459,6 @@ export const SignupFlow: React.FC = () => {
         {step === 3 && (
           <VerificationWaitingCard
             email={email}
-            token={verificationToken}
             name={name}
             city={effectiveCity}
             countryCode={countryCode}
@@ -520,8 +471,7 @@ export const SignupFlow: React.FC = () => {
               }
             }}
             onVerified={() => {
-              // The page refreshes / navigates forward once completed
-              window.location.href = "/set-up-reports?step=1";
+              router.push("/set-up-reports?step=1");
             }}
           />
         )}

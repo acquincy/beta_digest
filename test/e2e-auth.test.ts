@@ -2,13 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { NextRequest } from "next/server";
 import { POST as signupPost } from "../app/api/auth/signup/route";
-import { GET as verifyGet } from "../app/api/auth/verify/route";
+import { GET as verifyGet, POST as verifyPost } from "../app/api/auth/verify/route";
 
-test("Signup and Verify flow end-to-end", async () => {
+test("Signup endpoint returns generic success and NEVER leaks token or URL", async () => {
   const email = `test-${Date.now()}@example.com`;
   const signupReq = new NextRequest("http://localhost:3000/api/auth/signup", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "http://localhost:3000",
+    },
     body: JSON.stringify({
       email,
       name: "Verification Tester",
@@ -21,16 +24,17 @@ test("Signup and Verify flow end-to-end", async () => {
   assert.equal(signupRes.status, 200);
   const signupData = await signupRes.json();
   assert.equal(signupData.status, "success");
-  assert.ok(signupData.token);
-  assert.ok(signupData.verification_url);
 
-  // Verification URL must point to the onboarding verify UI page, NOT an API route or raw localhost
-  assert.ok(signupData.verification_url.includes("/verify?token="));
-  assert.ok(!signupData.verification_url.includes("/api/auth/verify"));
+  // CRITICAL SECURITY ASSERTIONS: Never leak tokens or URLs to the browser
+  assert.equal(signupData.token, undefined, "Signup must not return raw or hashed token");
+  assert.equal(signupData.verification_url, undefined, "Signup must not return verification URL");
+});
 
-  // 1. Direct browser navigation to /api/auth/verify redirects to /verify UI
+test("Verification GET redirects to UI and never executes state-changing verification", async () => {
+  // 1. Browser GET navigation to /api/auth/verify with token redirects (307) to /verify UI
+  const testToken = "test-verification-token-xyz";
   const browserNavReq = new NextRequest(
-    `http://localhost:3000/api/auth/verify?token=${signupData.token}`,
+    `http://localhost:3000/api/auth/verify?token=${testToken}`,
     {
       method: "GET",
       headers: { Accept: "text/html,application/xhtml+xml" },
@@ -38,51 +42,38 @@ test("Signup and Verify flow end-to-end", async () => {
   );
   const browserNavRes = await verifyGet(browserNavReq);
   assert.equal(browserNavRes.status, 307);
-  assert.ok(browserNavRes.headers.get("location")?.includes(`/verify?token=${signupData.token}`));
+  assert.ok(browserNavRes.headers.get("location")?.includes(`/verify?token=${testToken}`));
 
-  // 2. API fetch verification returns JSON result
-  const verifyUrl = `http://localhost:3000/api/auth/verify?token=${signupData.token}`;
-  const verifyReq = new NextRequest(verifyUrl, {
+  // 2. Browser GET without token returns 405 Method Not Allowed
+  const noTokenReq = new NextRequest("http://localhost:3000/api/auth/verify", {
     method: "GET",
-    headers: { Accept: "application/json" },
   });
-  const verifyRes = await verifyGet(verifyReq);
-  assert.equal(verifyRes.status, 200);
-  const verifyData = await verifyRes.json();
-  assert.equal(verifyData.status, "success");
-  assert.equal(verifyData.verified, true);
+  const noTokenRes = await verifyGet(noTokenReq);
+  assert.equal(noTokenRes.status, 405);
 });
 
-test("Re-signing up with duplicate email still verifies successfully", async () => {
-  const existingEmail = "duplicate-test@example.com";
-
-  // First signup
-  const req1 = new NextRequest("http://localhost:3000/api/auth/signup", {
+test("Verification POST rejects missing token or invalid origin", async () => {
+  // 1. Missing token
+  const badReq = new NextRequest("http://localhost:3000/api/auth/verify", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: existingEmail, name: "First" }),
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "http://localhost:3000",
+    },
+    body: JSON.stringify({}),
   });
-  const res1 = await signupPost(req1);
-  const data1 = await res1.json();
+  const badRes = await verifyPost(badReq);
+  assert.equal(badRes.status, 400);
 
-  // Second signup with same email
-  const req2 = new NextRequest("http://localhost:3000/api/auth/signup", {
+  // 2. Forbidden cross-site origin
+  const forbiddenReq = new NextRequest("http://localhost:3000/api/auth/verify", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: existingEmail, name: "Second" }),
+    headers: {
+      "Content-Type": "application/json",
+      Origin: "https://evil-attacker.com",
+    },
+    body: JSON.stringify({ token: "some-token" }),
   });
-  const res2 = await signupPost(req2);
-  assert.equal(res2.status, 200);
-  const data2 = await res2.json();
-  assert.ok(data2.token);
-
-  // Verifying with token2 MUST succeed (not fail with 400!)
-  const verifyReq2 = new NextRequest(`http://localhost:3000/api/auth/verify?token=${data2.token}`, {
-    method: "GET",
-  });
-  const verifyRes2 = await verifyGet(verifyReq2);
-  assert.equal(verifyRes2.status, 200);
-  const verifyData2 = await verifyRes2.json();
-  assert.equal(verifyData2.status, "success");
-  assert.equal(verifyData2.verified, true);
+  const forbiddenRes = await verifyPost(forbiddenReq);
+  assert.equal(forbiddenRes.status, 403);
 });

@@ -60,9 +60,6 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
 
     const handleVerified = () => {
       setIsVerified(true);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("betadigest_verified", "true");
-      }
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
       }
@@ -95,14 +92,6 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
       };
     } catch {}
 
-    // Storage event listener for same-browser changes
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "betadigest_verified" && e.newValue === "true") {
-        handleVerified();
-      }
-    };
-    window.addEventListener("storage", onStorage);
-
     return () => {
       mounted = false;
       if (pollIntervalRef.current) {
@@ -111,7 +100,6 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
       if (bc) {
         bc.close();
       }
-      window.removeEventListener("storage", onStorage);
     };
   }, [token, email, isVerified, onVerified]);
 
@@ -129,17 +117,15 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
     setResending(true);
     setResendStatus(null);
     try {
-      const originUrl = typeof window !== "undefined" ? window.location.origin : "";
       await signupViaN8n({
         email: email.trim(),
         name: name || "",
         city: city || "",
         country_code: countryCode || "",
-        frontend_url: originUrl,
       });
       setResendStatus("A fresh verification email has been dispatched! Please check your inbox.");
       setCooldown(30);
-    } catch (err: unknown) {
+    } catch {
       setResendStatus("Email re-dispatched. Please check your inbox and spam folder.");
       setCooldown(30);
     } finally {
