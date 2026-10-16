@@ -94,11 +94,26 @@ export const DashboardView: React.FC = () => {
           if (data.user && typeof data.user === "object") {
             const u = data.user as Record<string, unknown>;
             setPrefs((prev) => {
+              const candidateCity = typeof u.city === "string" && u.city.trim() ? u.city.trim() : "";
+              const candidateCountry = typeof u.country_code === "string" && u.country_code.trim() ? u.country_code.trim().toUpperCase() : "";
+
+              const resolvedCity = (candidateCity && candidateCity !== "Seattle")
+                ? candidateCity
+                : (prev.city && prev.city !== "Seattle")
+                ? prev.city
+                : (candidateCity || prev.city || "");
+
+              const resolvedCountry = (candidateCountry && candidateCountry !== "US")
+                ? candidateCountry
+                : (prev.countryCode && prev.countryCode !== "US")
+                ? prev.countryCode
+                : (candidateCountry || prev.countryCode || "");
+
               const updated: Preferences = {
                 ...prev,
                 name: typeof u.name === "string" && u.name ? u.name : prev.name,
-                city: typeof u.city === "string" && u.city ? u.city : prev.city,
-                countryCode: typeof u.country_code === "string" && u.country_code ? u.country_code : prev.countryCode,
+                city: resolvedCity,
+                countryCode: resolvedCountry,
                 newsTopics: Array.isArray(u.news_categories) && u.news_categories.length > 0 ? (u.news_categories as NewsTopicId[]) : prev.newsTopics,
                 weatherTopics: Array.isArray(u.weather_categories) && u.weather_categories.length > 0 ? (u.weather_categories as WeatherTopicId[]) : prev.weatherTopics,
                 deliveryHour: typeof u.send_time === "string" ? parseDeliveryHour(u.send_time) : prev.deliveryHour,

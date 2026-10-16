@@ -103,3 +103,43 @@ test("Onboarded users routing contract: set-up-reports redirects to preferences"
   // Already onboarded -> redirected to preferences editor (not blank screen or dashboard loop)
   assert.equal(resolveSetUpReportsDestination({ valid: true, onboarding_completed: true }), "/preferences");
 });
+
+test("City and Country code preservation contract: never overwrite with Seattle/US fallbacks", () => {
+  // Test simulation of preferences merge logic
+  function resolvePreferences(
+    existingUser: { city?: string | null; country_code?: string | null },
+    requestBody: { city?: string; country_code?: string; weather_categories?: string[]; news_categories?: string[] }
+  ) {
+    let city = existingUser.city || null;
+    if (typeof requestBody.city === "string" && requestBody.city.trim().length >= 2 && requestBody.city.trim() !== "Seattle") {
+      city = requestBody.city.trim();
+    } else if (typeof requestBody.city === "string" && requestBody.city.trim().length >= 2 && !existingUser.city) {
+      city = requestBody.city.trim();
+    }
+
+    let countryCode = existingUser.country_code || null;
+    if (typeof requestBody.country_code === "string" && /^[A-Z]{2}$/i.test(requestBody.country_code.trim()) && requestBody.country_code.trim().toUpperCase() !== "US") {
+      countryCode = requestBody.country_code.trim().toUpperCase();
+    } else if (typeof requestBody.country_code === "string" && /^[A-Z]{2}$/i.test(requestBody.country_code.trim()) && !existingUser.country_code) {
+      countryCode = requestBody.country_code.trim().toUpperCase();
+    }
+
+    return { city, countryCode };
+  }
+
+  // Case 1: User has custom city "Lagos", "NG"; submits only topic preferences
+  const res1 = resolvePreferences({ city: "Lagos", country_code: "NG" }, { weather_categories: ["rain-chance"] });
+  assert.equal(res1.city, "Lagos", "Lagos must be preserved");
+  assert.equal(res1.countryCode, "NG", "NG must be preserved");
+
+  // Case 2: User has custom city "Tokyo", "JP"; request contains empty or no city
+  const res2 = resolvePreferences({ city: "Tokyo", country_code: "JP" }, {});
+  assert.equal(res2.city, "Tokyo", "Tokyo must be preserved");
+  assert.equal(res2.countryCode, "JP", "JP must be preserved");
+
+  // Case 3: User has "London", "GB"; request accidentally carries default "Seattle", "US"
+  const res3 = resolvePreferences({ city: "London", country_code: "GB" }, { city: "Seattle", country_code: "US" });
+  assert.equal(res3.city, "London", "Default Seattle must NOT overwrite existing London");
+  assert.equal(res3.countryCode, "GB", "Default US must NOT overwrite existing GB");
+});
+

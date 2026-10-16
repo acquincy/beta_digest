@@ -50,7 +50,7 @@ import {
   NEWS_TOPIC_LABELS,
   Preferences,
 } from "@/lib/types";
-import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
+import { loadPreferences, savePreferences, parseDeliveryHour, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { savePreferencesViaApi, fetchPreferencesViaApi } from "@/lib/n8n";
 
 export const WEATHER_ICONS: Record<WeatherTopicId, LucideIcon> = {
@@ -108,31 +108,87 @@ export const TopicPreferencesEditor: React.FC = () => {
     fetchPreferencesViaApi()
       .then((data) => {
         if (!mounted || !data) return;
-        if (data.preferences) {
-          const freshWeather = Array.isArray(data.preferences.weatherTopics)
-            ? (data.preferences.weatherTopics as WeatherTopicId[])
-            : null;
-          const freshNews = Array.isArray(data.preferences.newsTopics)
-            ? (data.preferences.newsTopics as NewsTopicId[])
-            : null;
+        const u = data.user;
+        const p = data.preferences;
 
-          if (freshWeather && freshWeather.length > 0) {
-            setWeatherTopics(freshWeather.slice(0, 3));
-          }
-          if (freshNews && freshNews.length > 0) {
-            setNewsTopics(freshNews.slice(0, 5));
-          }
+        const dbCity =
+          typeof u?.city === "string" && u.city.trim()
+            ? u.city.trim()
+            : typeof p?.city === "string" && p.city.trim()
+            ? p.city.trim()
+            : "";
+        const dbCountry =
+          typeof u?.country_code === "string" && u.country_code.trim()
+            ? u.country_code.trim().toUpperCase()
+            : typeof p?.countryCode === "string" && p.countryCode.trim()
+            ? p.countryCode.trim().toUpperCase()
+            : "";
+        const dbName =
+          typeof u?.name === "string" && u.name.trim()
+            ? u.name.trim()
+            : typeof p?.name === "string" && p.name.trim()
+            ? p.name.trim()
+            : "";
+        const dbWeather = (
+          Array.isArray(p?.weatherTopics) && p.weatherTopics.length > 0
+            ? p.weatherTopics
+            : Array.isArray(u?.weather_categories)
+            ? u.weather_categories
+            : null
+        ) as WeatherTopicId[] | null;
+        const dbNews = (
+          Array.isArray(p?.newsTopics) && p.newsTopics.length > 0
+            ? p.newsTopics
+            : Array.isArray(u?.news_categories)
+            ? u.news_categories
+            : null
+        ) as NewsTopicId[] | null;
+        const dbSendTime =
+          typeof u?.send_time === "string" && u.send_time
+            ? u.send_time
+            : typeof p?.sendTime === "string" && p.sendTime
+            ? p.sendTime
+            : "";
 
-          if (data.user) {
-            setPrefs((prev) => ({
-              ...prev,
-              name: data.user?.name || prev.name,
-              city: data.user?.city || prev.city,
-              countryCode: data.user?.country_code || prev.countryCode,
-              send_time: data.user?.send_time || prev.deliveryHour,
-            }));
-          }
+        if (dbWeather && dbWeather.length > 0) {
+          setWeatherTopics(dbWeather.slice(0, 3));
         }
+        if (dbNews && dbNews.length > 0) {
+          setNewsTopics(dbNews.slice(0, 5));
+        }
+
+        setPrefs((prev) => {
+          // Strictly protect existing city from being overwritten by fallback Seattle
+          const resolvedCity =
+            dbCity && dbCity !== "Seattle"
+              ? dbCity
+              : prev.city && prev.city !== "Seattle"
+              ? prev.city
+              : dbCity || prev.city || "";
+
+          const resolvedCountry =
+            dbCountry && dbCountry !== "US"
+              ? dbCountry
+              : prev.countryCode && prev.countryCode !== "US"
+              ? prev.countryCode
+              : dbCountry || prev.countryCode || "";
+
+          const updated: Preferences = {
+            ...prev,
+            name: dbName || prev.name,
+            city: resolvedCity,
+            countryCode: resolvedCountry,
+            deliveryHour: dbSendTime ? parseDeliveryHour(dbSendTime) : prev.deliveryHour,
+            weatherTopics:
+              dbWeather && dbWeather.length > 0
+                ? dbWeather.slice(0, 3)
+                : prev.weatherTopics,
+            newsTopics:
+              dbNews && dbNews.length > 0 ? dbNews.slice(0, 5) : prev.newsTopics,
+          };
+          savePreferences(updated);
+          return updated;
+        });
       })
       .catch((err) => {
         console.warn("Could not fetch remote preferences:", err);
@@ -181,7 +237,7 @@ export const TopicPreferencesEditor: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      // 1. Update localStorage immediately
+      // 1. Update localStorage immediately while strictly keeping the existing city & country
       const updatedPrefs: Preferences = {
         ...prefs,
         weatherTopics,
@@ -190,7 +246,24 @@ export const TopicPreferencesEditor: React.FC = () => {
       savePreferences(updatedPrefs);
 
       // 2. Dispatch to the n8n flow via /api/user/preferences
+      // Explicitly pass existing city and countryCode if available to safeguard against any server-side fallback
+      const cityToSend =
+        prefs.city && prefs.city.trim() && prefs.city.trim() !== "Seattle"
+          ? prefs.city.trim()
+          : prefs.city && prefs.city.trim()
+          ? prefs.city.trim()
+          : undefined;
+
+      const countryToSend =
+        prefs.countryCode && prefs.countryCode.trim() && prefs.countryCode.trim() !== "US"
+          ? prefs.countryCode.trim().toUpperCase()
+          : prefs.countryCode && prefs.countryCode.trim()
+          ? prefs.countryCode.trim().toUpperCase()
+          : undefined;
+
       await savePreferencesViaApi({
+        city: cityToSend,
+        country_code: countryToSend,
         weather_categories: weatherTopics,
         news_categories: newsTopics,
       });
