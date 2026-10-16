@@ -240,9 +240,35 @@ export async function sendSignInLinkViaApi(email: string): Promise<GenericApiRes
   return data;
 }
 
+export interface UserPreferencesResponse {
+  status: "success" | "error";
+  user?: {
+    name?: string;
+    city?: string;
+    country_code?: string;
+    news_categories?: string[];
+    weather_categories?: string[];
+    send_time?: string;
+  };
+  preferences?: {
+    name?: string;
+    city?: string;
+    countryCode?: string;
+    newsTopics?: string[];
+    weatherTopics?: string[];
+    sendTime?: string;
+  };
+}
+
+export async function fetchPreferencesViaApi(): Promise<UserPreferencesResponse | null> {
+  const res = await fetch("/api/user/preferences");
+  if (!res.ok) return null;
+  return res.json().catch(() => null);
+}
+
 export async function savePreferencesViaApi(payload: {
-  city: string;
-  country_code: string;
+  city?: string;
+  country_code?: string;
   news_categories?: string[];
   weather_categories?: string[];
   send_time?: string;

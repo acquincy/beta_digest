@@ -23,7 +23,7 @@ export default async function SetUpReportsPage() {
   }
 
   if (sessionResult.status === "authenticated" && sessionResult.session.onboardingCompleted) {
-    redirect("/dashboard");
+    redirect("/preferences");
   }
 
   return (
