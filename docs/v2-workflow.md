@@ -2,7 +2,7 @@
 
 **Workflow Name:** Beta Digest v2  
 **Workflow ID:** `MIu6TbUDD8zKMicJ`  
-**Status:** Inactive (all schedule triggers disabled)
+**Status:** Published & Active (10 triggers registered)
 
 This is the canonical and only workflow powering Beta Digest.
 
@@ -10,18 +10,18 @@ This is the canonical and only workflow powering Beta Digest.
 
 ## 1. Webhook Endpoints
 
-All webhook endpoints are scoped under `/v2/` and require **Header Auth** (`Authorization` or `X-N8N-Shared-Secret`).
+All webhook endpoints are scoped under `/v2/` with `authentication: none` in n8n (protected and mediated by the website's Next.js API routes).
 
 | Endpoint | HTTP Method | Auth | Description |
 | :--- | :--- | :--- | :--- |
-| `/v2/auth/signup` | `POST` | Header Auth | Validates email, creates or refreshes verification token, sends verification / sign-in email |
-| `/v2/auth/verify` | `POST` | Header Auth | Validates single-use token hash, marks user verified, creates persistent session |
-| `/v2/session/resolve` | `POST` | Header Auth | Resolves session token hash against `user_sessions`, updates `last_seen_at` and returns status |
-| `/v2/user/preferences` | `POST` | Header Auth | Updates user delivery and topic preferences (`news_categories`, `weather_categories`, `send_time`) |
-| `/v2/digest/dashboard` | `POST` | Header Auth | Authenticates session and aggregates live weather and news briefings for reader dashboard |
-| `/v2/auth/send-link` | `POST` | Header Auth | Dispatches passwordless magic sign-in link with 15-minute token expiry |
-| `/v2/auth/logout` | `POST` | Header Auth | Revokes active session in `user_sessions` by setting `revoked_at` |
-| `/v2/digest/send-hourly` | `GET` | Header Auth | On-demand trigger for hourly digest dispatch chain (optional query overrides: `hour`, `email`) |
+| `/v2/auth/signup` | `POST` | Direct / Proxied | Validates email, creates or refreshes verification token, sends verification / sign-in email |
+| `/v2/auth/verify` | `POST` | Direct / Proxied | Validates single-use token hash, marks user verified, creates persistent session |
+| `/v2/session/resolve` | `POST` | Direct / Proxied | Resolves session token hash against `user_sessions`, updates `last_seen_at` and returns status |
+| `/v2/user/preferences` | `POST` | Direct / Proxied | Updates user delivery and topic preferences (`news_categories`, `weather_categories`, `send_time`) |
+| `/v2/digest/dashboard` | `POST` | Direct / Proxied | Authenticates session and aggregates live weather and news briefings for reader dashboard |
+| `/v2/auth/send-link` | `POST` | Direct / Proxied | Dispatches passwordless magic sign-in link with 15-minute token expiry |
+| `/v2/auth/logout` | `POST` | Direct / Proxied | Revokes active session in `user_sessions` by setting `revoked_at` |
+| `/v2/digest/send-hourly` | `GET` | Direct / Proxied | On-demand trigger for hourly digest dispatch chain (optional query overrides: `hour`, `email`) |
 
 ---
 

@@ -14,60 +14,65 @@ export const N8N_SHARED_SECRET = process.env.N8N_SHARED_SECRET || "";
 
 export const N8N_TIMEOUT_MS = 3000;
 
+function normalizeEndpoint(envValue: string | undefined, defaultPath: string): string {
+  if (!envValue) return `${N8N_BASE_URL}${defaultPath}`;
+  const trimmed = envValue.trim().replace(/\/+$/, "");
+  if (
+    trimmed.includes("n8n.srv1650803.hstgr.cloud/webhook/") &&
+    !trimmed.includes("/webhook/v2/")
+  ) {
+    return trimmed.replace("/webhook/", "/webhook/v2/");
+  }
+  return trimmed;
+}
+
 export const N8N_ENDPOINTS = {
   get signup(): string {
-    return (
-      process.env["AUTH/SIGNUP_URL"] ||
-      process.env["AUTH_SIGNUP_URL"] ||
-      `${N8N_BASE_URL}/webhook/v2/auth/signup`
+    return normalizeEndpoint(
+      process.env["AUTH/SIGNUP_URL"] || process.env["AUTH_SIGNUP_URL"],
+      "/webhook/v2/auth/signup"
     );
   },
   get verify(): string {
-    return (
-      process.env["AUTH/VERIFY_URL"] ||
-      process.env["AUTH_VERIFY_URL"] ||
-      `${N8N_BASE_URL}/webhook/v2/auth/verify`
+    return normalizeEndpoint(
+      process.env["AUTH/VERIFY_URL"] || process.env["AUTH_VERIFY_URL"],
+      "/webhook/v2/auth/verify"
     );
   },
   get sessionResolve(): string {
-    return (
-      process.env["SESSION_RESOLVE_URL"] ||
-      process.env["SESSION/RESOLVE_URL"] ||
-      `${N8N_BASE_URL}/webhook/v2/session/resolve`
+    return normalizeEndpoint(
+      process.env["SESSION_RESOLVE_URL"] || process.env["SESSION/RESOLVE_URL"],
+      "/webhook/v2/session/resolve"
     );
   },
   get preferences(): string {
-    return (
-      process.env["USER/PREFERENCES_URL"] ||
-      process.env["USER_PREFERENCES_URL"] ||
-      `${N8N_BASE_URL}/webhook/v2/user/preferences`
+    return normalizeEndpoint(
+      process.env["USER/PREFERENCES_URL"] || process.env["USER_PREFERENCES_URL"],
+      "/webhook/v2/user/preferences"
     );
   },
   get dashboard(): string {
-    return (
-      process.env["DASHBOARD_URL"] ||
-      `${N8N_BASE_URL}/webhook/v2/digest/dashboard`
+    return normalizeEndpoint(
+      process.env["DASHBOARD_URL"],
+      "/webhook/v2/digest/dashboard"
     );
   },
   get sendLink(): string {
-    return (
-      process.env["AUTH_SEND_LINK_URL"] ||
-      process.env["AUTH/SEND_LINK_URL"] ||
-      `${N8N_BASE_URL}/webhook/v2/auth/send-link`
+    return normalizeEndpoint(
+      process.env["AUTH_SEND_LINK_URL"] || process.env["AUTH/SEND_LINK_URL"],
+      "/webhook/v2/auth/send-link"
     );
   },
   get logout(): string {
-    return (
-      process.env["AUTH_LOGOUT_URL"] ||
-      process.env["AUTH/LOGOUT_URL"] ||
-      `${N8N_BASE_URL}/webhook/v2/auth/logout`
+    return normalizeEndpoint(
+      process.env["AUTH_LOGOUT_URL"] || process.env["AUTH/LOGOUT_URL"],
+      "/webhook/v2/auth/logout"
     );
   },
   get sendHourly(): string {
-    return (
-      process.env["DIGEST_SEND_HOURLY_URL"] ||
-      process.env["DIGEST/SEND_HOURLY_URL"] ||
-      `${N8N_BASE_URL}/webhook/v2/digest/send-hourly`
+    return normalizeEndpoint(
+      process.env["DIGEST_SEND_HOURLY_URL"] || process.env["DIGEST/SEND_HOURLY_URL"],
+      "/webhook/v2/digest/send-hourly"
     );
   },
 };

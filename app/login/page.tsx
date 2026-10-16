@@ -2,20 +2,22 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Mail } from "lucide-react";
+import { ArrowLeft, Check, Mail, Loader2 } from "lucide-react";
 import { CanvasA } from "@/components/CanvasA";
 import { Header } from "@/components/Header";
 import { IconTile } from "@/components/primitives/IconTile";
 import { UnderlineInput } from "@/components/primitives/UnderlineInput";
 import { DarkButton } from "@/components/primitives/Button";
 import { Footer } from "@/components/Footer";
+import { sendSignInLinkViaApi } from "@/lib/n8n";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [sentMagicLink, setSentMagicLink] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed || !trimmed.includes("@")) {
@@ -23,7 +25,19 @@ export default function LoginPage() {
       return;
     }
     setError("");
-    setSentMagicLink(true);
+    setLoading(true);
+    try {
+      await sendSignInLinkViaApi(trimmed);
+      setSentMagicLink(true);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to send sign-in link. Please verify your connection."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,8 +106,9 @@ export default function LoginPage() {
                   required
                 />
 
-                <DarkButton type="submit" className="w-full h-[56px] mt-2">
-                  Send sign-in link
+                <DarkButton type="submit" disabled={loading} className="w-full h-[56px] mt-2 flex items-center justify-center gap-2">
+                  {loading && <Loader2 className="w-5 h-5 animate-spin" />}
+                  <span>{loading ? "Sending link..." : "Send sign-in link"}</span>
                 </DarkButton>
               </form>
 

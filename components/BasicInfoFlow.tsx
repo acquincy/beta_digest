@@ -35,11 +35,7 @@ export const BasicInfoFlow: React.FC = () => {
       setCitySelection(p.city || "");
     }
     setHydrated(true);
-
-    if (!p.name) {
-      router.push("/signup");
-    }
-  }, [router]);
+  }, []);
 
   const isOtherCity = citySelection === "__other__";
   const effectiveCity = isOtherCity ? customCity.trim() : citySelection;

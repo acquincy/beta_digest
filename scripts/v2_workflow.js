@@ -12,11 +12,7 @@ const wh_signup = trigger({
       httpMethod: 'POST',
       path: 'v2/auth/signup',
       responseMode: 'responseNode',
-      authentication: 'headerAuth',
       options: {}
-    },
-    credentials: {
-      httpHeaderAuth: newCredential('Header Auth')
     }
   }
 });
@@ -475,11 +471,7 @@ const wh_verify = trigger({
       httpMethod: 'POST',
       path: 'v2/auth/verify',
       responseMode: 'responseNode',
-      authentication: 'headerAuth',
       options: {}
-    },
-    credentials: {
-      httpHeaderAuth: newCredential('Header Auth')
     }
   }
 });
@@ -773,11 +765,7 @@ const wh_session_resolve = trigger({
       httpMethod: 'POST',
       path: 'v2/session/resolve',
       responseMode: 'responseNode',
-      authentication: 'headerAuth',
       options: {}
-    },
-    credentials: {
-      httpHeaderAuth: newCredential('Header Auth')
     }
   }
 });
@@ -1002,11 +990,7 @@ const wh_preferences = trigger({
       httpMethod: 'POST',
       path: 'v2/user/preferences',
       responseMode: 'responseNode',
-      authentication: 'headerAuth',
       options: {}
-    },
-    credentials: {
-      httpHeaderAuth: newCredential('Header Auth')
     }
   }
 });
@@ -1179,11 +1163,7 @@ const wh_dashboard = trigger({
       httpMethod: 'POST',
       path: 'v2/digest/dashboard',
       responseMode: 'responseNode',
-      authentication: 'headerAuth',
       options: {}
-    },
-    credentials: {
-      httpHeaderAuth: newCredential('Header Auth')
     }
   }
 });
@@ -1461,11 +1441,7 @@ const wh_send_link = trigger({
       httpMethod: 'POST',
       path: 'v2/auth/send-link',
       responseMode: 'responseNode',
-      authentication: 'headerAuth',
       options: {}
-    },
-    credentials: {
-      httpHeaderAuth: newCredential('Header Auth')
     }
   }
 });
@@ -1773,11 +1749,7 @@ const wh_logout = trigger({
       httpMethod: 'POST',
       path: 'v2/auth/logout',
       responseMode: 'responseNode',
-      authentication: 'headerAuth',
       options: {}
-    },
-    credentials: {
-      httpHeaderAuth: newCredential('Header Auth')
     }
   }
 });
@@ -1851,12 +1823,8 @@ const wh_send_hourly = trigger({
     parameters: {
       httpMethod: 'GET',
       path: 'v2/digest/send-hourly',
-      responseMode: 'lastNode',
-      authentication: 'headerAuth',
+      responseMode: 'responseNode',
       options: {}
-    },
-    credentials: {
-      httpHeaderAuth: newCredential('Header Auth')
     }
   }
 });
@@ -1946,7 +1914,12 @@ let dueUsers = rawUsers.filter(u => {
 });
 
 if (dueUsers.length === 0) {
-  return [];
+  return [{
+    json: {
+      hasDueUsers: false,
+      count: 0
+    }
+  }];
 }
 
 const appBaseUrl = $('Config: Digest Base URL').first()?.json?.APP_BASE_URL || 'https://betadigest.online';
@@ -1975,6 +1948,8 @@ return dueUsers.map(user => {
 
   return {
     json: {
+      hasDueUsers: true,
+      count: dueUsers.length,
       id: user.id,
       email: user.email,
       name: readerName,
@@ -2052,6 +2027,47 @@ const supa_update_last_sent_date = node({
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
+  }
+});
+
+const if_hourly_has_due_users = ifElse({
+  name: 'Hourly: Anyone Due?',
+  conditions: [
+    {
+      leftValue: '={{ Boolean($json.hasDueUsers) }}',
+      operator: 'true',
+      rightValue: true
+    }
+  ]
+});
+
+const respond_hourly_empty = node({
+  type: 'n8n-nodes-base.respondToWebhook',
+  version: 1.5,
+  config: {
+    name: 'Respond Hourly Empty',
+    parameters: {
+      respondWith: 'json',
+      responseBody: '[]',
+      options: {
+        responseCode: 200
+      }
+    }
+  }
+});
+
+const respond_hourly_sent = node({
+  type: 'n8n-nodes-base.respondToWebhook',
+  version: 1.5,
+  config: {
+    name: 'Respond Hourly Sent',
+    parameters: {
+      respondWith: 'json',
+      responseBody: '={{ JSON.stringify({ status: "success", success: true, count: $input.all().length }) }}',
+      options: {
+        responseCode: 200
+      }
+    }
   }
 });
 
@@ -2236,8 +2252,11 @@ export default workflow('beta-digest-v2', 'Beta Digest v2: Auth and Dashboard')
   .add(config_digest
     .to(supa_fetch_subscribers)
     .to(code_filter_due_users)
-    .to(resend_send_digest)
-    .to(supa_update_last_sent_date))
+    .to(if_hourly_has_due_users
+      .onFalse(respond_hourly_empty)
+      .onTrue(resend_send_digest
+        .to(supa_update_last_sent_date)
+        .to(respond_hourly_sent))))
 
 
   // 9. Daily cleanup

@@ -27,7 +27,7 @@ export async function sendVerificationEmail({
 
   // To prevent deliverability issues or spam classification, use configured verified domain:
   const fromEmail =
-    process.env.RESEND_FROM_EMAIL || "Beta Digest <onboarding@resend.dev>";
+    process.env.RESEND_FROM_EMAIL || "Beta Digest <verify@betadigest.online>";
 
   const emailHtml = `<!DOCTYPE html>
 <html lang="en">

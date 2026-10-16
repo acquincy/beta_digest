@@ -51,6 +51,21 @@ function VerifyContent() {
           setStatus("success");
           const target = result.destination || (result.onboarding_completed ? "/dashboard" : "/onboarding");
           setDestination(target);
+
+          // Notify any waiting tabs (e.g. signup flow) that verification succeeded
+          if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+            try {
+              const channel = new BroadcastChannel("betadigest_auth");
+              channel.postMessage({
+                verified: true,
+                onboarding_completed: Boolean(result.onboarding_completed),
+                destination: target,
+              });
+              channel.close();
+            } catch (e) {
+              // Ignore BroadcastChannel errors in sandboxed iframes/browsers
+            }
+          }
         } else {
           setStatus("error");
           setErrorMessage(result.error || "The verification link is invalid or has expired.");
