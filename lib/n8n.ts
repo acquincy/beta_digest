@@ -1,48 +1,185 @@
 /**
- * n8n Instance Integration Client for Beta Digest
- * Connected to instance: https://n8n.srv1650803.hstgr.cloud
+ * Server and Client Communication Layer for Beta Digest
+ * - Server: calls n8n v2 webhooks with header-auth secret and 3-second timeout.
+ * - Client: calls the site's own /api routes only.
  */
 
-export const N8N_BASE_URL =
+// Server-only environment variables (never exposed to client)
+export const N8N_BASE_URL = (
   process.env.N8N_BASE_URL ||
-  process.env.NEXT_PUBLIC_N8N_BASE_URL ||
-  "https://n8n.srv1650803.hstgr.cloud";
+  "https://n8n.srv1650803.hstgr.cloud"
+).replace(/\/+$/, "");
+
+export const N8N_SHARED_SECRET = process.env.N8N_SHARED_SECRET || "";
+
+export const N8N_TIMEOUT_MS = 3000;
+
+function normalizeEndpoint(envValue: string | undefined, defaultPath: string): string {
+  if (!envValue) return `${N8N_BASE_URL}${defaultPath}`;
+  const trimmed = envValue.trim().replace(/\/+$/, "");
+  if (
+    trimmed.includes("n8n.srv1650803.hstgr.cloud/webhook/") &&
+    !trimmed.includes("/webhook/v2/")
+  ) {
+    return trimmed.replace("/webhook/", "/webhook/v2/");
+  }
+  return trimmed;
+}
 
 export const N8N_ENDPOINTS = {
   get signup(): string {
-    return (
-      process.env["AUTH/SIGNUP_URL"] ||
-      process.env.AUTH_SIGNUP_URL ||
-      process.env.NEXT_PUBLIC_AUTH_SIGNUP_URL ||
-      `${N8N_BASE_URL}/webhook/auth/signup`
+    return normalizeEndpoint(
+      process.env["AUTH/SIGNUP_URL"] || process.env["AUTH_SIGNUP_URL"],
+      "/webhook/v2/auth/signup"
     );
   },
   get verify(): string {
-    return (
-      process.env["AUTH/VERIFY_URL"] ||
-      process.env.AUTH_VERIFY_URL ||
-      process.env.NEXT_PUBLIC_AUTH_VERIFY_URL ||
-      `${N8N_BASE_URL}/webhook/auth/verify`
+    return normalizeEndpoint(
+      process.env["AUTH/VERIFY_URL"] || process.env["AUTH_VERIFY_URL"],
+      "/webhook/v2/auth/verify"
+    );
+  },
+  get sessionResolve(): string {
+    return normalizeEndpoint(
+      process.env["SESSION_RESOLVE_URL"] || process.env["SESSION/RESOLVE_URL"],
+      "/webhook/v2/session/resolve"
     );
   },
   get preferences(): string {
-    return (
-      process.env["USER/PREFERENCES_URL"] ||
-      process.env.USER_PREFERENCES_URL ||
-      process.env.NEXT_PUBLIC_USER_PREFERENCES_URL ||
-      `${N8N_BASE_URL}/webhook/user/preferences`
+    return normalizeEndpoint(
+      process.env["USER/PREFERENCES_URL"] || process.env["USER_PREFERENCES_URL"],
+      "/webhook/v2/user/preferences"
     );
   },
   get dashboard(): string {
-    return (
-      process.env.DASHBOARD_URL ||
-      process.env.NEXT_PUBLIC_DASHBOARD_URL ||
-      `${N8N_BASE_URL}/webhook/digest/dashboard`
+    return normalizeEndpoint(
+      process.env["DASHBOARD_URL"],
+      "/webhook/v2/digest/dashboard"
+    );
+  },
+  get sendLink(): string {
+    return normalizeEndpoint(
+      process.env["AUTH_SEND_LINK_URL"] || process.env["AUTH/SEND_LINK_URL"],
+      "/webhook/v2/auth/send-link"
+    );
+  },
+  get logout(): string {
+    return normalizeEndpoint(
+      process.env["AUTH_LOGOUT_URL"] || process.env["AUTH/LOGOUT_URL"],
+      "/webhook/v2/auth/logout"
+    );
+  },
+  get sendHourly(): string {
+    return normalizeEndpoint(
+      process.env["DIGEST_SEND_HOURLY_URL"] || process.env["DIGEST/SEND_HOURLY_URL"],
+      "/webhook/v2/digest/send-hourly"
     );
   },
 };
 
-export interface N8nSignupPayload {
+function getN8nHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (N8N_SHARED_SECRET) {
+    headers["Authorization"] = N8N_SHARED_SECRET;
+    headers["X-N8N-Shared-Secret"] = N8N_SHARED_SECRET;
+    headers["x-n8n-shared-secret"] = N8N_SHARED_SECRET;
+  }
+  return headers;
+}
+
+// -----------------------------------------------------------------------------
+// SERVER-TO-N8N CALLS (Must only be called from server route handlers / server actions)
+// -----------------------------------------------------------------------------
+
+export async function n8nSignup(payload: {
+  email: string;
+  name?: string;
+  city?: string;
+  country_code?: string;
+  news_categories?: string[];
+  weather_categories?: string[];
+  send_time?: string;
+}): Promise<Response> {
+  return fetch(N8N_ENDPOINTS.signup, {
+    method: "POST",
+    headers: getN8nHeaders(),
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
+  });
+}
+
+export async function n8nVerify(payload: {
+  token: string;
+  session_token_hash: string;
+  user_agent?: string;
+}): Promise<Response> {
+  return fetch(N8N_ENDPOINTS.verify, {
+    method: "POST",
+    headers: getN8nHeaders(),
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
+  });
+}
+
+export async function n8nResolveSession(sessionTokenHash: string): Promise<Response> {
+  return fetch(N8N_ENDPOINTS.sessionResolve, {
+    method: "POST",
+    headers: getN8nHeaders(),
+    body: JSON.stringify({ session_token_hash: sessionTokenHash }),
+    signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
+  });
+}
+
+export async function n8nUpdatePreferences(payload: {
+  session_token_hash: string;
+  city?: string;
+  country_code?: string;
+  news_categories?: string[];
+  weather_categories?: string[];
+  send_time?: string;
+}): Promise<Response> {
+  return fetch(N8N_ENDPOINTS.preferences, {
+    method: "POST",
+    headers: getN8nHeaders(),
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
+  });
+}
+
+export async function n8nFetchDashboard(sessionTokenHash: string): Promise<Response> {
+  return fetch(N8N_ENDPOINTS.dashboard, {
+    method: "POST",
+    headers: getN8nHeaders(),
+    body: JSON.stringify({ session_token_hash: sessionTokenHash }),
+    signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
+  });
+}
+
+export async function n8nSendLink(email: string): Promise<Response> {
+  return fetch(N8N_ENDPOINTS.sendLink, {
+    method: "POST",
+    headers: getN8nHeaders(),
+    body: JSON.stringify({ email }),
+    signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
+  });
+}
+
+export async function n8nLogout(sessionTokenHash: string): Promise<Response> {
+  return fetch(N8N_ENDPOINTS.logout, {
+    method: "POST",
+    headers: getN8nHeaders(),
+    body: JSON.stringify({ session_token_hash: sessionTokenHash }),
+    signal: AbortSignal.timeout(N8N_TIMEOUT_MS),
+  });
+}
+
+// -----------------------------------------------------------------------------
+// CLIENT-TO-INTERNAL-API CALLS (Called from browser UI components)
+// -----------------------------------------------------------------------------
+
+export interface SignupInput {
   email: string;
   name?: string;
   city?: string;
@@ -51,144 +188,123 @@ export interface N8nSignupPayload {
   weather_categories?: string[];
   send_time?: string;
   delivery_hour?: number;
-  frontend_url?: string;
 }
 
-export interface N8nSignupResult {
+export interface GenericApiResult {
   status: "success" | "error";
   message: string;
-  token?: string;
-  verification_url?: string;
+  destination?: string;
 }
 
-export interface N8nVerifyResult {
-  status: "success" | "error";
-  verified?: boolean;
-  userId?: string;
-  message: string;
-}
-
-export interface N8nPreferencesPayload {
-  email?: string;
-  userId?: string;
-  city: string;
-  country_code: string;
-  categories?: string[];
-  news_categories?: string[];
-  weather_categories?: string[];
-  send_time?: string;
-  delivery_hour?: number;
-  last_sent_date?: string | null;
-}
-
-export interface N8nPreferencesResult {
-  status: "success" | "error";
-  message: string;
-}
-
-export interface N8nDashboardResult {
-  user?: {
-    email?: string;
-    name?: string;
-    city?: string;
-    country_code?: string;
-    news_categories?: string[];
-    weather_categories?: string[];
-    send_time?: string;
-    last_sent_date?: string | null;
-  };
-  weather?: {
-    city?: string;
-    temp?: number;
-    feels_like?: number;
-    condition?: string;
-    humidity?: number;
-    weather_categories?: string[];
-    summary?: string;
-  };
-  preferences?: {
-    email?: string;
-    city?: string;
-    country_code?: string;
-    news_categories?: string[];
-    weather_categories?: string[];
-    send_time?: string;
-    last_sent_date?: string | null;
-  };
-  weekly_digest?:
-    | string
-    | {
-        edition_date?: string;
-        categories?: string[];
-        summary?: string;
-        articles?: Array<{
-          title?: string;
-          summary?: string;
-          url?: string;
-          source?: string;
-          published_at?: string;
-          category?: string;
-        }>;
-      };
-  generated_at?: string;
-}
-
-/**
- * Trigger account creation & verification email dispatch via n8n
- */
-export async function signupViaN8n(payload: N8nSignupPayload): Promise<N8nSignupResult> {
+export async function signupViaApi(payload: SignupInput): Promise<GenericApiResult> {
   const res = await fetch("/api/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || `Signup failed with status ${res.status}`);
+    throw new Error(data.message || `Signup failed with HTTP ${res.status}`);
   }
   return data;
 }
 
-/**
- * Verify user token against n8n workflow
- */
-export async function verifyViaN8n(token: string): Promise<N8nVerifyResult> {
-  const res = await fetch(`/api/auth/verify?token=${encodeURIComponent(token)}`);
+export async function verifyViaApi(token: string): Promise<{
+  success: boolean;
+  onboarding_completed?: boolean;
+  destination?: string;
+  error?: string;
+}> {
+  const res = await fetch("/api/auth/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || `Verification failed with status ${res.status}`);
+    throw new Error(data.error || data.message || `Verification failed with HTTP ${res.status}`);
   }
   return data;
 }
 
-/**
- * Sync topics and location to n8n user profile
- */
-export async function savePreferencesViaN8n(
-  payload: N8nPreferencesPayload
-): Promise<N8nPreferencesResult> {
+export async function sendSignInLinkViaApi(email: string): Promise<GenericApiResult> {
+  const res = await fetch("/api/auth/send-link", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || `Sign-in link dispatch failed with HTTP ${res.status}`);
+  }
+  return data;
+}
+
+export async function savePreferencesViaApi(payload: {
+  city: string;
+  country_code: string;
+  news_categories?: string[];
+  weather_categories?: string[];
+  send_time?: string;
+  delivery_hour?: number;
+  email?: string;
+  categories?: string[];
+}): Promise<GenericApiResult> {
   const res = await fetch("/api/user/preferences", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || `Preferences update failed with status ${res.status}`);
+    throw new Error(data.message || `Preferences update failed with HTTP ${res.status}`);
   }
   return data;
 }
 
-/**
- * Fetch live generated digest from n8n
- */
-export async function fetchDashboardViaN8n(): Promise<N8nDashboardResult> {
+export async function logoutViaApi(): Promise<void> {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+  }).catch(() => {});
+  window.location.href = "/";
+}
+
+export interface N8nDashboardArticle {
+  category?: string;
+  title?: string;
+  summary?: string;
+  source?: string;
+  published_at?: string;
+  url?: string;
+}
+
+export interface N8nDashboardResult {
+  weather?: {
+    summary?: string;
+    temperature?: number;
+    high?: number;
+    low?: number;
+    rain_chance?: number;
+    uv_index?: number;
+    air_quality?: number;
+  };
+  weekly_digest?:
+    | string
+    | {
+        summary?: string;
+        articles?: N8nDashboardArticle[];
+      };
+  [key: string]: unknown;
+}
+
+export async function fetchDashboardViaApi(): Promise<N8nDashboardResult | null> {
   const res = await fetch("/api/digest/dashboard");
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.message || `Dashboard fetch failed with status ${res.status}`);
-  }
-  return data;
+  if (!res.ok) return null;
+  return res.json().catch(() => null);
 }
+
+// Backwards-compatibility aliases for existing component imports
+export const signupViaN8n = signupViaApi;
+export const verifyViaN8n = verifyViaApi;
+export const savePreferencesViaN8n = savePreferencesViaApi;
+export const fetchDashboardViaN8n = fetchDashboardViaApi;

@@ -1,13 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { CloudSun, Mail } from "lucide-react";
+import { CloudSun, Mail, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 import { IconTile } from "./primitives/IconTile";
 import { DarkButton } from "./primitives/Button";
 import { HandDrawnEllipse } from "./HandDrawnEllipse";
+import { sendSignInLinkViaApi } from "@/lib/n8n";
 
 export const LandingHero: React.FC = () => {
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInLoading, setSignInLoading] = useState(false);
+  const [signInSent, setSignInSent] = useState(false);
+  const [signInError, setSignInError] = useState<string | null>(null);
+
+  const handleSignInSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = signInEmail.trim().toLowerCase();
+    if (!email) return;
+
+    setSignInLoading(true);
+    setSignInError(null);
+    try {
+      await sendSignInLinkViaApi(email);
+      setSignInSent(true);
+    } catch (err: unknown) {
+      setSignInError(err instanceof Error ? err.message : "Failed to send link");
+    } finally {
+      setSignInLoading(false);
+    }
+  };
+
   return (
     <section
       aria-label="Introduction & Digest Overview"
@@ -59,11 +83,76 @@ export const LandingHero: React.FC = () => {
           {/* 32px gap */}
           <div className="h-8" />
 
-          {/* DarkButton "Get your daily digest" */}
-          <div>
-            <Link href="/signup" tabIndex={-1}>
-              <DarkButton>Get your daily digest</DarkButton>
-            </Link>
+          {/* CTA & Returning User Sign-in */}
+          <div className="flex flex-col gap-4 max-w-[500px]">
+            <div className="flex items-center gap-4 flex-wrap">
+              <Link href="/signup" tabIndex={-1}>
+                <DarkButton>Get your daily digest</DarkButton>
+              </Link>
+              {!showSignIn && (
+                <button
+                  type="button"
+                  onClick={() => setShowSignIn(true)}
+                  className="font-sans font-[600] text-[15px] text-[#4B5563] hover:text-black transition-colors underline underline-offset-4 decoration-[rgba(0,0,0,0.3)] hover:decoration-black cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <span>Sign in on this device</span>
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+
+            {showSignIn && (
+              <div className="mt-2 p-5 rounded-[24px] bg-white border border-[var(--line)] shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-sans font-[600] text-[14px] text-black">
+                    Sign in on this device
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSignIn(false);
+                      setSignInSent(false);
+                      setSignInError(null);
+                    }}
+                    className="text-xs text-[#6B7280] hover:text-black cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
+                <p className="font-sans text-[13px] text-[#4B5563] mb-3">
+                  Enter your verified email. We&apos;ll send a one-click login link to your inbox.
+                </p>
+                {signInSent ? (
+                  <div className="flex items-center gap-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                    <span>Check your email! We sent a sign-in link if an account exists.</span>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSignInSubmit} className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="email"
+                      required
+                      value={signInEmail}
+                      onChange={(e) => setSignInEmail(e.target.value)}
+                      placeholder="your.email@example.com"
+                      className="flex-1 px-4 py-2.5 rounded-full border border-[var(--line)] bg-[#F8F9FA] text-sm text-black focus:outline-none focus:border-black transition-colors"
+                      disabled={signInLoading}
+                    />
+                    <button
+                      type="submit"
+                      disabled={signInLoading || !signInEmail.trim()}
+                      className="px-5 py-2.5 rounded-full bg-black text-white text-sm font-semibold hover:bg-black/90 disabled:opacity-50 transition-opacity whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {signInLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                      <span>Send link</span>
+                    </button>
+                  </form>
+                )}
+                {signInError && (
+                  <p className="text-xs text-red-600 mt-2">{signInError}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

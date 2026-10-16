@@ -16,6 +16,7 @@ import {
   Sunrise,
   FileText,
   Sparkles,
+  LogOut,
 } from "lucide-react";
 import { Header } from "./Header";
 import { CanvasB } from "./CanvasB";
@@ -31,7 +32,7 @@ import {
 import { loadPreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
 import { getTimeUntilNextDispatch, formatHourOption, TimeRemaining } from "@/lib/time-utils";
-import { fetchDashboardViaN8n, N8nDashboardResult } from "@/lib/n8n";
+import { fetchDashboardViaN8n, N8nDashboardResult, N8nDashboardArticle, logoutViaApi } from "@/lib/n8n";
 
 const SURFACES = ["#F6FFDD", "#FFFFFF", "rgba(213,134,206,0.14)"];
 
@@ -85,12 +86,12 @@ export const DashboardView: React.FC = () => {
       .catch((err) => console.warn("Live news fetch error:", err));
 
     fetchDashboardViaN8n()
-      .then((data) => {
+      .then((data: N8nDashboardResult | null) => {
         if (mounted && data && (data.weekly_digest || data.weather)) {
           setN8nDigest(data);
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.warn("n8n dashboard fetch:", err);
       });
 
@@ -148,7 +149,7 @@ export const DashboardView: React.FC = () => {
     if (!n8nDigest?.weekly_digest || typeof n8nDigest.weekly_digest !== "object") return [];
     const wd = n8nDigest.weekly_digest;
     if (!Array.isArray(wd.articles) || wd.articles.length === 0) return [];
-    return wd.articles.map((art, idx) => {
+    return wd.articles.map((art: N8nDashboardArticle, idx: number) => {
       const topic = (art.category?.toLowerCase() || "technology") as NewsTopicId;
       return {
         id: `n8n-${idx}`,
@@ -429,13 +430,26 @@ export const DashboardView: React.FC = () => {
                 </p>
               )}
             </div>
-            <Link
-              href="/set-up-reports?step=1"
-              className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-black text-black hover:bg-black/5 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap min-w-max self-start sm:self-auto"
-            >
-              <Sliders className="w-4 h-4 text-black" aria-hidden="true" />
-              <span>Edit preferences</span>
-            </Link>
+            <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+              <Link
+                href="/set-up-reports?step=1"
+                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-black text-black hover:bg-black/5 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap min-w-max"
+              >
+                <Sliders className="w-4 h-4 text-black" aria-hidden="true" />
+                <span>Edit preferences</span>
+              </Link>
+              <button
+                type="button"
+                onClick={async () => {
+                  await logoutViaApi();
+                }}
+                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-[rgba(0,0,0,0.15)] text-[#4B5563] hover:text-black hover:border-black font-sans font-[600] text-[14px] transition-colors whitespace-nowrap"
+                aria-label="Sign out"
+              >
+                <LogOut className="w-4 h-4" aria-hidden="true" />
+                <span>Sign out</span>
+              </button>
+            </div>
           </div>
 
           {!hydrated ? (

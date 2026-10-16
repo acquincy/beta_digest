@@ -1,7 +1,6 @@
 import fs from "fs";
 
-const mcpUrl = "https://n8n.srv1650803.hstgr.cloud/mcp-server/http";
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3NzFlNWVkYS1jNzVmLTQ2MmUtOWM3OS1iMmQxN2ZmMmQ4YmMiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6IjA1NjNlMDg2LTJjNzQtNDY5Yy1hZjJjLWNmNThmNmQ2NTU5ZSIsImlhdCI6MTc5MTQ3MzA4MX0.P0F7olkn6hqACVWo_46GCiBkUYZjpm3F2IBASO6KRkY";
+const token = process.env.N8N_MCP_TOKEN || "";
 
 async function callMcp(toolName, args) {
   const body = {

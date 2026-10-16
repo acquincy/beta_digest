@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { tokenStore } from "@/lib/token-store";
-import { N8N_ENDPOINTS } from "@/lib/n8n";
 
 export async function GET(req: NextRequest) {
   try {

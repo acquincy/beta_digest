@@ -1,13 +1,31 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
 import { SetUpReportsFlow } from "@/components/wizard/SetUpReportsFlow";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Set Up Your Reports — BetaDigest",
   description: "Customize your daily delivery time, topics, and digest preview.",
 };
 
-export default function SetUpReportsPage() {
+export default async function SetUpReportsPage() {
+  const sessionResult = await getSession();
+
+  if (sessionResult.status === "unauthenticated") {
+    redirect("/signup");
+  }
+
+  if (sessionResult.status === "invalid") {
+    redirect("/api/auth/clear?next=/signup");
+  }
+
+  if (sessionResult.status === "authenticated" && sessionResult.session.onboardingCompleted) {
+    redirect("/dashboard");
+  }
+
   return (
     <Suspense
       fallback={
