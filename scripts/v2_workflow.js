@@ -145,7 +145,7 @@ const supa_lookup_signup_user = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -236,7 +236,7 @@ const supa_create_user = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -286,7 +286,7 @@ const supa_update_login_token = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -315,7 +315,7 @@ const supa_update_refresh_token = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -482,7 +482,7 @@ const supa_find_verify_token = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -546,7 +546,7 @@ const supa_mark_user_verified = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -570,7 +570,7 @@ const supa_insert_verified_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -627,7 +627,7 @@ const supa_lookup_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -684,7 +684,7 @@ const supa_fetch_user_for_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -787,7 +787,7 @@ const supa_touch_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -890,7 +890,7 @@ const supa_lookup_session_for_prefs = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -956,7 +956,7 @@ const supa_update_user_prefs = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -1013,7 +1013,7 @@ const supa_lookup_session_for_dash = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -1070,7 +1070,7 @@ const supa_fetch_single_user = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -1348,7 +1348,7 @@ const supa_lookup_send_link_user = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -1440,7 +1440,7 @@ const supa_update_send_link_token = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -1522,7 +1522,7 @@ const supa_revoke_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -1595,7 +1595,7 @@ const supa_cleanup_expired_sessions = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
@@ -1618,7 +1618,7 @@ const supa_cleanup_unverified_users = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('Supabase account')
+      supabaseApi: newCredential('SLVH')
     }
   },
   alwaysOutputData: true,
