@@ -45,3 +45,25 @@ export const preferencesSchema = z
   );
 
 export type PreferencesFormData = z.infer<typeof preferencesSchema>;
+
+export const topicPreferencesSchema = z
+  .object({
+    weatherTopics: z
+      .array(weatherTopicIdSchema)
+      .max(3, "Select up to 3 weather details.")
+      .default([]),
+    newsTopics: z
+      .array(newsTopicIdSchema)
+      .max(5, "Select up to 5 news topics.")
+      .default([]),
+  })
+  .refine(
+    (data) => data.weatherTopics.length + data.newsTopics.length >= 1,
+    {
+      message: "Please select at least 1 topic in total.",
+      path: ["weatherTopics"],
+    }
+  );
+
+export type TopicPreferencesFormData = z.infer<typeof topicPreferencesSchema>;
+

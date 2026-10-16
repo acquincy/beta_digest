@@ -1,9 +1,63 @@
 import { NextRequest, NextResponse } from "next/server";
-import { n8nUpdatePreferences } from "@/lib/n8n";
+import { n8nUpdatePreferences, n8nFetchDashboard } from "@/lib/n8n";
 import { hashToken, BD_SESSION_COOKIE } from "@/lib/session";
 import { validateOrigin, withPrivateCacheHeaders } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
+
+export async function GET(req: NextRequest) {
+  const sessionCookie = req.cookies.get(BD_SESSION_COOKIE)?.value;
+  if (!sessionCookie) {
+    return withPrivateCacheHeaders(
+      NextResponse.json(
+        { status: "error", message: "Unauthorized: active session required." },
+        { status: 401 }
+      )
+    );
+  }
+
+  try {
+    const sessionTokenHash = hashToken(sessionCookie);
+    const n8nRes = await n8nFetchDashboard(sessionTokenHash);
+    const data = await n8nRes.json().catch(() => ({}));
+
+    if (!n8nRes.ok) {
+      return withPrivateCacheHeaders(
+        NextResponse.json(
+          {
+            status: "error",
+            message: data?.message || `Failed to fetch preferences: HTTP ${n8nRes.status}`,
+          },
+          { status: n8nRes.status }
+        )
+      );
+    }
+
+    const userData = data?.user || {};
+    return withPrivateCacheHeaders(
+      NextResponse.json({
+        status: "success",
+        user: userData,
+        preferences: {
+          name: userData.name || "",
+          city: userData.city || "Seattle",
+          countryCode: userData.country_code || "US",
+          newsTopics: Array.isArray(userData.news_categories) ? userData.news_categories : [],
+          weatherTopics: Array.isArray(userData.weather_categories) ? userData.weather_categories : [],
+          sendTime: userData.send_time || "07:00:00",
+        },
+      })
+    );
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Internal Server Error";
+    return withPrivateCacheHeaders(
+      NextResponse.json(
+        { status: "error", message: `Failed to load preferences: ${message}` },
+        { status: 500 }
+      )
+    );
+  }
+}
 
 export async function POST(req: NextRequest) {
   if (!validateOrigin(req)) {
@@ -77,6 +131,8 @@ export async function POST(req: NextRequest) {
         status: "success",
         success: true,
         message: "Preferences updated successfully.",
+        preferences: data?.preferences,
+        user: data?.user,
       })
     );
   } catch (err: unknown) {

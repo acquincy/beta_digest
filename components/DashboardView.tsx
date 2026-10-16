@@ -29,7 +29,7 @@ import {
   CityWeatherData,
   EditorialStory,
 } from "@/lib/types";
-import { loadPreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
+import { loadPreferences, savePreferences, parseDeliveryHour, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
 import { getTimeUntilNextDispatch, formatHourOption, TimeRemaining } from "@/lib/time-utils";
 import { fetchDashboardViaN8n, N8nDashboardResult, N8nDashboardArticle, logoutViaApi } from "@/lib/n8n";
@@ -87,8 +87,26 @@ export const DashboardView: React.FC = () => {
 
     fetchDashboardViaN8n()
       .then((data: N8nDashboardResult | null) => {
-        if (mounted && data && (data.weekly_digest || data.weather)) {
-          setN8nDigest(data);
+        if (mounted && data) {
+          if (data.weekly_digest || data.weather) {
+            setN8nDigest(data);
+          }
+          if (data.user && typeof data.user === "object") {
+            const u = data.user as Record<string, unknown>;
+            setPrefs((prev) => {
+              const updated: Preferences = {
+                ...prev,
+                name: typeof u.name === "string" && u.name ? u.name : prev.name,
+                city: typeof u.city === "string" && u.city ? u.city : prev.city,
+                countryCode: typeof u.country_code === "string" && u.country_code ? u.country_code : prev.countryCode,
+                newsTopics: Array.isArray(u.news_categories) && u.news_categories.length > 0 ? (u.news_categories as NewsTopicId[]) : prev.newsTopics,
+                weatherTopics: Array.isArray(u.weather_categories) && u.weather_categories.length > 0 ? (u.weather_categories as WeatherTopicId[]) : prev.weatherTopics,
+                deliveryHour: typeof u.send_time === "string" ? parseDeliveryHour(u.send_time) : prev.deliveryHour,
+              };
+              savePreferences(updated);
+              return updated;
+            });
+          }
         }
       })
       .catch((err: unknown) => {
@@ -432,7 +450,7 @@ export const DashboardView: React.FC = () => {
             </div>
             <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
               <Link
-                href="/set-up-reports?step=1"
+                href="/preferences"
                 className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-black text-black hover:bg-black/5 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap min-w-max"
               >
                 <Sliders className="w-4 h-4 text-black" aria-hidden="true" />
@@ -522,7 +540,7 @@ export const DashboardView: React.FC = () => {
                   <div className="p-6 rounded-[24px] bg-[#F7F7F2] border border-[var(--line)] text-center font-sans text-[15px] text-[#6B6B5A]">
                     No weather details selected ·{" "}
                     <Link
-                      href="/set-up-reports?step=2"
+                      href="/preferences"
                       className="text-black font-[600] underline hover:no-underline"
                     >
                       Edit preferences
@@ -562,7 +580,7 @@ export const DashboardView: React.FC = () => {
                   <div className="p-6 rounded-[20px] bg-[#F7F7F2] border border-[var(--line)] text-center font-sans text-[15px] text-[#6B6B5A]">
                     No news topics selected ·{" "}
                     <Link
-                      href="/set-up-reports?step=2"
+                      href="/preferences"
                       className="text-black font-[600] underline hover:no-underline"
                     >
                       Edit preferences

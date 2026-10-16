@@ -1007,33 +1007,9 @@ const body = input.body || input;
 
 const sessionHash = String(body.session_token_hash || '').trim();
 
-let city = String(body.city || '').trim();
-if (!city || city.length < 2 || city.length > 60) city = 'Seattle';
-
-let countryCode = String(body.country_code || '').trim().toUpperCase();
-if (!/^[A-Z]{2}$/.test(countryCode)) countryCode = 'US';
-
-let news = Array.isArray(body.news_categories) ? body.news_categories : [];
-news = news.filter(c => typeof c === 'string').slice(0, 5);
-
-let weather = Array.isArray(body.weather_categories) ? body.weather_categories : [];
-weather = weather.filter(c => typeof c === 'string').slice(0, 3);
-
-let sendTime = String(body.send_time || '').trim();
-if (/^\\d{1,2}:\\d{2}$/.test(sendTime)) {
-  sendTime = sendTime.padStart(5, '0') + ':00';
-} else if (!/^\\d{2}:\\d{2}:\\d{2}$/.test(sendTime)) {
-  sendTime = '07:00:00';
-}
-
 return [{
   json: {
-    sessionHash,
-    city,
-    country_code: countryCode,
-    news_categories: news,
-    weather_categories: weather,
-    send_time: sendTime
+    sessionHash
   }
 }];
 `
@@ -1089,6 +1065,106 @@ const if_prefs_session_active = ifElse({
   }
 });
 
+const supa_fetch_user_for_prefs = node({
+  type: 'n8n-nodes-base.supabase',
+  version: 1,
+  config: {
+    name: 'Supabase: Fetch User For Prefs',
+    parameters: {
+      resource: 'row',
+      operation: 'getAll',
+      tableId: 'users',
+      returnAll: false,
+      limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
+      filters: {
+        conditions: [
+          { keyName: 'id', condition: 'eq', keyValue: '={{ $json.user_id }}' }
+        ]
+      }
+    },
+    credentials: {
+      supabaseApi: newCredential('SLVH Supabase account')
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
+});
+
+const code_merge_preferences = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Merge Preferences Input',
+    parameters: {
+      jsCode: `
+const rawWh = $('Webhook: POST /v2/user/preferences').first()?.json || {};
+const body = rawWh.body || rawWh;
+const existingUser = $input.first()?.json || {};
+
+const userId = existingUser.id || $('Supabase: Lookup Session for Prefs').first()?.json?.user_id;
+
+// Merge news categories: if provided in request, use & limit to 5; otherwise preserve existing
+let news = Array.isArray(body.news_categories)
+  ? body.news_categories.filter(c => typeof c === 'string').slice(0, 5)
+  : Array.isArray(body.categories)
+  ? body.categories.filter(c => typeof c === 'string').slice(0, 5)
+  : (Array.isArray(existingUser.news_categories) && existingUser.news_categories.length > 0
+      ? existingUser.news_categories
+      : ['technology', 'economy', 'science']);
+
+// Merge weather categories: if provided in request, use & limit to 3; otherwise preserve existing
+let weather = Array.isArray(body.weather_categories)
+  ? body.weather_categories.filter(c => typeof c === 'string').slice(0, 3)
+  : (Array.isArray(existingUser.weather_categories) && existingUser.weather_categories.length > 0
+      ? existingUser.weather_categories
+      : ['current-temperature', 'rain-chance', 'uv-index']);
+
+// Ensure at least 1 total topic selected
+if (news.length === 0 && weather.length === 0) {
+  news = ['technology', 'economy', 'science'];
+  weather = ['current-temperature', 'rain-chance', 'uv-index'];
+}
+
+// Preserve existing city unless provided
+let city = existingUser.city || 'Seattle';
+if (typeof body.city === 'string' && body.city.trim().length >= 2 && body.city.trim().length <= 60) {
+  city = body.city.trim();
+}
+
+// Preserve existing country_code unless provided
+let countryCode = existingUser.country_code || 'US';
+if (typeof body.country_code === 'string' && /^[A-Z]{2}$/i.test(body.country_code.trim())) {
+  countryCode = body.country_code.trim().toUpperCase();
+}
+
+// Preserve existing send_time unless provided
+let sendTime = existingUser.send_time || '07:00:00';
+if (typeof body.send_time === 'string' && body.send_time.trim()) {
+  const st = body.send_time.trim();
+  if (/^\\d{1,2}:\\d{2}$/.test(st)) {
+    sendTime = st.padStart(5, '0') + ':00';
+  } else if (/^\\d{2}:\\d{2}:\\d{2}$/.test(st)) {
+    sendTime = st;
+  }
+}
+
+return [{
+  json: {
+    userId,
+    city,
+    country_code: countryCode,
+    news_categories: news,
+    weather_categories: weather,
+    send_time: sendTime
+  }
+}];
+`
+    }
+  }
+});
+
 const supa_update_user_prefs = node({
   type: 'n8n-nodes-base.supabase',
   version: 1,
@@ -1102,17 +1178,17 @@ const supa_update_user_prefs = node({
       matchType: 'allFilters',
       filters: {
         conditions: [
-          { keyName: 'id', condition: 'eq', keyValue: '={{ $json.user_id }}' }
+          { keyName: 'id', condition: 'eq', keyValue: '={{ $json.userId }}' }
         ]
       },
       dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
-          { fieldId: 'city', fieldValue: '={{ $("Sanitize Preferences Input").first()?.json?.city }}' },
-          { fieldId: 'country_code', fieldValue: '={{ $("Sanitize Preferences Input").first()?.json?.country_code }}' },
-          { fieldId: 'news_categories', fieldValue: '={{ $("Sanitize Preferences Input").first()?.json?.news_categories }}' },
-          { fieldId: 'weather_categories', fieldValue: '={{ $("Sanitize Preferences Input").first()?.json?.weather_categories }}' },
-          { fieldId: 'send_time', fieldValue: '={{ $("Sanitize Preferences Input").first()?.json?.send_time }}' },
+          { fieldId: 'city', fieldValue: '={{ $json.city }}' },
+          { fieldId: 'country_code', fieldValue: '={{ $json.country_code }}' },
+          { fieldId: 'news_categories', fieldValue: '={{ $json.news_categories }}' },
+          { fieldId: 'weather_categories', fieldValue: '={{ $json.weather_categories }}' },
+          { fieldId: 'send_time', fieldValue: '={{ $json.send_time }}' },
           { fieldId: 'onboarding_completed', fieldValue: '={{ true }}' }
         ]
       }
@@ -1132,7 +1208,7 @@ const respond_prefs_success = node({
     name: 'Respond Prefs Success',
     parameters: {
       respondWith: 'json',
-      responseBody: '={{ JSON.stringify({ status: "success", success: true, message: "User onboarding preferences saved." }) }}',
+      responseBody: '={{ JSON.stringify({ status: "success", success: true, message: "User preferences updated.", preferences: { city: $("Merge Preferences Input").first()?.json?.city, country_code: $("Merge Preferences Input").first()?.json?.country_code, news_categories: $("Merge Preferences Input").first()?.json?.news_categories, weather_categories: $("Merge Preferences Input").first()?.json?.weather_categories, send_time: $("Merge Preferences Input").first()?.json?.send_time } }) }}',
       options: { responseCode: 200 }
     }
   }
@@ -2216,7 +2292,10 @@ export default workflow('beta-digest-v2', 'Beta Digest v2: Auth and Dashboard')
     .to(supa_lookup_session_for_prefs)
     .to(if_prefs_session_active
       .onFalse(respond_prefs_401)
-      .onTrue(supa_update_user_prefs.to(respond_prefs_success))))
+      .onTrue(supa_fetch_user_for_prefs
+        .to(code_merge_preferences)
+        .to(supa_update_user_prefs)
+        .to(respond_prefs_success))))
 
   // 5. Dashboard
   .add(wh_dashboard
