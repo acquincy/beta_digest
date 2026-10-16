@@ -8,59 +8,55 @@ export const CanvasB: React.FC<CanvasBProps> = ({ showConcentricCircles = true }
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
-      style={{
-        backgroundColor: "#F2F3F8",
-      }}
+      className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-[#0a0a0a]"
     >
-      {/* Lime glow & pink wash */}
+      {/* Ambient Horizon & Dusk Spotlight Glow */}
       <div
         className="absolute inset-0 w-full h-full"
         style={{
           background: `
-            radial-gradient(70% 80% at 60% 45%, #E9FF9E 0%, #DDFB6E 45%, #D3F566 100%),
-            radial-gradient(40% 30% at 100% 100%, rgba(230, 180, 230, 0.6), transparent),
-            radial-gradient(70% 90% at 0% 40%, #FFFFFF 0%, rgba(255, 255, 255, 0) 100%)
+            radial-gradient(110% 55% at 50% -5%, rgba(107, 98, 242, 0.18) 0%, rgba(245, 158, 11, 0.05) 45%, transparent 75%),
+            radial-gradient(70% 50% at 85% 25%, rgba(107, 98, 242, 0.12) 0%, transparent 60%),
+            radial-gradient(60% 60% at 15% 65%, rgba(107, 98, 242, 0.06) 0%, transparent 70%)
           `,
         }}
       />
 
-      {/* Left side grey arcs: 1500px at 40% opacity, 1100px circle */}
+      {/* Subtle hairline geometric arcs */}
       <div
-        className="absolute rounded-full"
+        className="absolute rounded-full pointer-events-none"
         style={{
-          width: "1500px",
-          height: "1500px",
-          left: "-620px",
-          top: "calc(10% - 200px)",
-          background: "linear-gradient(160deg, #E4E4E8, #F7F7FA)",
-          opacity: 0.4,
+          width: "1400px",
+          height: "1400px",
+          left: "-500px",
+          top: "-200px",
+          border: "1px solid rgba(255, 255, 255, 0.03)",
         }}
       />
       <div
-        className="absolute rounded-full"
+        className="absolute rounded-full pointer-events-none"
         style={{
-          width: "1100px",
-          height: "1100px",
-          left: "-420px",
-          top: "10%",
-          background: "linear-gradient(160deg, #E4E4E8, #F7F7FA)",
+          width: "1000px",
+          height: "1000px",
+          left: "-300px",
+          top: "0px",
+          border: "1px solid rgba(255, 255, 255, 0.025)",
         }}
       />
 
-      {/* Right side circle: 900px at right:-300px, top:-100px */}
+      {/* Right side ambient circle */}
       <div
-        className="absolute rounded-full"
+        className="absolute rounded-full pointer-events-none"
         style={{
           width: "900px",
           height: "900px",
           right: "-300px",
           top: "-100px",
-          background: "rgba(255, 255, 255, 0.18)",
+          background: "radial-gradient(circle, rgba(107, 98, 242, 0.08) 0%, transparent 70%)",
         }}
       />
 
-      {/* 2 concentric white circles (radius 520px at 18% opacity, radius 380px at 22%) centered behind message cards */}
+      {/* 2 concentric hairline rings centered behind hero mockup */}
       {showConcentricCircles && (
         <div
           className="hidden md:block absolute"
@@ -71,7 +67,7 @@ export const CanvasB: React.FC<CanvasBProps> = ({ showConcentricCircles = true }
             height: "0",
           }}
         >
-          {/* Outer circle: radius 520px -> diameter 1040px */}
+          {/* Outer hairline ring */}
           <div
             className="absolute rounded-full pointer-events-none"
             style={{
@@ -79,10 +75,10 @@ export const CanvasB: React.FC<CanvasBProps> = ({ showConcentricCircles = true }
               height: "1040px",
               top: "-520px",
               left: "-520px",
-              border: "1.5px solid rgba(255, 255, 255, 0.18)",
+              border: "1px solid rgba(255, 255, 255, 0.04)",
             }}
           />
-          {/* Inner circle: radius 380px -> diameter 760px */}
+          {/* Inner hairline ring */}
           <div
             className="absolute rounded-full pointer-events-none"
             style={{
@@ -90,7 +86,7 @@ export const CanvasB: React.FC<CanvasBProps> = ({ showConcentricCircles = true }
               height: "760px",
               top: "-380px",
               left: "-380px",
-              border: "1.5px solid rgba(255, 255, 255, 0.22)",
+              border: "1px solid rgba(255, 255, 255, 0.05)",
             }}
           />
         </div>

@@ -34,13 +34,13 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       className={clsx(
         "w-5 h-5 rounded-[5px] flex items-center justify-center shrink-0 cursor-pointer select-none",
         "transition-all duration-150",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]",
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}
       style={{
-        backgroundColor: checked ? "var(--lime)" : "#FFFFFF",
-        border: checked ? "1.5px solid #292B2D" : "1.5px solid rgba(0, 0, 0, 0.35)",
+        backgroundColor: checked ? "#ffffff" : "rgba(255, 255, 255, 0.05)",
+        border: checked ? "1.5px solid #ffffff" : "1.5px solid rgba(255, 255, 255, 0.25)",
       }}
     >
       {checked && (
@@ -54,8 +54,8 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         >
           <path
             d="M2.5 6.2L4.8 8.5L9.5 3.5"
-            stroke="#292B2D"
-            strokeWidth="1.5"
+            stroke="#000000"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />

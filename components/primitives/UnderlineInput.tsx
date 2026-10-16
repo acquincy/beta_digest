@@ -32,7 +32,7 @@ export const UnderlineInput = React.forwardRef<HTMLInputElement, UnderlineInputP
         {label && (
           <label
             htmlFor={inputId}
-            className="font-sans font-[700] text-[20px] text-black mb-1 select-none"
+            className="font-sans font-[500] text-[18px] text-[#ededed] mb-1 select-none"
           >
             {label}
           </label>
@@ -45,8 +45,8 @@ export const UnderlineInput = React.forwardRef<HTMLInputElement, UnderlineInputP
             aria-describedby={error ? errorId : undefined}
             onBlur={onBlur}
             className={clsx(
-              "w-full bg-transparent rounded-none font-sans font-[400] text-[18px] text-black placeholder-[#BDBDBD]",
-              "border-0 border-b-[1.5px] border-black p-0 outline-none focus:outline-none focus:ring-0 focus:border-b-[2px] focus:border-black",
+              "w-full bg-transparent rounded-none font-sans font-[400] text-[18px] text-[#ededed] placeholder-[#686868]",
+              "border-0 border-b-[1.5px] border-white/20 p-0 outline-none focus:outline-none focus:ring-0 focus:border-b-[2px] focus:border-white transition-colors",
               error && "!border-b-[2px] !border-[var(--error)] text-[var(--error)]",
               className
             )}

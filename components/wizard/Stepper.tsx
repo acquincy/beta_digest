@@ -24,12 +24,12 @@ export const Stepper: React.FC<StepperProps> = ({ currentStep }) => {
             {/* Dot circle: 32px */}
             <div
               aria-current={isActive ? "step" : undefined}
-              className={`w-8 h-8 rounded-full flex items-center justify-center font-sans font-[700] text-[14px] transition-colors ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center font-sans font-[600] text-[13px] transition-colors ${
                 isCompleted
-                  ? "bg-[var(--lime)] text-black"
+                  ? "bg-white text-black shadow-sm"
                   : isActive
-                  ? "bg-black text-white"
-                  : "bg-[var(--track)] text-[#9A9A9A]"
+                  ? "bg-white text-black ring-2 ring-white/50"
+                  : "bg-[#222222] border border-white/10 text-[#686868]"
               }`}
             >
               {isCompleted ? (
@@ -45,7 +45,7 @@ export const Stepper: React.FC<StepperProps> = ({ currentStep }) => {
                 className="w-10 h-[2px] mx-2 transition-colors"
                 style={{
                   backgroundColor:
-                    s < currentStep ? "var(--lime)" : "var(--track)",
+                    s < currentStep ? "rgba(255, 255, 255, 0.6)" : "#262626",
                 }}
               />
             )}

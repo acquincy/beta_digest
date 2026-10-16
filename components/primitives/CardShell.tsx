@@ -19,15 +19,15 @@ export const CardShell: React.FC<CardShellProps> = ({
   return (
     <div
       className={clsx(
-        "bg-white mx-auto my-8 relative overflow-hidden transition-all duration-200",
+        "bg-[#161616] border border-white/10 text-[#ededed] mx-auto my-8 relative overflow-hidden transition-all duration-200 backdrop-blur-xl",
         "w-[calc(100%-32px)] sm:w-full",
         isReview ? "max-w-[1024px]" : "max-w-[768px]",
         // Radius: 40px desktop, 32px mobile
         "rounded-[32px] md:rounded-[40px]",
         // Padding: 48px 48px 0 desktop, 24px 24px 0 mobile
         "p-6 pb-0 md:p-12 md:pb-0",
-        // Shadow float for elevated wizard modal feeling
-        "shadow-[var(--shadow-float)]",
+        // Elevated shadow
+        "shadow-[0_24px_64px_rgba(0,0,0,0.7)]",
         className
       )}
     >
@@ -36,7 +36,7 @@ export const CardShell: React.FC<CardShellProps> = ({
       {footer && (
         <div
           className={clsx(
-            "border-t border-[rgba(0,0,0,0.08)] flex items-center justify-between",
+            "border-t border-white/10 flex items-center justify-between",
             // Mobile: margin 24px -24px 0, padding 16px 24px
             // Desktop: margin 32px -48px 0, padding 24px 48px
             "-mx-6 mt-6 px-6 py-4 md:-mx-12 md:mt-8 md:px-12 md:py-6"

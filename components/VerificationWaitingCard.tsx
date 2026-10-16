@@ -134,24 +134,24 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
   };
 
   return (
-    <div className="relative w-full max-w-[666px] bg-white rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[var(--shadow-float)] step-enter flex flex-col items-center text-center">
+    <div className="relative w-full max-w-[666px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-xl step-enter flex flex-col items-center text-center">
       {/* Close button */}
       {onClose ? (
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-5 right-5 w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F7F7F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black shadow-sm transition-colors cursor-pointer"
+          className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-[#8E9096] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
         >
-          <X className="w-[22px] h-[22px] text-[#7A7A7A]" aria-hidden="true" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
       ) : (
         <Link
           href="/"
           aria-label="Close"
-          className="absolute top-5 right-5 w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F7F7F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black shadow-sm transition-colors cursor-pointer"
+          className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-[#8E9096] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
         >
-          <X className="w-[22px] h-[22px] text-[#7A7A7A]" aria-hidden="true" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </Link>
       )}
 
@@ -173,21 +173,20 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
       </div>
 
       <h1
-        className="font-display font-[700] text-[30px] leading-[36px] md:text-[38px] md:leading-[42px] text-black text-center mt-6"
-        style={{ letterSpacing: "-0.03em" }}
+        className="font-display font-[600] text-[30px] leading-[36px] md:text-[38px] md:leading-[42px] text-white text-center mt-6 tracking-tight"
       >
         {isVerified ? "Account verified!" : "Check your email"}
       </h1>
 
-      <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[var(--text)] text-center mt-3 max-w-md">
+      <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[#8E9096] text-center mt-3 max-w-md">
         {isVerified ? (
-          <span className="text-emerald-700 font-medium">
+          <span className="text-emerald-400 font-medium">
             Your verification was confirmed. Refreshing page...
           </span>
         ) : (
           <>
             We dispatched a secure one-time verification link to{" "}
-            <span className="font-semibold text-black bg-[#F5F5F0] px-2.5 py-1 rounded-md inline-block mt-1">
+            <span className="font-semibold text-white bg-white/10 border border-white/10 px-2.5 py-1 rounded-md inline-block mt-1">
               {email}
             </span>
           </>
@@ -196,28 +195,28 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
 
       {/* Instruction Card */}
       {!isVerified && (
-        <div className="mt-6 w-full max-w-[500px] bg-[#F9F9F6] border border-[var(--line)] rounded-[24px] p-6 text-left flex flex-col gap-3">
-          <div className="flex items-center gap-2 font-sans font-[600] text-[14px] text-black">
-            <span className="w-6 h-6 rounded-full bg-black text-white text-[12px] flex items-center justify-center shrink-0">
+        <div className="mt-6 w-full max-w-[500px] bg-[#121212] border border-white/10 rounded-[20px] p-6 text-left flex flex-col gap-3">
+          <div className="flex items-center gap-2 font-sans font-[500] text-[14px] text-white">
+            <span className="w-6 h-6 rounded-full bg-white/10 text-white text-[12px] flex items-center justify-center shrink-0">
               1
             </span>
             <span>Open the email sent from Beta Digest</span>
           </div>
-          <div className="flex items-center gap-2 font-sans font-[600] text-[14px] text-black">
-            <span className="w-6 h-6 rounded-full bg-black text-white text-[12px] flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-2 font-sans font-[500] text-[14px] text-white">
+            <span className="w-6 h-6 rounded-full bg-white/10 text-white text-[12px] flex items-center justify-center shrink-0">
               2
             </span>
             <span>Click the &quot;Verify account&quot; button inside</span>
           </div>
-          <div className="flex items-center gap-2 font-sans font-[600] text-[14px] text-black">
-            <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-[12px] flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-2 font-sans font-[500] text-[14px] text-white">
+            <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[12px] flex items-center justify-center shrink-0">
               3
             </span>
             <span>This page will automatically refresh once verified</span>
           </div>
 
-          <div className="mt-2 pt-3 border-t border-[var(--line)] flex items-center gap-2 text-[12px] text-[#7A7A7A]">
-            <AlertCircle className="w-4 h-4 shrink-0 text-[#999]" />
+          <div className="mt-2 pt-3 border-t border-white/10 flex items-center gap-2 text-[12px] text-[#8E9096]">
+            <AlertCircle className="w-4 h-4 shrink-0 text-[#686868]" />
             <span>Don&apos;t see the email? Check your spam or promotions folder.</span>
           </div>
         </div>
@@ -225,16 +224,16 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
 
       {/* Live Listening Indicator */}
       {!isVerified && (
-        <div className="mt-6 flex items-center gap-2.5 px-4 py-2 bg-[#F5F5F0] rounded-full border border-[var(--line)]">
-          <RotateCw className="w-3.5 h-3.5 text-emerald-600 animate-spin" />
-          <span className="font-sans text-[13px] font-[500] text-[#555]">
+        <div className="mt-6 flex items-center gap-2.5 px-4 py-2 bg-white/[0.04] rounded-full border border-white/10">
+          <RotateCw className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
+          <span className="font-sans text-[13px] font-[500] text-[#8E9096]">
             Listening for email verification confirmation...
           </span>
         </div>
       )}
 
       {resendStatus && (
-        <div className="mt-4 p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-[14px] text-sm font-sans max-w-md">
+        <div className="mt-4 p-3 bg-emerald-950/40 text-emerald-300 border border-emerald-500/30 rounded-[14px] text-sm font-sans max-w-md">
           {resendStatus}
         </div>
       )}
@@ -246,7 +245,7 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
             type="button"
             onClick={handleResend}
             disabled={resending || cooldown > 0}
-            className="w-full sm:w-[220px] h-[52px] inline-flex items-center justify-center gap-2 text-[15px]"
+            className="w-full sm:w-[240px] h-[50px] inline-flex items-center justify-center gap-2 text-[15px]"
           >
             {resending ? (
               <RotateCw className="w-4 h-4 animate-spin" />
@@ -261,7 +260,7 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
             <button
               type="button"
               onClick={onChangeEmail}
-              className="font-sans text-[14px] text-[#7A7A7A] hover:text-black underline cursor-pointer transition-colors mt-2"
+              className="font-sans text-[14px] text-[#8E9096] hover:text-white underline cursor-pointer transition-colors mt-2"
             >
               Wrong email address? Change email
             </button>

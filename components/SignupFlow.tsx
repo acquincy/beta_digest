@@ -215,14 +215,14 @@ export const SignupFlow: React.FC = () => {
       <main className="flex-grow flex items-center justify-center p-4 py-12 md:py-16">
         {step === 1 && (
           /* S1 Location Modal */
-          <div className="relative w-full max-w-[666px] bg-white rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[var(--shadow-float)] step-enter flex flex-col items-center select-none">
+          <div className="relative w-full max-w-[666px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-xl step-enter flex flex-col items-center select-none">
             {/* Close button */}
             <Link
               href="/"
               aria-label="Close"
-              className="absolute top-5 right-5 w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F7F7F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black shadow-sm transition-colors cursor-pointer"
+              className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-[#8E9096] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
             >
-              <X className="w-[22px] h-[22px] text-[#7A7A7A]" aria-hidden="true" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </Link>
 
             {/* S1: 80px IconTile (Globe) */}
@@ -231,12 +231,12 @@ export const SignupFlow: React.FC = () => {
             </div>
 
             {/* H1 "Where are you located?" */}
-            <h1 className="font-display font-[700] text-[32px] md:text-[40px] leading-[40px] text-black text-center mt-6">
+            <h1 className="font-display font-[600] text-[32px] md:text-[40px] leading-[40px] text-white text-center mt-6 tracking-tight">
               Where are you located?
             </h1>
 
             {/* Subtitle */}
-            <p className="font-sans font-[400] text-[18px] md:text-[20px] text-[var(--text)] text-center mt-2">
+            <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[#8E9096] text-center mt-2">
               Select your country and city to get started.
             </p>
 
@@ -246,7 +246,7 @@ export const SignupFlow: React.FC = () => {
               <div>
                 <label
                   htmlFor="country-select"
-                  className="block font-sans font-[600] text-[14px] text-black mb-1.5"
+                  className="block font-sans font-[500] text-[14px] text-[#ededed] mb-1.5"
                 >
                   Country
                 </label>
@@ -255,18 +255,18 @@ export const SignupFlow: React.FC = () => {
                     id="country-select"
                     value={countryCode}
                     onChange={handleCountryChange}
-                    className="w-full h-[44px] rounded-[8px] bg-[var(--lime)] hover:bg-[var(--lime-hover)] px-4 font-sans font-[700] text-[14px] text-black cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black appearance-none"
+                    className="w-full h-[46px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-4 font-sans font-medium text-[14px] text-white cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 appearance-none"
                   >
-                    <option value="" disabled>
+                    <option value="" disabled className="bg-[#161616] text-[#8E9096]">
                       Select your country
                     </option>
                     {COUNTRIES.map((c) => (
-                      <option key={c.code} value={c.code}>
+                      <option key={c.code} value={c.code} className="bg-[#161616] text-white">
                         {c.name}
                       </option>
                     ))}
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#8E9096]">
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                       <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
@@ -278,7 +278,7 @@ export const SignupFlow: React.FC = () => {
               <div>
                 <label
                   htmlFor="city-select"
-                  className="block font-sans font-[600] text-[14px] text-black mb-1.5"
+                  className="block font-sans font-[500] text-[14px] text-[#ededed] mb-1.5"
                 >
                   City
                 </label>
@@ -288,19 +288,19 @@ export const SignupFlow: React.FC = () => {
                     value={citySelection}
                     onChange={handleCityChange}
                     disabled={!countryCode}
-                    className="w-full h-[44px] rounded-[8px] bg-[var(--lime)] hover:bg-[var(--lime-hover)] px-4 font-sans font-[700] text-[14px] text-black cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
+                    className="w-full h-[46px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-4 font-sans font-medium text-[14px] text-white cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
                   >
-                    <option value="" disabled>
+                    <option value="" disabled className="bg-[#161616] text-[#8E9096]">
                       Select your city
                     </option>
                     {availableCities.map((c) => (
-                      <option key={c.name} value={c.name}>
+                      <option key={c.name} value={c.name} className="bg-[#161616] text-white">
                         {c.name}
                       </option>
                     ))}
-                    {countryCode && <option value="__other__">Other</option>}
+                    {countryCode && <option value="__other__" className="bg-[#161616] text-white">Other</option>}
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-black">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#8E9096]">
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                       <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
@@ -333,7 +333,7 @@ export const SignupFlow: React.FC = () => {
                 type="button"
                 onClick={handleS1Continue}
                 disabled={!canContinueS1}
-                className="w-[156px] h-[58px]"
+                className="w-[156px] h-[52px] !bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-sm"
               >
                 Continue
               </DarkButton>
@@ -343,14 +343,14 @@ export const SignupFlow: React.FC = () => {
 
         {step === 2 && (
           /* S2 Credentials Modal */
-          <div className="relative w-full max-w-[666px] bg-white rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[var(--shadow-float)] step-enter flex flex-col">
+          <div className="relative w-full max-w-[666px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-xl step-enter flex flex-col">
             {/* Close button */}
             <Link
               href="/"
               aria-label="Close"
-              className="absolute top-5 right-5 w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F7F7F7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black shadow-sm transition-colors cursor-pointer"
+              className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-[#8E9096] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
             >
-              <X className="w-[22px] h-[22px] text-[#7A7A7A]" aria-hidden="true" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </Link>
 
             <div className="flex justify-center pt-2">
@@ -358,13 +358,12 @@ export const SignupFlow: React.FC = () => {
             </div>
 
             <h1
-              className="font-display font-[700] text-[30px] leading-[34px] md:text-[40px] md:leading-[40px] text-black text-center mt-6"
-              style={{ letterSpacing: "-0.03em" }}
+              className="font-display font-[600] text-[30px] leading-[34px] md:text-[38px] md:leading-[42px] text-white text-center mt-6 tracking-tight"
             >
               Start your journey to smarter updates
             </h1>
 
-            <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[var(--text)] text-center mt-4">
+            <p className="font-sans font-[400] text-[15px] md:text-[17px] text-[#8E9096] text-center mt-3">
               We just need your name and email to create your account.
             </p>
 
@@ -373,7 +372,7 @@ export const SignupFlow: React.FC = () => {
                 label="First name*"
                 placeholder="Alex"
                 value={name}
-                height={56}
+                height={52}
                 onChange={(e) => {
                   setName(e.target.value);
                   if (nameError) setNameError("");
@@ -391,7 +390,7 @@ export const SignupFlow: React.FC = () => {
                 type="email"
                 placeholder="reader@betadigest.com"
                 value={email}
-                height={56}
+                height={52}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (emailError) setEmailError("");
@@ -404,11 +403,7 @@ export const SignupFlow: React.FC = () => {
 
               {/* Consent box with Checkbox */}
               <div
-                className="mt-6 rounded-[24px] p-4 flex items-start gap-3 border"
-                style={{
-                  backgroundColor: "#F5F5F0",
-                  borderColor: "var(--line)",
-                }}
+                className="mt-6 rounded-[20px] p-4 flex items-start gap-3 bg-white/[0.03] border border-white/10"
               >
                 <div className="mt-0.5">
                   <Checkbox
@@ -417,18 +412,18 @@ export const SignupFlow: React.FC = () => {
                     ariaLabel="I agree to Terms & Conditions and Privacy Policy"
                   />
                 </div>
-                <div className="font-sans font-[400] text-[15px] leading-[22px] text-[var(--text)]">
+                <div className="font-sans font-[400] text-[14px] leading-[22px] text-[#8E9096]">
                   I agree to the{" "}
                   <Link
                     href="/credits"
-                    className="font-bold underline text-black hover:opacity-80"
+                    className="font-medium underline text-white hover:opacity-80 transition-opacity"
                   >
                     Terms &amp; Conditions
                   </Link>{" "}
                   and{" "}
                   <Link
                     href="/credits"
-                    className="font-bold underline text-black hover:opacity-80"
+                    className="font-medium underline text-white hover:opacity-80 transition-opacity"
                   >
                     Privacy Policy
                   </Link>
@@ -443,7 +438,7 @@ export const SignupFlow: React.FC = () => {
                 </OutlineButton>
 
                 {isFormValid ? (
-                  <DarkButton type="submit" disabled={submitting}>
+                  <DarkButton type="submit" disabled={submitting} className="!bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-sm">
                     {submitting ? "Sending verification..." : "Join free"}
                   </DarkButton>
                 ) : (

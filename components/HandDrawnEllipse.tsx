@@ -34,8 +34,8 @@ export const HandDrawnEllipse: React.FC<HandDrawnEllipseProps> = ({
       >
         <path
           d="M 24 24 C 24 10, 85 4, 155 5 C 192 6, 204 15, 202 27 C 200 39, 172 48, 100 49 C 40 50, 7 45, 6 28 C 5 13, 55 6, 130 5 C 170 4, 196 11, 200 20"
-          stroke="var(--lime)"
-          strokeWidth="3"
+          stroke="#6b62f2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{
