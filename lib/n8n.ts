@@ -63,6 +63,13 @@ export const N8N_ENDPOINTS = {
       `${N8N_BASE_URL}/webhook/v2/auth/logout`
     );
   },
+  get sendHourly(): string {
+    return (
+      process.env["DIGEST_SEND_HOURLY_URL"] ||
+      process.env["DIGEST/SEND_HOURLY_URL"] ||
+      `${N8N_BASE_URL}/webhook/v2/digest/send-hourly`
+    );
+  },
 };
 
 function getN8nHeaders(): Record<string, string> {

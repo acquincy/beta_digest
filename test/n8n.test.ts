@@ -14,6 +14,7 @@ test("N8N_ENDPOINTS provides valid URLs for all workflows", () => {
   assert.ok(N8N_ENDPOINTS.sessionResolve.includes("/webhook/v2/session/resolve"));
   assert.ok(N8N_ENDPOINTS.sendLink.includes("/webhook/v2/auth/send-link"));
   assert.ok(N8N_ENDPOINTS.logout.includes("/webhook/v2/auth/logout"));
+  assert.ok(N8N_ENDPOINTS.sendHourly.includes("/webhook/v2/digest/send-hourly"));
 });
 
 test("N8N_ENDPOINTS respects environment variables dynamically", () => {

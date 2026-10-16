@@ -220,7 +220,7 @@ const supa_lookup_signup_user = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -314,7 +314,7 @@ const supa_create_user = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -368,7 +368,7 @@ const supa_update_login_token = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -401,7 +401,7 @@ const supa_update_refresh_token = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -422,7 +422,7 @@ const resend_send_verification = node({
       additionalOptions: {}
     },
     credentials: {
-      resendApi: newCredential('Resend account')
+      resendApi: newCredential('SLVH Resend account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -443,7 +443,7 @@ const resend_send_login_link = node({
       additionalOptions: {}
     },
     credentials: {
-      resendApi: newCredential('Resend account')
+      resendApi: newCredential('SLVH Resend account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -646,7 +646,7 @@ const supa_find_verify_token = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -714,7 +714,7 @@ const supa_mark_user_verified = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -741,7 +741,7 @@ const supa_insert_verified_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -802,7 +802,7 @@ const supa_lookup_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -850,7 +850,7 @@ const supa_fetch_user_for_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -957,7 +957,7 @@ const supa_touch_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1077,7 +1077,7 @@ const supa_lookup_session_for_prefs = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1134,7 +1134,7 @@ const supa_update_user_prefs = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1208,7 +1208,7 @@ const supa_lookup_session_for_dash = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1256,7 +1256,7 @@ const supa_fetch_single_user = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1624,7 +1624,7 @@ const supa_lookup_send_link_user = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1720,7 +1720,7 @@ const supa_update_send_link_token = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1741,7 +1741,7 @@ const resend_dispatch_send_link = node({
       additionalOptions: {}
     },
     credentials: {
-      resendApi: newCredential('Resend account')
+      resendApi: newCredential('SLVH Resend account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1806,7 +1806,7 @@ const supa_revoke_session = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1827,11 +1827,241 @@ const respond_logout_success = node({
 });
 
 // -------------------------------------------------------------
+// 8. HOURLY DIGEST SENDER
+// -------------------------------------------------------------
+const sched_hourly_digest = trigger({
+  type: 'n8n-nodes-base.scheduleTrigger',
+  version: 1.3,
+  disabled: true,
+  config: {
+    name: 'Schedule Trigger: Hourly Digest',
+    parameters: {
+      rule: {
+        interval: [{ field: 'hours' }]
+      }
+    }
+  }
+});
+
+const wh_send_hourly = trigger({
+  type: 'n8n-nodes-base.webhook',
+  version: 2.1,
+  config: {
+    name: 'Webhook: GET /v2/digest/send-hourly',
+    parameters: {
+      httpMethod: 'GET',
+      path: 'v2/digest/send-hourly',
+      responseMode: 'lastNode',
+      authentication: 'headerAuth',
+      options: {}
+    },
+    credentials: {
+      httpHeaderAuth: newCredential('Header Auth')
+    }
+  }
+});
+
+const config_digest = node({
+  type: 'n8n-nodes-base.set',
+  version: 3.4,
+  config: {
+    name: 'Config: Digest Base URL',
+    parameters: {
+      mode: 'manual',
+      fields: {
+        values: [
+          {
+            name: 'APP_BASE_URL',
+            stringValue: 'https://betadigest.online'
+          }
+        ]
+      },
+      includeOtherFields: true
+    }
+  }
+});
+
+const supa_fetch_subscribers = node({
+  type: 'n8n-nodes-base.supabase',
+  version: 1,
+  config: {
+    name: 'Supabase: Fetch Subscribers',
+    parameters: {
+      resource: 'row',
+      operation: 'getAll',
+      tableId: 'users',
+      returnAll: true
+    },
+    credentials: {
+      supabaseApi: newCredential('SLVH Supabase account')
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
+});
+
+const code_filter_due_users = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Filter Scheduled Users & Format Reminder',
+    parameters: {
+      jsCode: `
+const now = new Date();
+let currentHour = now.getUTCHours();
+const todayDate = now.toISOString().split('T')[0];
+
+let queryHour = null;
+let queryEmail = null;
+try {
+  const wh = $('Webhook: GET /v2/digest/send-hourly').first()?.json;
+  if (wh?.query?.hour !== undefined) {
+    queryHour = parseInt(String(wh.query.hour), 10);
+  }
+  if (wh?.query?.email) {
+    queryEmail = String(wh.query.email).trim().toLowerCase();
+  }
+} catch (e) {}
+
+const targetHour = (queryHour !== null && !Number.isNaN(queryHour)) ? queryHour : currentHour;
+const paddedHour = String(targetHour).padStart(2, '0');
+
+const rawUsers = $input.all().map(item => item.json).filter(u => u && u.email);
+
+const parseHour = (sendTime) => {
+  if (!sendTime || typeof sendTime !== 'string') return null;
+  const parts = sendTime.trim().split(':');
+  const h = parseInt(parts[0], 10);
+  return Number.isNaN(h) ? null : h;
+};
+
+let dueUsers = rawUsers.filter(u => {
+  if (u.verified !== true || u.is_verified !== true) return false;
+  if (u.onboarding_completed !== true) return false;
+  const userHour = parseHour(u.send_time);
+  if (userHour === null || userHour !== targetHour) return false;
+  if (u.last_sent_date && String(u.last_sent_date).startsWith(todayDate)) return false;
+  if (queryEmail && String(u.email).toLowerCase() !== queryEmail) return false;
+  return true;
+});
+
+if (dueUsers.length === 0) {
+  return [];
+}
+
+const appBaseUrl = $('Config: Digest Base URL').first()?.json?.APP_BASE_URL || 'https://betadigest.online';
+const dashboardUrl = appBaseUrl.replace(/\/+$/, '') + '/dashboard';
+
+return dueUsers.map(user => {
+  const readerName = user.name || (user.email ? user.email.split('@')[0] : 'Reader');
+  const subject = \`Your Beta Digest is ready (${paddedHour}:00 edition)\`;
+  const html = \`<div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; padding: 36px 32px; background: #FAF7F2; color: #1C1917; border: 1px solid #E7E0D6;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #78716C; margin: 0 0 8px;">Beta Digest • Scheduled Reminder</p>
+  <h1 style="font-size: 24px; margin: 0 0 16px; color: #1C1917;">Good day, ${readerName}.</h1>
+  <p style="font-size: 15px; line-height: 1.6; color: #44403C; margin: 0 0 20px;">
+    This is your scheduled <strong>${user.send_time || paddedHour + ':00:00'}</strong> reminder that your personalized Beta Digest for <strong>${user.city || 'your city'}</strong> is ready.
+  </p>
+  <p style="font-size: 15px; line-height: 1.6; color: #44403C; margin: 0 0 28px;">
+    Head over to your dashboard to view your live weather metrics and curated news stories whenever you are ready.
+  </p>
+  <p style="margin: 0 0 28px;">
+    <a href="${dashboardUrl}" style="display: inline-block; background: #C84B31; color: #FFFFFF; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-family: sans-serif; font-size: 14px; font-weight: 600;">View Your Dashboard</a>
+  </p>
+  <hr style="border: none; border-top: 1px solid #E7E0D6; margin: 24px 0;" />
+  <p style="font-size: 12px; color: #78716C; margin: 0;">
+    Direct link: <a href="${dashboardUrl}" style="color: #C84B31;">${dashboardUrl}</a>
+  </p>
+</div>\`;
+
+  return {
+    json: {
+      id: user.id,
+      email: user.email,
+      name: readerName,
+      city: user.city || '',
+      country_code: user.country_code || '',
+      news_categories: user.news_categories || [],
+      weather_categories: user.weather_categories || [],
+      send_time: user.send_time || \`${paddedHour}:00:00\`,
+      triggered_hour: targetHour,
+      today_date: todayDate,
+      dashboard_url: dashboardUrl,
+      subject,
+      html
+    }
+  };
+});
+`
+    }
+  }
+});
+
+const resend_send_digest = node({
+  type: 'n8n-nodes-resend.resend',
+  version: 2,
+  config: {
+    name: 'Send Digest Email via Resend',
+    parameters: {
+      authentication: 'apiKey',
+      from: 'Beta Digest <verify@betadigest.online>',
+      to: '={{ $json.email }}',
+      subject: '={{ $json.subject }}',
+      html: '={{ $json.html }}',
+      additionalOptions: {}
+    },
+    credentials: {
+      resendApi: newCredential('SLVH Resend account')
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
+});
+
+const supa_update_last_sent_date = node({
+  type: 'n8n-nodes-base.supabase',
+  version: 1,
+  config: {
+    name: 'Supabase: Update Last Sent Date',
+    parameters: {
+      resource: 'row',
+      operation: 'update',
+      tableId: 'users',
+      filterType: 'manual',
+      matchType: 'allFilters',
+      filters: {
+        conditions: [
+          {
+            keyName: 'email',
+            condition: 'eq',
+            keyValue: "={{ $('Filter Scheduled Users & Format Reminder').item.json.email }}"
+          }
+        ]
+      },
+      dataToSend: 'defineBelow',
+      fieldsUi: {
+        fieldValues: [
+          {
+            fieldId: 'last_sent_date',
+            fieldValue: "={{ $('Filter Scheduled Users & Format Reminder').item.json.today_date }}"
+          }
+        ]
+      }
+    },
+    credentials: {
+      supabaseApi: newCredential('SLVH Supabase account')
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
+});
+
+// -------------------------------------------------------------
 // 9. DAILY CLEANUP SCHEDULE (Inactive during testing)
 // -------------------------------------------------------------
 const sched_daily_cleanup = trigger({
   type: 'n8n-nodes-base.scheduleTrigger',
   version: 1.3,
+  disabled: true,
   config: {
     name: 'Schedule Trigger: Daily Cleanup',
     parameters: {
@@ -1882,7 +2112,7 @@ const supa_cleanup_expired_sessions = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1908,7 +2138,7 @@ const supa_cleanup_unverified_users = node({
       }
     },
     credentials: {
-      supabaseApi: newCredential('SLVH')
+      supabaseApi: newCredential('SLVH Supabase account')
     },
     alwaysOutputData: true,
     onError: 'continueRegularOutput'
@@ -1999,6 +2229,16 @@ export default workflow('beta-digest-v2', 'Beta Digest v2: Auth and Dashboard')
   .add(wh_logout
     .to(supa_revoke_session)
     .to(respond_logout_success))
+
+  // 8. Digest sender
+  .add(sched_hourly_digest.to(config_digest))
+  .add(wh_send_hourly.to(config_digest))
+  .add(config_digest
+    .to(supa_fetch_subscribers)
+    .to(code_filter_due_users)
+    .to(resend_send_digest)
+    .to(supa_update_last_sent_date))
+
 
   // 9. Daily cleanup
   .add(sched_daily_cleanup
