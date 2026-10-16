@@ -15,8 +15,8 @@ import { Header } from "./Header";
 import { CanvasB } from "./CanvasB";
 import { LandingHero } from "./LandingHero";
 import { Chip } from "./primitives/Chip";
-import { IconTile, GradientIcon } from "./primitives/IconTile";
-import { PrimaryButton, DarkButton } from "./primitives/Button";
+import { IconTile } from "./primitives/IconTile";
+import { DarkButton } from "./primitives/Button";
 import { Footer } from "./Footer";
 import {
   WeatherTopicId,
@@ -94,11 +94,11 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen text-[var(--text)] flex flex-col">
+    <div className="relative min-h-screen text-[var(--text)] flex flex-col bg-[#0a0a0a]">
       {/* Canvas B background fixed behind hero */}
       <CanvasB />
 
-      {/* Header: Logo and Wordmark only */}
+      {/* Floating Pill Navigation Bar */}
       <Header />
 
       {/* Main Page Content */}
@@ -106,56 +106,60 @@ export const LandingPage: React.FC = () => {
         {/* A. Hero */}
         <LandingHero />
 
-        {/* B. Features (bg --canvas, padding 80px) */}
+        {/* B. Features */}
         <section
+          id="features"
           aria-label="Digest Features"
-          className="w-full bg-[var(--canvas)] py-20 px-6 lg:px-20"
+          className="w-full py-24 px-6 lg:px-12 relative"
         >
-          <div className="max-w-[1120px] mx-auto flex flex-col items-center">
-            {/* Centered header: H2 48px/56px max-width 720px */}
-            <h2 className="font-display font-[600] text-[32px] leading-[40px] md:text-[48px] md:leading-[56px] text-black text-center max-w-[720px]">
+          <div className="max-w-[1140px] mx-auto flex flex-col items-center">
+            {/* Eyebrow badge */}
+            <div className="text-[12px] font-sans font-semibold uppercase tracking-widest text-[#8E9096] mb-3">
+              TAILORED BRIEFS
+            </div>
+
+            {/* Centered header: H2 max-width 720px */}
+            <h2 className="font-display font-[600] text-[32px] leading-[38px] md:text-[46px] md:leading-[54px] text-white text-center max-w-[720px] tracking-tight">
               Get the weather and news that matter to you
             </h2>
 
-            {/* 16px gap, Paragraph (20px/30px, max-width 640px, centered) */}
-            <p className="font-sans font-[400] text-[18px] leading-[26px] md:text-[20px] md:leading-[30px] text-[var(--text)] text-center max-w-[640px] mt-4">
+            {/* Paragraph */}
+            <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] md:leading-[28px] text-[#8E9096] text-center max-w-[620px] mt-4">
               Pick up to 3 weather details and up to 5 news topics. Your digest arrives in your inbox at the hour you choose.
             </p>
 
-            {/* 48px gap, then 2-column grid, equal widths, 24px gap, max-width 1120px */}
-            <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 mt-12 items-stretch">
-              {/* Weather Card: white, radius 40px, padding 40px */}
+            {/* 2-column grid */}
+            <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 mt-14 items-stretch">
+              {/* Weather Card */}
               <div
-                className="w-full bg-white rounded-[40px] p-8 md:p-10 flex flex-col justify-between"
-                style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}
+                className="w-full bg-[#161616] border border-white/10 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-white/20 transition-colors"
               >
                 <div>
-                  {/* 64px gradient icon (CloudSun) */}
-                  <div className="w-16 h-16 flex items-center justify-center">
-                    <GradientIcon icon={CloudSun} size={64} />
+                  {/* Icon */}
+                  <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-white">
+                    <CloudSun className="w-7 h-7 text-white" />
                   </div>
 
-                  {/* 24px gap */}
                   <div className="h-6" />
 
-                  {/* Title "Weather" Red Hat Display 700 32px */}
-                  <h3 className="font-display font-[700] text-[32px] leading-tight text-black">
+                  {/* Title */}
+                  <h3 className="font-display font-[600] text-[28px] md:text-[32px] leading-tight text-white tracking-tight">
                     Weather
                   </h3>
 
-                  {/* 12px gap, Description 18px */}
-                  <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text)] mt-3">
+                  {/* Description */}
+                  <p className="font-sans font-[400] text-[16px] leading-[26px] text-[#8E9096] mt-3">
                     Precise weather for your exact city, tailored to your preferences.
                   </p>
                 </div>
 
-                {/* 32px gap, then counter and chips */}
-                <div className="mt-8">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-sans font-[600] text-[14px] text-black">
+                {/* Counter and chips */}
+                <div className="mt-10 pt-6 border-t border-white/10">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <span className="font-sans font-[500] text-[14px] text-white">
                       Select weather details
                     </span>
-                    <span className="font-sans font-[600] text-[14px] text-[var(--text-muted-sm)] tabular-nums">
+                    <span className="font-sans font-[500] text-[14px] text-[#8E9096] tabular-nums">
                       ({activeWeather.length}/3)
                     </span>
                   </div>
@@ -185,38 +189,36 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* News Card: identical structure */}
+              {/* News Card */}
               <div
-                className="w-full bg-white rounded-[40px] p-8 md:p-10 flex flex-col justify-between"
-                style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}
+                className="w-full bg-[#161616] border border-white/10 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-white/20 transition-colors"
               >
                 <div>
-                  {/* 64px gradient icon (Newspaper) */}
-                  <div className="w-16 h-16 flex items-center justify-center">
-                    <GradientIcon icon={Newspaper} size={64} />
+                  {/* Icon */}
+                  <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-white">
+                    <Newspaper className="w-7 h-7 text-white" />
                   </div>
 
-                  {/* 24px gap */}
                   <div className="h-6" />
 
-                  {/* Title "News" Red Hat Display 700 32px */}
-                  <h3 className="font-display font-[700] text-[32px] leading-tight text-black">
+                  {/* Title */}
+                  <h3 className="font-display font-[600] text-[28px] md:text-[32px] leading-tight text-white tracking-tight">
                     News
                   </h3>
 
-                  {/* 12px gap, Description 18px */}
-                  <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text)] mt-3">
+                  {/* Description */}
+                  <p className="font-sans font-[400] text-[16px] leading-[26px] text-[#8E9096] mt-3">
                     The 5 stories that matter, on the topics you choose.
                   </p>
                 </div>
 
-                {/* 32px gap, then counter and chips */}
-                <div className="mt-8">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-sans font-[600] text-[14px] text-black">
+                {/* Counter and chips */}
+                <div className="mt-10 pt-6 border-t border-white/10">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <span className="font-sans font-[500] text-[14px] text-white">
                       Select news topics
                     </span>
-                    <span className="font-sans font-[600] text-[14px] text-[var(--text-muted-sm)] tabular-nums">
+                    <span className="font-sans font-[500] text-[14px] text-[#8E9096] tabular-nums">
                       ({activeNews.length}/5)
                     </span>
                   </div>
@@ -249,106 +251,146 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* C. How It Works (bg --canvas, padding 96px 0) */}
+        {/* C. How It Works */}
         <section
           id="how-it-works"
           aria-label="How It Works"
-          className="w-full bg-[var(--canvas)] py-24 px-6 flex flex-col items-center"
+          className="w-full py-24 px-6 flex flex-col items-center relative"
         >
-          {/* H2 centered */}
-          <h2 className="font-display font-[600] text-[32px] leading-[38px] md:text-[48px] md:leading-[56px] text-black text-center">
+          <div className="text-[12px] font-sans font-semibold uppercase tracking-widest text-[#8E9096] mb-3">
+            DAILY ROUTINE
+          </div>
+
+          <h2 className="font-display font-[600] text-[32px] leading-[38px] md:text-[46px] md:leading-[54px] text-white text-center tracking-tight">
             How It Works
           </h2>
 
-          {/* 56px gap */}
-          <div className="h-14" />
+          <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[#8E9096] text-center max-w-[560px] mt-4">
+            Four simple steps to starting every morning with clarity and peace of mind.
+          </p>
 
-          {/* Stack container 896px wide */}
-          <div className="w-full max-w-[896px] bg-[#E5E5EA] rounded-[24px] p-4 md:p-6 grid gap-4 overflow-hidden">
-            {/* 1 */}
-            <div className="w-full min-h-[96px] bg-white rounded-[24px] px-6 py-4 flex items-center gap-6">
-              <IconTile icon={MailCheck} size={48} radius={14} iconSize={26} />
-              <span className="font-sans font-[600] text-[20px] md:text-[22px] text-black">
-                Sign up with just your email
+          <div className="h-12" />
+
+          {/* Stack container 920px wide */}
+          <div className="w-full max-w-[920px] flex flex-col gap-3.5">
+            {/* Step 1 */}
+            <div className="w-full min-h-[84px] bg-[#161616] border border-white/10 rounded-[22px] px-6 py-4 flex items-center justify-between hover:border-white/20 transition-all shadow-sm group">
+              <div className="flex items-center gap-5">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
+                  <MailCheck className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-sans font-[500] text-[18px] md:text-[20px] text-white">
+                  Sign up with just your email
+                </span>
+              </div>
+              <span className="font-mono text-xs text-[#686868] uppercase tracking-wider pl-4">
+                01
               </span>
             </div>
 
-            {/* 2 */}
-            <div className="w-full min-h-[96px] bg-white rounded-[24px] px-6 py-4 flex items-center gap-6">
-              <IconTile icon={MessagesSquare} size={48} radius={14} iconSize={26} />
-              <span className="font-sans font-[600] text-[20px] md:text-[22px] text-black">
-                Customize your digest preferences
+            {/* Step 2 */}
+            <div className="w-full min-h-[84px] bg-[#161616] border border-white/10 rounded-[22px] px-6 py-4 flex items-center justify-between hover:border-white/20 transition-all shadow-sm group">
+              <div className="flex items-center gap-5">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
+                  <MessagesSquare className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-sans font-[500] text-[18px] md:text-[20px] text-white">
+                  Customize your digest preferences
+                </span>
+              </div>
+              <span className="font-mono text-xs text-[#686868] uppercase tracking-wider pl-4">
+                02
               </span>
             </div>
 
-            {/* 3 */}
-            <div className="w-full min-h-[96px] bg-white rounded-[24px] px-6 py-4 flex items-center gap-6">
-              <IconTile icon={Timer} size={48} radius={14} iconSize={26} />
-              <span className="font-sans font-[600] text-[20px] md:text-[22px] text-black">
-                Choose when to receive your daily digest
+            {/* Step 3 */}
+            <div className="w-full min-h-[84px] bg-[#161616] border border-white/10 rounded-[22px] px-6 py-4 flex items-center justify-between hover:border-white/20 transition-all shadow-sm group">
+              <div className="flex items-center gap-5">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
+                  <Timer className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-sans font-[500] text-[18px] md:text-[20px] text-white">
+                  Choose when to receive your daily digest
+                </span>
+              </div>
+              <span className="font-mono text-xs text-[#686868] uppercase tracking-wider pl-4">
+                03
               </span>
             </div>
 
-            {/* 4 (L4: Get your digest in your inbox every day with Inbox icon) */}
-            <div className="w-full min-h-[96px] bg-white rounded-[24px] px-6 py-4 flex items-center gap-6">
-              <IconTile icon={Inbox} size={48} radius={14} iconSize={26} />
-              <span className="font-sans font-[600] text-[20px] md:text-[22px] text-black">
-                Get your digest in your inbox every day
+            {/* Step 4 */}
+            <div className="w-full min-h-[84px] bg-[#161616] border border-white/10 rounded-[22px] px-6 py-4 flex items-center justify-between hover:border-white/20 transition-all shadow-sm group">
+              <div className="flex items-center gap-5">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
+                  <Inbox className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-sans font-[500] text-[18px] md:text-[20px] text-white">
+                  Get your digest in your inbox every day
+                </span>
+              </div>
+              <span className="font-mono text-xs text-[#686868] uppercase tracking-wider pl-4">
+                04
               </span>
             </div>
           </div>
 
-          {/* 64px gap */}
-          <div className="h-16" />
+          <div className="h-12" />
 
-          {/* DarkButton */}
+          {/* DarkButton / Pill */}
           <Link href="/signup" tabIndex={-1}>
-            <DarkButton>Get your daily digest</DarkButton>
+            <DarkButton className="!bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-[0_2px_12px_rgba(255,255,255,0.15)]">
+              Get your daily digest
+            </DarkButton>
           </Link>
         </section>
 
-        {/* D. FAQ (bg white, padding 96px 0) */}
+        {/* D. FAQ */}
         <section
           id="faq"
           aria-label="Frequently Asked Questions"
-          className="w-full bg-white py-24 px-6 flex flex-col items-center"
+          className="w-full py-24 px-6 flex flex-col items-center relative"
         >
-          <h2 className="font-display font-[600] text-[32px] leading-[38px] md:text-[48px] md:leading-[56px] text-black text-center">
+          <div className="text-[12px] font-sans font-semibold uppercase tracking-widest text-[#8E9096] mb-3">
+            QUESTIONS &amp; ANSWERS
+          </div>
+
+          <h2 className="font-display font-[600] text-[32px] leading-[38px] md:text-[46px] md:leading-[54px] text-white text-center tracking-tight">
             Frequently Asked Questions
           </h2>
 
-          <div className="h-14" />
+          <div className="h-12" />
 
-          <div className="w-full max-w-[896px] flex flex-col gap-4">
+          <div className="w-full max-w-[896px] flex flex-col gap-3.5">
             {FAQ_ITEMS.map((item, idx) => {
               const isOpen = openFaqIndex === idx;
               return (
                 <div
                   key={idx}
-                  className={`w-full rounded-[24px] border transition-all duration-200 overflow-hidden ${
-                    isOpen ? "bg-[#F8F9FB]" : "bg-white"
+                  className={`w-full rounded-[22px] border transition-all duration-200 overflow-hidden ${
+                    isOpen
+                      ? "bg-[#181818] border-white/20"
+                      : "bg-[#141414] border-white/10 hover:border-white/15"
                   }`}
-                  style={{ borderColor: "var(--line)" }}
                 >
                   <button
                     type="button"
                     onClick={() => toggleFaq(idx)}
                     aria-expanded={isOpen}
-                    className="w-full min-h-[78px] px-8 py-5 flex items-center justify-between text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-[24px]"
+                    className="w-full min-h-[72px] px-7 py-5 flex items-center justify-between text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-[22px]"
                   >
-                    <span className="font-sans font-[600] text-[20px] text-black pr-4">
+                    <span className="font-sans font-[500] text-[18px] md:text-[19px] text-[#ededed] pr-4">
                       {item.q}
                     </span>
                     <ChevronDown
-                      className={`w-5 h-5 text-black shrink-0 transition-transform duration-200 ${
-                        isOpen ? "rotate-180" : ""
+                      className={`w-5 h-5 text-[#8E9096] shrink-0 transition-transform duration-200 ${
+                        isOpen ? "rotate-180 text-white" : ""
                       }`}
                       aria-hidden="true"
                     />
                   </button>
                   {isOpen && (
-                    <div className="px-8 pb-6 pt-1">
-                      <p className="font-sans font-[400] text-[16px] leading-[26px] text-[var(--text)]">
+                    <div className="px-7 pb-6 pt-1 border-t border-white/5">
+                      <p className="font-sans font-[400] text-[15px] md:text-[16px] leading-[26px] text-[#8E9096]">
                         {item.a}
                       </p>
                     </div>
@@ -359,31 +401,57 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* E. Final CTA (L6) */}
+        {/* E. Final CTA */}
         <section
           aria-label="Get Started"
-          className="w-full bg-black py-24 px-6 text-center flex flex-col items-center"
+          className="relative w-full py-28 px-6 text-center flex flex-col items-center overflow-hidden"
         >
-          {/* H2 "Start Getting Your Beta Digest" */}
-          <h2 className="font-display font-[600] text-[34px] leading-[44px] md:text-[56px] md:leading-[72px] text-white max-w-[760px]">
+          {/* Radial Spotlight Accent behind CTA */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: "700px",
+              height: "400px",
+              top: "10%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "radial-gradient(ellipse at center, rgba(107, 98, 242, 0.22) 0%, transparent 70%)",
+              zIndex: 0,
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Dusk Violet Wash Strip */}
+          <div
+            className="w-full max-w-[400px] h-[1px] mb-12"
+            style={{
+              background: "linear-gradient(90deg, transparent, rgba(107, 98, 242, 0.6) 50%, transparent)",
+            }}
+            aria-hidden="true"
+          />
+
+          {/* H2 */}
+          <h2 className="relative z-10 font-display font-[600] text-[34px] leading-[44px] md:text-[54px] md:leading-[64px] text-white max-w-[760px] tracking-tight">
             Start Getting Your Beta Digest
           </h2>
 
-          <div className="h-6" />
+          <div className="h-5" />
 
-          {/* Paragraph "Join thousands of users who start their day informed. Free forever." */}
-          <p className="font-sans font-[400] text-[18px] md:text-[20px] leading-[28px] text-[#E5E5E5] max-w-xl">
+          {/* Paragraph */}
+          <p className="relative z-10 font-sans font-[400] text-[17px] md:text-[19px] leading-[28px] text-[#8E9096] max-w-xl">
             Join thousands of users who start their day informed. Free forever.
           </p>
 
           <div className="h-10" />
 
           {/* PrimaryButton */}
-          <Link href="/signup" tabIndex={-1}>
-            <PrimaryButton size="cta">Get your daily digest</PrimaryButton>
+          <Link href="/signup" tabIndex={-1} className="relative z-10">
+            <DarkButton size="cta" className="!bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-[0_2px_16px_rgba(255,255,255,0.18)]">
+              Get your daily digest
+            </DarkButton>
           </Link>
 
-          <div className="h-[72px]" />
+          <div className="h-20" />
 
           <Footer />
         </section>

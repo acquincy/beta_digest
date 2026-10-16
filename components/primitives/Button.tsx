@@ -25,7 +25,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    // Disabled button spec: bg #858585, text white, cursor not-allowed
+    // Disabled button spec: bg #222222, text #686868, border hairline, cursor not-allowed
     if (disabled) {
       return (
         <button
@@ -34,12 +34,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           aria-disabled="true"
           className={clsx(
             "inline-flex items-center justify-center font-sans font-[500] rounded-full select-none cursor-not-allowed whitespace-nowrap min-w-max",
-            "bg-[#858585] text-white",
+            "bg-[#1c1c1c] text-[#686868] border border-white/5",
             size === "cta"
-              ? "h-[76px] px-8 text-[20px]"
+              ? "h-[64px] md:h-[72px] px-8 text-[18px] md:text-[20px]"
               : size === "sm"
-              ? "h-[44px] px-6 text-[15px]"
-              : "h-[57px] px-8 text-[18px]",
+              ? "h-[40px] px-5 text-[14px]"
+              : "h-[52px] px-7 text-[16px]",
             className
           )}
           {...props}
@@ -48,7 +48,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <span>{children}</span>
           {(rightIcon || showArrow) && (
             <span className="ml-2 shrink-0">
-              {rightIcon || <ArrowRight className="w-[18px] h-[18px]" aria-hidden="true" />}
+              {rightIcon || <ArrowRight className="w-[18px] h-[18px] text-[#686868]" aria-hidden="true" />}
             </span>
           )}
         </button>
@@ -56,14 +56,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     if (variant === "outline") {
-      // OutlineButton (Back): height 58px, padding 0 28px, bg white, 1px solid #000, text black, ArrowLeft 16px leading
       return (
         <button
           ref={ref}
           className={clsx(
-            "inline-flex items-center justify-center font-sans font-[500] text-[18px] text-black bg-white border border-black rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
-            "h-[58px] px-[28px] gap-2 active:scale-[0.98] transition-transform duration-150",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
+            "inline-flex items-center justify-center font-sans font-[500] text-[16px] text-[#ededed] bg-white/[0.04] hover:bg-white/[0.09] hover:text-white border border-white/15 rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
+            "h-[52px] px-[26px] gap-2 active:scale-[0.98] transition-all duration-150 backdrop-blur-md",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]",
             className
           )}
           {...props}
@@ -71,7 +70,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           {leftIcon !== undefined ? (
             leftIcon
           ) : (
-            <ArrowLeft className="w-[16px] h-[16px] text-black shrink-0" aria-hidden="true" />
+            <ArrowLeft className="w-[16px] h-[16px] text-[#ededed] shrink-0" aria-hidden="true" />
           )}
           <span>{children}</span>
           {rightIcon && <span className="ml-2 shrink-0">{rightIcon}</span>}
@@ -80,8 +79,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     if (variant === "dark") {
-      // DarkButton: same size (57px, px 32px, text 18px), bg #000, text white. Hover #222.
-      // Landing CTA size: 76px high, 312px wide min, 20px text.
       const isCta = size === "cta";
       const hasArrow = showArrow ?? true;
 
@@ -89,14 +86,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <button
           ref={ref}
           className={clsx(
-            "inline-flex items-center justify-center font-sans font-[500] text-white bg-black hover:bg-[#222222] rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
-            "active:scale-[0.98] transition-all duration-150",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
+            "inline-flex items-center justify-center font-sans font-[500] text-[#ededed] bg-[#161616] hover:bg-white/10 hover:text-white border border-white/10 hover:border-white/20 rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
+            "active:scale-[0.98] transition-all duration-150 shadow-[0_2px_8px_rgba(0,0,0,0.4)] backdrop-blur-md",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]",
             isCta
-              ? "h-[76px] px-8 text-[20px]"
+              ? "h-[64px] md:h-[72px] px-8 text-[18px] md:text-[20px]"
               : size === "sm"
-              ? "h-[44px] px-6 text-[15px]"
-              : "h-[57px] px-[32px] text-[18px]",
+              ? "h-[40px] px-5 text-[14px]"
+              : "h-[52px] px-[28px] text-[16px]",
             className
           )}
           {...props}
@@ -105,15 +102,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <span>{children}</span>
           {hasArrow && (
             <span className="ml-2 shrink-0">
-              {rightIcon || <ArrowRight className="w-[18px] h-[18px] text-white" aria-hidden="true" />}
+              {rightIcon || <ArrowRight className="w-[18px] h-[18px] text-[#ededed]" aria-hidden="true" />}
             </span>
           )}
         </button>
       );
     }
 
-    // PrimaryButton (lime): bg --lime, text black, height 57px, padding 0 32px, radius full, Inter 500 18px, trailing ArrowRight icon 18px with 8px gap. Hover bg --lime-hover. Active scale .98. Focus-visible: 2px solid black ring, 2px offset.
-    // Landing CTA size: 76px high, 312px wide min, 20px text
+    // PrimaryButton (Snow White pill per Dimension spec: #ffffff bg, #000000 text, 9999px radius)
     const isCta = size === "cta";
     const hasArrow = showArrow ?? true;
 
@@ -121,25 +117,16 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={clsx(
-          "inline-flex items-center justify-center font-sans font-[500] text-black rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
-          "active:scale-[0.98] transition-all duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
+          "inline-flex items-center justify-center font-sans font-[500] text-black bg-white hover:bg-[#eaeaea] rounded-full select-none cursor-pointer whitespace-nowrap min-w-max",
+          "active:scale-[0.98] transition-all duration-150 shadow-[0_2px_12px_rgba(255,255,255,0.12)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]",
           isCta
-            ? "h-[76px] px-8 text-[20px]"
+            ? "h-[64px] md:h-[72px] px-8 text-[18px] md:text-[20px]"
             : size === "sm"
-            ? "h-[44px] px-6 text-[15px]"
-            : "h-[57px] px-[32px] text-[18px]",
+            ? "h-[40px] px-5 text-[14px]"
+            : "h-[52px] px-[28px] text-[16px]",
           className
         )}
-        style={{
-          backgroundColor: "var(--lime)",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "var(--lime-hover)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "var(--lime)";
-        }}
         {...props}
       >
         {leftIcon && <span className="mr-2 shrink-0">{leftIcon}</span>}

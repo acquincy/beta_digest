@@ -34,8 +34,6 @@ import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
 import { getTimeUntilNextDispatch, formatHourOption, TimeRemaining } from "@/lib/time-utils";
 import { fetchDashboardViaN8n, N8nDashboardResult, N8nDashboardArticle, logoutViaApi } from "@/lib/n8n";
 
-const SURFACES = ["#F6FFDD", "#FFFFFF", "rgba(213,134,206,0.14)"];
-
 export const DashboardView: React.FC = () => {
   const [hydrated, setHydrated] = useState(false);
   const [prefs, setPrefs] = useState<Preferences>(INITIAL_PREFERENCES);
@@ -232,59 +230,57 @@ export const DashboardView: React.FC = () => {
       : "col-span-1";
 
   const renderWeatherWidget = (topicId: WeatherTopicId, index: number) => {
-    const bgSurface = SURFACES[index % SURFACES.length];
     const isWide = topicId === "hourly-3h" || topicId === "forecast-3day";
 
     return (
       <div
         key={topicId}
-        className={`rounded-[24px] p-5 md:p-6 border border-[rgba(0,0,0,0.08)] flex flex-col justify-between ${
+        className={`rounded-[24px] p-5 md:p-6 bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between ${
           isWide ? wideSpanClass : ""
         }`}
-        style={{ backgroundColor: bgSurface }}
       >
         <div className="flex items-center justify-between mb-3">
-          <span className="font-sans font-[600] text-[13px] text-[#292B2D] uppercase tracking-wide">
+          <span className="font-sans font-[600] text-[13px] text-white uppercase tracking-wide">
             {WEATHER_TOPIC_LABELS[topicId]}
           </span>
           {topicId === "current-temperature" && (
-            <Sun className="w-5 h-5 text-black" aria-hidden="true" />
+            <Sun className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "high-low" && (
-            <CloudSun className="w-5 h-5 text-black" aria-hidden="true" />
+            <CloudSun className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "rain-chance" && (
-            <Droplets className="w-5 h-5 text-black" aria-hidden="true" />
+            <Droplets className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "thunderstorm-chance" && (
-            <CloudLightning className="w-5 h-5 text-black" aria-hidden="true" />
+            <CloudLightning className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "cloudiness" && (
-            <Cloud className="w-5 h-5 text-black" aria-hidden="true" />
+            <Cloud className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "uv-index" && (
-            <Sun className="w-5 h-5 text-black" aria-hidden="true" />
+            <Sun className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "air-quality" && (
-            <ShieldAlert className="w-5 h-5 text-black" aria-hidden="true" />
+            <ShieldAlert className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "wind" && (
-            <Wind className="w-5 h-5 text-black" aria-hidden="true" />
+            <Wind className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "humidity" && (
-            <Droplets className="w-5 h-5 text-black" aria-hidden="true" />
+            <Droplets className="w-5 h-5 text-white" aria-hidden="true" />
           )}
           {topicId === "sun-times" && (
-            <Sunrise className="w-5 h-5 text-black" aria-hidden="true" />
+            <Sunrise className="w-5 h-5 text-white" aria-hidden="true" />
           )}
         </div>
 
         {topicId === "current-temperature" && (
           <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.currentTemp}{weather.tempUnit}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] capitalize mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] capitalize mt-1">
               {weather.condition}
             </div>
           </div>
@@ -292,10 +288,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "high-low" && (
           <div>
-            <div className="font-sans font-[700] text-[24px] md:text-[28px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[24px] md:text-[28px] text-white tabular-nums">
               High {weather.high ?? "—"}{weather.tempUnit} / Low {weather.low ?? "—"}{weather.tempUnit}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1 tabular-nums">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1 tabular-nums">
               Spread: {typeof weather.high === "number" && typeof weather.low === "number" ? `${weather.high - weather.low}°` : "—"}
             </div>
           </div>
@@ -306,15 +302,15 @@ export const DashboardView: React.FC = () => {
             {(weather.hourly || []).map((h, i) => (
               <div
                 key={i}
-                className="bg-white/80 rounded-[18px] p-3 text-center border border-[rgba(0,0,0,0.06)]"
+                className="bg-white/[0.04] rounded-[18px] p-3 text-center border border-white/5"
               >
-                <div className="font-sans text-[12px] text-[#666] tabular-nums font-[500]">
+                <div className="font-sans text-[12px] text-[#8E9096] tabular-nums font-[500]">
                   {h.time}
                 </div>
-                <div className="font-sans font-[700] text-[18px] text-black tabular-nums my-1">
+                <div className="font-sans font-[700] text-[18px] text-white tabular-nums my-1">
                   {h.temp}{weather.tempUnit}
                 </div>
-                <div className="font-sans text-[12px] text-[#444] truncate">
+                <div className="font-sans text-[12px] text-[#8E9096] truncate">
                   {h.condition}
                 </div>
               </div>
@@ -327,17 +323,17 @@ export const DashboardView: React.FC = () => {
             {(weather.threeDay || []).map((d, i) => (
               <div
                 key={i}
-                className="bg-white/80 rounded-[18px] p-4 border border-[rgba(0,0,0,0.06)] flex flex-col justify-between"
+                className="bg-white/[0.04] rounded-[18px] p-4 border border-white/5 flex flex-col justify-between"
               >
-                <div className="font-sans font-[600] text-[14px] text-black">
+                <div className="font-sans font-[600] text-[14px] text-white">
                   {d.day}
                 </div>
-                <div className="font-sans text-[12px] text-[#666] mt-0.5">
+                <div className="font-sans text-[12px] text-[#8E9096] mt-0.5">
                   {d.condition}
                 </div>
-                <div className="font-sans font-[700] text-[16px] text-black tabular-nums mt-2">
+                <div className="font-sans font-[700] text-[16px] text-white tabular-nums mt-2">
                   {d.high}{weather.tempUnit}{" "}
-                  <span className="font-normal text-[#888]">
+                  <span className="font-normal text-[#8E9096]">
                     / {d.low}{weather.tempUnit}
                   </span>
                 </div>
@@ -348,10 +344,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "rain-chance" && (
           <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.rainProb}%
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
               Afternoon precipitation
             </div>
           </div>
@@ -359,10 +355,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "thunderstorm-chance" && (
           <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.thunderstormProb}%
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
               Isolated afternoon storm risk
             </div>
           </div>
@@ -370,10 +366,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "cloudiness" && (
           <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.cloudiness}%
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
               Sky coverage
             </div>
           </div>
@@ -381,10 +377,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "uv-index" && (
           <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.uvIndex}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
               {weather.uvDescription} UV
             </div>
           </div>
@@ -392,10 +388,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "air-quality" && (
           <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.airQuality}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
               AQI · {weather.airQualityDescription}
             </div>
           </div>
@@ -403,10 +399,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "wind" && (
           <div>
-            <div className="font-sans font-[700] text-[28px] md:text-[32px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[28px] md:text-[32px] text-white tabular-nums">
               {weather.windSpeed} {weather.windUnit}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
               Direction {weather.windDirection}
             </div>
           </div>
@@ -414,10 +410,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "humidity" && (
           <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.humidity}%
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
               Relative humidity
             </div>
           </div>
@@ -425,10 +421,10 @@ export const DashboardView: React.FC = () => {
 
         {topicId === "sun-times" && (
           <div>
-            <div className="font-sans font-[700] text-[20px] md:text-[22px] text-black tabular-nums">
+            <div className="font-sans font-[700] text-[20px] md:text-[22px] text-white tabular-nums">
               ↑ {weather.sunrise} · ↓ {weather.sunset}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#555] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
               Daylight window
             </div>
           </div>
@@ -447,18 +443,15 @@ export const DashboardView: React.FC = () => {
 
       {/* Main dashboard content: Single centered card, max-width 1120px */}
       <main className="w-full max-w-[1120px] mx-auto px-4 md:px-6 flex flex-col gap-6">
-        <div
-          className="w-full bg-white rounded-[32px] md:rounded-[48px] p-6 md:p-10 border border-[var(--line)] shadow-sm flex flex-col gap-8"
-          style={{ boxShadow: "var(--shadow-slab)" }}
-        >
+        <div className="w-full bg-[#161616] rounded-[32px] md:rounded-[48px] p-6 md:p-10 border border-white/10 shadow-2xl flex flex-col gap-8">
           {/* Header row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--line)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
             <div>
-              <h1 className="font-display font-[700] text-[32px] md:text-[36px] leading-tight text-black">
+              <h1 className="font-display font-[700] text-[32px] md:text-[36px] leading-tight text-white">
                 {hydrated && prefs.name ? `Hi, ${prefs.name}` : "Hi"}
               </h1>
               {hydrated && todayFormatted && (
-                <p className="font-sans font-[500] text-[15px] text-[#6B6B5A] tabular-nums mt-1">
+                <p className="font-sans font-[500] text-[15px] text-[#8E9096] tabular-nums mt-1">
                   {todayFormatted}
                 </p>
               )}
@@ -466,9 +459,9 @@ export const DashboardView: React.FC = () => {
             <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
               <Link
                 href="/preferences"
-                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-black text-black hover:bg-black/5 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap min-w-max"
+                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-white/20 bg-white/5 text-white hover:bg-white/10 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap min-w-max"
               >
-                <Sliders className="w-4 h-4 text-black" aria-hidden="true" />
+                <Sliders className="w-4 h-4 text-white" aria-hidden="true" />
                 <span>Edit preferences</span>
               </Link>
               <button
@@ -476,7 +469,7 @@ export const DashboardView: React.FC = () => {
                 onClick={async () => {
                   await logoutViaApi();
                 }}
-                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-[rgba(0,0,0,0.15)] text-[#4B5563] hover:text-black hover:border-black font-sans font-[600] text-[14px] transition-colors whitespace-nowrap"
+                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-white/10 text-[#8E9096] hover:text-white hover:border-white/30 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap"
                 aria-label="Sign out"
               >
                 <LogOut className="w-4 h-4" aria-hidden="true" />
@@ -486,77 +479,68 @@ export const DashboardView: React.FC = () => {
           </div>
 
           {!hydrated ? (
-            /* Existing Skeleton State while hydrating */
+            /* Skeleton State while hydrating */
             <div className="flex-grow flex flex-col items-center justify-center py-12 text-center">
               <div className="relative mb-6">
-                <div
-                  className="w-16 h-16 rounded-[20px] flex items-center justify-center"
-                  style={{ backgroundColor: "var(--lime)" }}
-                >
-                  <FileText className="w-8 h-8 text-black" aria-hidden="true" />
+                <div className="w-16 h-16 rounded-[20px] bg-white/10 border border-white/10 flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-white" aria-hidden="true" />
                 </div>
-                <div
-                  className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-white flex items-center justify-center"
-                  style={{ boxShadow: "var(--shadow-tile)" }}
-                >
-                  <Sparkles className="w-4 h-4 text-black" aria-hidden="true" />
+                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#161616] border border-white/10 flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-4 h-4 text-white" aria-hidden="true" />
                 </div>
               </div>
 
-              <h2 className="font-display font-[600] text-[20px] text-black mb-2">
+              <h2 className="font-display font-[600] text-[20px] text-white mb-2">
                 Preparing your daily report...
               </h2>
 
-              <p className="font-sans font-[400] text-[14px] text-[#6B6B5A] max-w-sm mb-8">
+              <p className="font-sans font-[400] text-[14px] text-[#8E9096] max-w-sm mb-8">
                 We&apos;re gathering your personalized updates. This usually
                 takes just a moment.
               </p>
 
               <div
-                className="w-full max-w-[540px] bg-[#F7F7F2] rounded-[20px] p-5 border border-[var(--line)] flex flex-col gap-3 animate-pulse"
+                className="w-full max-w-[540px] bg-white/[0.03] rounded-[20px] p-5 border border-white/10 flex flex-col gap-3 animate-pulse"
                 style={{ animationDuration: "1.4s" }}
               >
-                <div className="w-24 h-4 bg-[#CED6BE] rounded-[8px]" />
-                <div className="w-full h-4 bg-[#E0E4D6] rounded-[8px]" />
-                <div className="w-full h-4 bg-[#E0E4D6] rounded-[8px]" />
-                <div className="w-[70%] h-4 bg-[#E0E4D6] rounded-[8px]" />
+                <div className="w-24 h-4 bg-white/10 rounded-[8px]" />
+                <div className="w-full h-4 bg-white/[0.06] rounded-[8px]" />
+                <div className="w-full h-4 bg-white/[0.06] rounded-[8px]" />
+                <div className="w-[70%] h-4 bg-white/[0.06] rounded-[8px]" />
               </div>
             </div>
           ) : (
             <>
               {/* Countdown row */}
-              <div className="p-5 md:p-6 rounded-[24px] bg-black text-white flex flex-col gap-3">
+              <div className="p-5 md:p-6 rounded-[24px] bg-[#111111] border border-white/10 text-white flex flex-col gap-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <Clock className="w-5 h-5 text-[var(--lime)]" aria-hidden="true" />
+                    <Clock className="w-5 h-5 text-[#6b62f2]" aria-hidden="true" />
                     <span className="font-sans font-[600] text-[16px] text-white">
                       Next digest arrives in
                     </span>
                   </div>
-                  <span
-                    className="font-sans font-[700] text-[16px] md:text-[18px] text-black px-4 py-1.5 rounded-full tabular-nums self-start sm:self-auto"
-                    style={{ backgroundColor: "var(--lime)" }}
-                  >
+                  <span className="font-sans font-[700] text-[16px] md:text-[18px] text-black bg-white px-4 py-1.5 rounded-full tabular-nums self-start sm:self-auto">
                     {countdown.formatted}
                   </span>
                 </div>
-                <div className="font-sans font-[400] text-[13px] md:text-[14px] text-[#A3A3A3]">
+                <div className="font-sans font-[400] text-[13px] md:text-[14px] text-[#8E9096]">
                   Scheduled for {formatHourOption(prefs.deliveryHour)} daily · Delivered to {prefs.email}
                 </div>
               </div>
 
               {/* Weather Section */}
               <section className="flex flex-col gap-4">
-                <h3 className="font-display font-[600] text-[24px] text-black">
+                <h3 className="font-display font-[600] text-[24px] text-white">
                   Your weather · {prefs.city}
                 </h3>
 
                 {selectedWeather.length === 0 ? (
-                  <div className="p-6 rounded-[24px] bg-[#F7F7F2] border border-[var(--line)] text-center font-sans text-[15px] text-[#6B6B5A]">
+                  <div className="p-6 rounded-[24px] bg-white/[0.03] border border-white/10 text-center font-sans text-[15px] text-[#8E9096]">
                     No weather details selected ·{" "}
                     <Link
                       href="/preferences"
-                      className="text-black font-[600] underline hover:no-underline"
+                      className="text-white font-[600] underline hover:no-underline"
                     >
                       Edit preferences
                     </Link>
@@ -572,14 +556,14 @@ export const DashboardView: React.FC = () => {
 
               {/* Live Digest Summary from n8n Dashboard Workflow */}
               {digestSummary && (
-                <section className="p-5 md:p-6 rounded-[24px] bg-[#F6FFDD] border border-[rgba(0,0,0,0.08)] flex flex-col gap-3">
+                <section className="p-5 md:p-6 rounded-[24px] bg-white/[0.03] border border-white/10 flex flex-col gap-3">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-black" aria-hidden="true" />
-                    <h3 className="font-display font-[600] text-[20px] text-black">
+                    <Sparkles className="w-5 h-5 text-white" aria-hidden="true" />
+                    <h3 className="font-display font-[600] text-[20px] text-white">
                       AI Executive Summary
                     </h3>
                   </div>
-                  <p className="font-sans font-[400] text-[15px] leading-relaxed text-[#292B2D] whitespace-pre-line">
+                  <p className="font-sans font-[400] text-[15px] leading-relaxed text-[#c2c2c2] whitespace-pre-line">
                     {digestSummary}
                   </p>
                 </section>
@@ -587,16 +571,16 @@ export const DashboardView: React.FC = () => {
 
               {/* News Section */}
               <section className="flex flex-col gap-4">
-                <h3 className="font-display font-[600] text-[24px] text-black">
+                <h3 className="font-display font-[600] text-[24px] text-white">
                   Your top 5 stories
                 </h3>
 
                 {prefs.newsTopics.length === 0 ? (
-                  <div className="p-6 rounded-[20px] bg-[#F7F7F2] border border-[var(--line)] text-center font-sans text-[15px] text-[#6B6B5A]">
+                  <div className="p-6 rounded-[20px] bg-white/[0.03] border border-white/10 text-center font-sans text-[15px] text-[#8E9096]">
                     No news topics selected ·{" "}
                     <Link
                       href="/preferences"
-                      className="text-black font-[600] underline hover:no-underline"
+                      className="text-white font-[600] underline hover:no-underline"
                     >
                       Edit preferences
                     </Link>
@@ -606,29 +590,29 @@ export const DashboardView: React.FC = () => {
                     {stories.map((story, i) => (
                       <article
                         key={`${story.id}-${i}`}
-                        className="p-5 rounded-[20px] bg-white border border-[rgba(0,0,0,0.08)] flex flex-col gap-2"
+                        className="p-5 md:p-6 rounded-[20px] bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col gap-2"
                       >
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-sans text-[14px] text-[#888] tabular-nums font-[600]">
+                          <span className="font-sans text-[14px] text-[#8E9096] tabular-nums font-[600]">
                             {(i + 1).toString().padStart(2, "0")}
                           </span>
-                          <span className="font-sans font-[600] text-[12px] px-2.5 py-0.5 rounded-full bg-[#F2F2F2] text-[#292B2D]">
+                          <span className="font-sans font-[600] text-[12px] px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/10">
                             {story.topicLabel}
                           </span>
-                          <span className="font-sans text-[13px] text-[#666]">
+                          <span className="font-sans text-[13px] text-[#8E9096]">
                             {story.source}
                           </span>
-                          <span className="text-[#999] text-[13px]">·</span>
-                          <span className="font-sans text-[13px] text-[#888]">
+                          <span className="text-white/20 text-[13px]">·</span>
+                          <span className="font-sans text-[13px] text-[#8E9096]">
                             {story.timestamp}
                           </span>
                         </div>
 
-                        <h4 className="font-sans font-[600] text-[18px] text-black leading-snug mt-1">
+                        <h4 className="font-sans font-[600] text-[18px] text-white leading-snug mt-1">
                           {story.headline}
                         </h4>
 
-                        <p className="font-sans font-[400] text-[14px] leading-[22px] text-[#555] line-clamp-2">
+                        <p className="font-sans font-[400] text-[14px] leading-[22px] text-[#8E9096] line-clamp-2">
                           {story.summary}
                         </p>
 
@@ -636,10 +620,10 @@ export const DashboardView: React.FC = () => {
                           href={story.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 font-sans font-[600] text-[13px] text-black hover:underline self-start mt-2"
+                          className="inline-flex items-center gap-1.5 font-sans font-[600] text-[13px] text-white hover:text-[#6b62f2] self-start mt-2 transition-colors"
                         >
                           <span>Read full story</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-black" aria-hidden="true" />
+                          <ArrowRight className="w-3.5 h-3.5 text-current" aria-hidden="true" />
                         </a>
                       </article>
                     ))}

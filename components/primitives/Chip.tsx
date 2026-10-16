@@ -34,20 +34,17 @@ export const Chip: React.FC<ChipProps> = ({
       disabled={disabled}
       onClick={handleClick}
       className={clsx(
-        "inline-flex items-center justify-center rounded-full font-sans font-[400] text-black select-none transition-all duration-150 whitespace-nowrap",
+        "inline-flex items-center justify-center rounded-full font-sans select-none transition-all duration-150 whitespace-nowrap",
         isLanding
-          ? "h-[36px] px-[14px] text-[14px]"
-          : "h-[32px] px-[13px] text-[13px]",
+          ? "h-[38px] px-[16px] text-[14px]"
+          : "h-[34px] px-[14px] text-[13px]",
         active
-          ? "border border-transparent font-medium"
-          : "border border-transparent hover:border-[#555555] focus-visible:border-[#555555]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-1",
-        disabled ? "opacity-45 cursor-not-allowed" : "cursor-pointer",
+          ? "bg-white text-black font-medium border border-white shadow-[0_2px_10px_rgba(255,255,255,0.15)]"
+          : "bg-[#1c1c1c] text-[#c2c2c2] border border-white/10 hover:border-white/25 hover:text-white hover:bg-white/[0.06]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0a0a0a]",
+        disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
         className
       )}
-      style={{
-        backgroundColor: active ? "var(--lime)" : "var(--chip-off)",
-      }}
       {...props}
     >
       {children}

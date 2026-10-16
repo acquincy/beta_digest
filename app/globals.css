@@ -1,30 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  /* Visual System Tokens — Exact Specs */
+  /* Dimension Design System Tokens */
+  --void-canvas: #0a0a0a;
+  --graphite: #161616;
+  --frosted-glass: rgba(255, 255, 255, 0.05);
+  --snow-white: #ffffff;
+  --bone: #ededed;
+  --ash: #c2c2c2;
+  --slate: #686868;
+  --smoke: #b2b2b2;
+  --hairline: rgba(255, 255, 255, 0.10);
+  --dusk-violet: #6b62f2;
+  --dusk-violet-glow: rgba(107, 98, 242, 0.35);
+
+  /* Semantic System Mapping */
   --lime: #D0FE54;
   --lime-hover: #C3F043;
-  --lime-tint: #F6FFDD;
+  --lime-tint: rgba(208, 254, 84, 0.12);
   --lilac: #D586CE;
   --lilac-bright: #E074D7;
   --spring: #98FDCA;
   --black: #000000;
-  --text: #292B2D;
+  --text: #ededed;
   --text-muted: #8E9096;
-  --text-muted-sm: #6B6F76;
-  --canvas: #F4F5F9;
-  --chip-off: #F7F7F7;
+  --text-muted-sm: #686868;
+  --canvas: #0a0a0a;
+  --chip-off: #1c1c1c;
   --white: #FFFFFF;
-  --line: rgba(0, 0, 0, 0.10);
-  --track: #E8E8E8;
+  --line: rgba(255, 255, 255, 0.10);
+  --track: #262626;
   --error: #E64D51;
   --success: #3CE07E;
-  --accent-gradient: linear-gradient(80deg, #E074D7 0.84%, #D586CE 99.38%);
+  --accent-gradient: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 40%, rgba(107, 98, 242, 0.565) 50%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0));
 
   /* Shadows */
-  --shadow-tile: 0 2px 10px rgba(0, 0, 0, 0.08);
-  --shadow-extrude: 0 15px 0 rgba(0, 0, 0, 0.10);
-  --shadow-float: 0 0 30px rgba(0, 0, 0, 0.10);
+  --shadow-tile: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-extrude: 0 20px 40px rgba(0, 0, 0, 0.6);
+  --shadow-float: 0 24px 64px rgba(0, 0, 0, 0.7);
 
   /* Radii */
   --radius-card-xl: 40px;
@@ -41,6 +54,17 @@
 }
 
 @theme {
+  --color-void-canvas: var(--void-canvas);
+  --color-graphite: var(--graphite);
+  --color-frosted-glass: var(--frosted-glass);
+  --color-snow-white: var(--snow-white);
+  --color-bone: var(--bone);
+  --color-ash: var(--ash);
+  --color-slate: var(--slate);
+  --color-smoke: var(--smoke);
+  --color-hairline: var(--hairline);
+  --color-dusk-violet: var(--dusk-violet);
+
   --color-lime: var(--lime);
   --color-lime-hover: var(--lime-hover);
   --color-lime-tint: var(--lime-tint);
@@ -106,7 +130,7 @@ body {
 
 /* Strict Focus Ring */
 :focus-visible {
-  outline: 2px solid #000000;
+  outline: 2px solid rgba(255, 255, 255, 0.6);
   outline-offset: 2px;
 }
 
@@ -140,7 +164,7 @@ select,
 /* Custom Scrollbar per spec */
 .thin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #000000 #D9D9D9;
+  scrollbar-color: #333333 #121212;
 }
 
 .thin-scrollbar::-webkit-scrollbar {
@@ -149,12 +173,12 @@ select,
 }
 
 .thin-scrollbar::-webkit-scrollbar-track {
-  background: #D9D9D9;
+  background: #121212;
   border-radius: 9999px;
 }
 
 .thin-scrollbar::-webkit-scrollbar-thumb {
-  background: #000000;
+  background: #333333;
   border-radius: 9999px;
 }
 

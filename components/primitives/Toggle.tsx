@@ -32,9 +32,9 @@ export const Toggle: React.FC<ToggleProps> = ({
             disabled && "cursor-not-allowed opacity-50"
           )}
         >
-          {label && <span className="font-semibold text-black text-sm sm:text-base">{label}</span>}
+          {label && <span className="font-[500] text-[#ededed] text-sm sm:text-base">{label}</span>}
           {description && (
-            <span className="text-xs sm:text-sm text-[var(--text-muted-sm)]">{description}</span>
+            <span className="text-xs sm:text-sm text-[#8E9096]">{description}</span>
           )}
         </label>
       )}
@@ -46,15 +46,15 @@ export const Toggle: React.FC<ToggleProps> = ({
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
         className={clsx(
-          "relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          checked ? "bg-[var(--lime)]" : "bg-[var(--chip-off)] border border-[var(--line)]"
+          "relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a] disabled:cursor-not-allowed disabled:opacity-50",
+          checked ? "bg-white" : "bg-[#222222] border border-white/10"
         )}
       >
         <span className="sr-only">{label || "Toggle"}</span>
         <span
           className={clsx(
-            "pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out",
-            checked ? "translate-x-5" : "translate-x-0"
+            "pointer-events-none inline-block h-6 w-6 transform rounded-full shadow-sm ring-0 transition duration-200 ease-in-out",
+            checked ? "translate-x-5 bg-black" : "translate-x-0 bg-[#888888]"
           )}
         />
       </button>

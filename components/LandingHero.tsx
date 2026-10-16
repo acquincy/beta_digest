@@ -2,8 +2,17 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { CloudSun, Mail, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
-import { IconTile } from "./primitives/IconTile";
+import {
+  CloudSun,
+  Mail,
+  CheckCircle2,
+  Loader2,
+  ArrowRight,
+  Sparkles,
+  Droplets,
+  Sun,
+  Wind,
+} from "lucide-react";
 import { DarkButton } from "./primitives/Button";
 import { HandDrawnEllipse } from "./HandDrawnEllipse";
 import { sendSignInLinkViaApi } from "@/lib/n8n";
@@ -35,76 +44,67 @@ export const LandingHero: React.FC = () => {
   return (
     <section
       aria-label="Introduction & Digest Overview"
-      className="relative w-full pt-10 min-h-[720px] pb-16 lg:pb-24 overflow-x-clip"
+      className="relative w-full pt-10 md:pt-14 min-h-[720px] pb-16 lg:pb-28 overflow-x-clip"
     >
-      <div className="w-full flex flex-col lg:flex-row items-start pl-6 lg:pl-[98px] pr-6 lg:pr-0">
-        {/* Left Column: 55% width */}
-        <div className="w-full lg:w-[55%] flex flex-col pt-4">
-          {/* Eyebrow: IconTile 64px (CloudSun) + label "Daily Digest" inline, 16px gap */}
-          <div className="flex items-center gap-4">
-            <IconTile icon={CloudSun} size={64} radius={20} iconSize={34} />
-            <span className="font-display font-[500] text-[22px] leading-none text-[#4B5563]">
-              Daily Digest
-            </span>
+      <div className="w-full max-w-[1240px] mx-auto flex flex-col lg:flex-row items-center lg:items-start justify-between px-6 lg:px-12 gap-12 lg:gap-8">
+        {/* Left Column */}
+        <div className="w-full lg:w-[52%] flex flex-col pt-2 lg:pt-6">
+          {/* Status Announcement Pill */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#161616]/90 border border-white/10 text-xs font-medium text-[#ededed] shadow-sm mb-6 w-max select-none">
+            <Sparkles className="w-3.5 h-3.5 text-[#6b62f2]" aria-hidden="true" />
+            <span>The morning digest, in five minutes</span>
+            <ArrowRight className="w-3 h-3 text-[#686868]" aria-hidden="true" />
           </div>
 
-          {/* 40px gap */}
-          <div className="h-10" />
-
-          {/* H1 "Your Personal Daily News & Weather Digest" (max-width 640px) */}
+          {/* H1 "Your Personal Daily News & Weather Digest" */}
           <h1
-            className="font-display font-[600] text-[38px] leading-[44px] md:text-[52px] md:leading-[60px] text-black max-w-[640px]"
-            style={{ letterSpacing: "-0.02em" }}
+            className="font-display font-[600] text-[36px] sm:text-[48px] lg:text-[56px] leading-[1.08] text-white tracking-tight"
           >
             Your Personal Daily News &amp; Weather Digest
           </h1>
 
-          {/* 24px gap */}
-          <div className="h-6" />
-
-          {/* Subhead "Delivered daily to your inbox" with HandDrawnEllipse around "your inbox" */}
-          <p className="font-sans font-[600] text-[20px] leading-[28px] md:text-[24px] md:leading-[32px] text-[#374151]">
+          {/* Subhead with HandDrawnEllipse */}
+          <p className="font-sans font-[500] text-[20px] sm:text-[22px] md:text-[24px] leading-[30px] md:leading-[34px] text-[#c2c2c2] mt-5">
             Delivered daily to{" "}
             <HandDrawnEllipse>
-              <span className="px-1 text-black font-[600]">your inbox</span>
+              <span className="px-1 text-white font-[600]">your inbox</span>
             </HandDrawnEllipse>
           </p>
 
-          {/* 24px gap */}
-          <div className="h-6" />
-
-          {/* Paragraph (max-width 500px) */}
-          <p className="font-sans font-[400] text-[18px] leading-[26px] md:text-[22px] md:leading-[28px] text-[var(--text)] text-opacity-80 max-w-[500px]">
+          {/* Concise Supporting Copy */}
+          <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] md:leading-[28px] text-[#8E9096] max-w-[500px] mt-4">
             Skip the noisy feeds and weather apps full of ads. Get a simple,
             accurate digest in your inbox every morning. Know exactly what to
             expect before you step outside.
           </p>
 
-          {/* 32px gap */}
-          <div className="h-8" />
-
           {/* CTA & Returning User Sign-in */}
-          <div className="flex flex-col gap-4 max-w-[500px]">
+          <div className="flex flex-col gap-4 max-w-[520px] mt-8">
             <div className="flex items-center gap-4 flex-wrap">
               <Link href="/signup" tabIndex={-1}>
-                <DarkButton>Get your daily digest</DarkButton>
+                <DarkButton
+                  className="!bg-white !text-black hover:!bg-[#eaeaea] shadow-[0_2px_12px_rgba(255,255,255,0.15)] font-medium"
+                >
+                  Get your daily digest
+                </DarkButton>
               </Link>
               {!showSignIn && (
                 <button
                   type="button"
                   onClick={() => setShowSignIn(true)}
-                  className="font-sans font-[600] text-[15px] text-[#4B5563] hover:text-black transition-colors underline underline-offset-4 decoration-[rgba(0,0,0,0.3)] hover:decoration-black cursor-pointer inline-flex items-center gap-1.5"
+                  className="font-sans font-[500] text-[14px] text-[#c2c2c2] hover:text-white px-4 py-3 rounded-full border border-white/10 hover:border-white/25 hover:bg-white/[0.04] transition-all cursor-pointer inline-flex items-center gap-2 select-none"
                 >
                   <span>Sign in on this device</span>
-                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  <ArrowRight className="w-3.5 h-3.5 text-[#8E9096]" aria-hidden="true" />
                 </button>
               )}
             </div>
 
+            {/* Inline Sign-in Disclosure Box */}
             {showSignIn && (
-              <div className="mt-2 p-5 rounded-[24px] bg-white border border-[var(--line)] shadow-sm">
+              <div className="mt-2 p-5 rounded-[24px] bg-[#161616] border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.6)] backdrop-blur-xl">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-sans font-[600] text-[14px] text-black">
+                  <span className="font-sans font-[600] text-[14px] text-white">
                     Sign in on this device
                   </span>
                   <button
@@ -114,17 +114,17 @@ export const LandingHero: React.FC = () => {
                       setSignInSent(false);
                       setSignInError(null);
                     }}
-                    className="text-xs text-[#6B7280] hover:text-black cursor-pointer"
+                    className="text-xs text-[#8E9096] hover:text-white cursor-pointer transition-colors"
                   >
                     Close
                   </button>
                 </div>
-                <p className="font-sans text-[13px] text-[#4B5563] mb-3">
+                <p className="font-sans text-[13px] text-[#8E9096] mb-3">
                   Enter your verified email. We&apos;ll send a one-click login link to your inbox.
                 </p>
                 {signInSent ? (
-                  <div className="flex items-center gap-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  <div className="flex items-center gap-2 text-sm text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-3">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
                     <span>Check your email! We sent a sign-in link if an account exists.</span>
                   </div>
                 ) : (
@@ -135,279 +135,174 @@ export const LandingHero: React.FC = () => {
                       value={signInEmail}
                       onChange={(e) => setSignInEmail(e.target.value)}
                       placeholder="your.email@example.com"
-                      className="flex-1 px-4 py-2.5 rounded-full border border-[var(--line)] bg-[#F8F9FA] text-sm text-black focus:outline-none focus:border-black transition-colors"
+                      className="flex-1 px-4 py-2.5 rounded-full border border-white/15 bg-[#101010] text-sm text-white placeholder-[#686868] focus:outline-none focus:border-white transition-colors"
                       disabled={signInLoading}
                     />
                     <button
                       type="submit"
                       disabled={signInLoading || !signInEmail.trim()}
-                      className="px-5 py-2.5 rounded-full bg-black text-white text-sm font-semibold hover:bg-black/90 disabled:opacity-50 transition-opacity whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
+                      className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 disabled:opacity-50 transition-opacity whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                     >
-                      {signInLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                      {signInLoading ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : null}
                       <span>Send link</span>
                     </button>
                   </form>
                 )}
                 {signInError && (
-                  <p className="text-xs text-red-600 mt-2">{signInError}</p>
+                  <p className="text-xs text-rose-400 mt-2">{signInError}</p>
                 )}
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column: 45% width desktop */}
-        <div className="w-full lg:w-[45%] relative mt-12 lg:mt-6">
-          {/* Concentric white circles centered behind the message cards */}
+        {/* Right Column: Visually Compelling Product Preview */}
+        <div className="w-full lg:w-[46%] relative flex justify-center lg:justify-end">
+          {/* Dusk Violet Radial Spotlight behind the preview */}
           <div
-            className="hidden lg:block absolute pointer-events-none"
+            className="absolute pointer-events-none"
             style={{
-              top: "240px",
-              left: "240px",
-              width: "0",
-              height: "0",
+              width: "480px",
+              height: "480px",
+              top: "-40px",
+              right: "-20px",
+              background: "radial-gradient(circle, rgba(107, 98, 242, 0.18) 0%, transparent 70%)",
               zIndex: 0,
             }}
             aria-hidden="true"
-          >
-            <div
-              className="absolute rounded-full"
-              style={{
-                width: "1040px",
-                height: "1040px",
-                top: "-520px",
-                left: "-520px",
-                backgroundColor: "rgba(255, 255, 255, 0.18)",
-              }}
-            />
-            <div
-              className="absolute rounded-full"
-              style={{
-                width: "760px",
-                height: "760px",
-                top: "-380px",
-                left: "-380px",
-                backgroundColor: "rgba(255, 255, 255, 0.22)",
-              }}
-            />
-          </div>
+          />
 
-          {/* Desktop stacked overlapping cards */}
-          <div className="hidden lg:block relative min-h-[550px] w-full z-10">
-            {/* Card 1 */}
-            <div
-              className="relative w-[447px] min-h-[320px] rounded-[32px] p-6 transition-all duration-200"
-              style={{
-                backgroundColor: "rgba(240, 240, 240, 0.78)",
-                backdropFilter: "blur(24px)",
-                WebkitBackdropFilter: "blur(24px)",
-                boxShadow: "var(--shadow-extrude)",
-              }}
-            >
-              {/* Header row */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
-                    <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
+          {/* Product Preview Card */}
+          <div className="relative z-10 w-full max-w-[490px] rounded-[32px] bg-[#161616]/95 backdrop-blur-2xl border border-white/10 shadow-[0_24px_64px_rgba(0,0,0,0.8),inset_0_1px_0_0_rgba(255,255,255,0.08)] p-6 sm:p-7 flex flex-col gap-5 transition-all">
+            {/* Dispatch Header Row */}
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="relative w-9 h-9 rounded-full bg-[#202020] border border-white/10 flex items-center justify-center shrink-0">
+                  <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
+                  <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#6b62f2]" />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="font-sans font-semibold text-[15px] text-white">
+                      BetaDigest
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-[#c2c2c2] border border-white/10">
+                      Daily Dispatch
+                    </span>
                   </div>
-                  <span
-                    className="font-sans font-[300] text-[22px] uppercase text-black"
-                    style={{ letterSpacing: "0.02em" }}
-                  >
-                    INBOX
+                  <span className="font-sans text-[12px] text-[#8E9096]">
+                    dispatch@betadigest.com · 07:00 AM
                   </span>
                 </div>
-                <span className="font-sans text-[16px] text-[#7A7A7A] tabular-nums">
-                  now
-                </span>
               </div>
-
-              {/* 16px gap */}
-              <div className="h-4" />
-
-              {/* Sender */}
-              <div className="font-display font-[600] text-[24px] text-black">
-                BetaDigest
-              </div>
-
-              {/* Subject */}
-              <div className="font-sans font-[600] text-[16px] text-black mt-1">
-                Your morning digest · Thu, Oct 8
-              </div>
-
-              {/* Preview body */}
-              <p className="font-sans font-[400] text-[16px] leading-[24px] text-black mt-2">
-                Weather in Seattle: 52°F, partly cloudy. High 58°F / low 45°F. Rain chance 30% this afternoon. UV index 3 (Moderate). Air quality 28 (Good).
-              </p>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[12px] font-medium text-[#c2c2c2] tabular-nums">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#6b62f2] animate-pulse" />
+                now
+              </span>
             </div>
 
-            {/* Card 2: offset ~ +112px right, +228px top, z-index above, width 445px */}
-            <div
-              className="absolute z-20 w-[445px] rounded-[32px] p-6 transition-all duration-200"
-              style={{
-                top: "228px",
-                left: "112px",
-                backgroundColor: "rgba(244, 244, 244, 0.96)",
-                backdropFilter: "blur(24px)",
-                WebkitBackdropFilter: "blur(24px)",
-                boxShadow: "var(--shadow-extrude)",
-              }}
-            >
-              {/* Header row */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
-                    <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
+            {/* Subject Line */}
+            <div className="font-display font-[500] text-[18px] text-white tracking-tight -mt-1">
+              Your morning digest · Seattle (52°F, Partly Cloudy)
+            </div>
+
+            {/* Weather Module Preview Card */}
+            <div className="rounded-[20px] bg-white/[0.03] border border-white/10 p-4 sm:p-5 flex flex-col gap-3.5">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center">
+                    <CloudSun className="w-6 h-6 text-[#ededed]" />
                   </div>
-                  <span
-                    className="font-sans font-[300] text-[22px] uppercase text-black"
-                    style={{ letterSpacing: "0.02em" }}
-                  >
-                    INBOX
-                  </span>
+                  <div>
+                    <div className="font-sans font-semibold text-[15px] text-white">
+                      Seattle, WA
+                    </div>
+                    <div className="font-sans text-[12px] text-[#8E9096]">
+                      Partly cloudy · High 58° / Low 45°
+                    </div>
+                  </div>
                 </div>
-                <span className="font-sans text-[16px] text-[#7A7A7A] tabular-nums">
-                  now
-                </span>
+                <div className="font-display font-[600] text-[32px] leading-none text-white tabular-nums">
+                  52°<span className="text-[18px] font-[400] text-[#8E9096]">F</span>
+                </div>
               </div>
 
-              {/* 16px gap */}
-              <div className="h-4" />
+              {/* Weather Metrics Pills */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1a1a1a] border border-white/10 text-[11px] text-[#c2c2c2]">
+                  <Droplets className="w-3 h-3 text-[#6b62f2]" />
+                  <span>Rain: 30% afternoon</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1a1a1a] border border-white/10 text-[11px] text-[#c2c2c2]">
+                  <Sun className="w-3 h-3 text-amber-400" />
+                  <span>UV Index: 3 (Mod)</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1a1a1a] border border-white/10 text-[11px] text-[#c2c2c2]">
+                  <Wind className="w-3 h-3 text-emerald-400" />
+                  <span>Air Quality: 28 (Good)</span>
+                </div>
+              </div>
+            </div>
 
-              {/* Subject */}
-              <div className="font-display font-[600] text-[20px] text-black">
-                Top stories today
+            {/* News Module Preview Section */}
+            <div className="flex flex-col gap-2.5">
+              <div className="text-[11px] font-sans font-semibold uppercase tracking-wider text-[#686868]">
+                TOP 5 ESSENTIAL STORIES
               </div>
 
-              {/* Three headline lines each with one-line grey summary */}
-              <div className="mt-3 space-y-2.5">
-                <div>
-                  <div className="font-sans font-[600] text-[15px] leading-snug text-black">
+              {/* Story 1 */}
+              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/15 transition-colors">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/10 text-white">
+                    Economy
+                  </span>
+                  <span className="font-sans font-semibold text-[13px] text-white leading-snug">
                     Central banks advance unified liquidity framework
-                  </div>
-                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
-                    Updated capital adequacy reserves reduce cross-border transfer friction.
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-sans font-[600] text-[15px] leading-snug text-black">
-                    Offshore clean power generation exceeds autumn benchmark
-                  </div>
-                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
-                    Utility storage clusters produce eighteen percent above projected seasonal totals.
-                  </div>
-                </div>
-
-                <div>
-                  <div className="font-sans font-[600] text-[15px] leading-snug text-black">
-                    Metropolitan transit authority deploys automated dispatch
-                  </div>
-                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
-                    Telemetry upgrades across commuter rail lines cut morning transfer delays.
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-[rgba(0,0,0,0.08)] font-sans font-[500] text-[14px] text-black">
-                Read the full digest in your inbox
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile vertical stack */}
-          <div className="flex flex-col lg:hidden gap-4 w-full max-w-[447px]">
-            {/* Card 1 */}
-            <div
-              className="w-full rounded-[32px] p-6"
-              style={{
-                backgroundColor: "rgba(240, 240, 240, 0.92)",
-                boxShadow: "var(--shadow-extrude)",
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
-                    <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
-                  </div>
-                  <span
-                    className="font-sans font-[300] text-[20px] uppercase text-black"
-                    style={{ letterSpacing: "0.02em" }}
-                  >
-                    INBOX
                   </span>
                 </div>
-                <span className="font-sans text-[15px] text-[#7A7A7A] tabular-nums">
-                  now
-                </span>
+                <p className="font-sans text-[12px] text-[#8E9096] leading-relaxed line-clamp-1">
+                  Updated capital adequacy reserves reduce cross-border transfer friction.
+                </p>
               </div>
-              <div className="font-display font-[600] text-[22px] text-black mt-4">
-                BetaDigest
-              </div>
-              <div className="font-sans font-[600] text-[15px] text-black mt-1">
-                Your morning digest · Thu, Oct 8
-              </div>
-              <p className="font-sans font-[400] text-[15px] leading-[22px] text-black mt-2">
-                Weather in Seattle: 52°F, partly cloudy. High 58°F / low 45°F. Rain chance 30% this afternoon. UV index 3 (Moderate). Air quality 28 (Good).
-              </p>
-            </div>
 
-            {/* Card 2 */}
-            <div
-              className="w-full rounded-[32px] p-6"
-              style={{
-                backgroundColor: "rgba(244, 244, 244, 0.96)",
-                boxShadow: "var(--shadow-extrude)",
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center shrink-0">
-                    <Mail className="w-4 h-4 text-white stroke-[2]" aria-hidden="true" />
-                  </div>
-                  <span
-                    className="font-sans font-[300] text-[20px] uppercase text-black"
-                    style={{ letterSpacing: "0.02em" }}
-                  >
-                    INBOX
+              {/* Story 2 */}
+              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/15 transition-colors">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/10 text-white">
+                    Technology
+                  </span>
+                  <span className="font-sans font-semibold text-[13px] text-white leading-snug">
+                    Offshore clean power exceeds seasonal benchmarks
                   </span>
                 </div>
-                <span className="font-sans text-[15px] text-[#7A7A7A] tabular-nums">
-                  now
-                </span>
+                <p className="font-sans text-[12px] text-[#8E9096] leading-relaxed line-clamp-1">
+                  Utility storage clusters produce eighteen percent above projected autumn totals.
+                </p>
               </div>
-              <div className="font-display font-[600] text-[20px] text-black mt-4">
-                Top stories today
-              </div>
-              <div className="mt-3 space-y-2.5">
-                <div>
-                  <div className="font-sans font-[600] text-[14px] leading-snug text-black">
-                    Central banks advance unified liquidity framework
-                  </div>
-                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
-                    Updated capital adequacy reserves reduce cross-border transfer friction.
-                  </div>
+
+              {/* Story 3 */}
+              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/15 transition-colors">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/10 text-white">
+                    Transit
+                  </span>
+                  <span className="font-sans font-semibold text-[13px] text-white leading-snug">
+                    Metropolitan rail deploys automated dispatch
+                  </span>
                 </div>
-                <div>
-                  <div className="font-sans font-[600] text-[14px] leading-snug text-black">
-                    Offshore clean power generation exceeds autumn benchmark
-                  </div>
-                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
-                    Utility storage clusters produce eighteen percent above projected seasonal totals.
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans font-[600] text-[14px] leading-snug text-black">
-                    Metropolitan transit authority deploys automated dispatch
-                  </div>
-                  <div className="font-sans font-[400] text-[13px] text-[#6B6F76] truncate">
-                    Telemetry upgrades across commuter rail lines cut morning transfer delays.
-                  </div>
-                </div>
+                <p className="font-sans text-[12px] text-[#8E9096] leading-relaxed line-clamp-1">
+                  Telemetry upgrades across commuter rail lines cut morning transfer delays.
+                </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-[rgba(0,0,0,0.08)] font-sans font-[500] text-[14px] text-black">
-                Read the full digest in your inbox
-              </div>
+            </div>
+
+            {/* Footer Summary Strip */}
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[12px] text-[#8E9096]">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#6b62f2]" />
+                <span>5-minute read</span>
+              </span>
+              <span>Delivered at your chosen hour</span>
             </div>
           </div>
         </div>

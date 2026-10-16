@@ -285,7 +285,7 @@ export const TopicPreferencesEditor: React.FC = () => {
     return (
       <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8 md:py-12 overflow-x-hidden">
         <CanvasA />
-        <div className="w-full max-w-[768px] h-[520px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+        <div className="w-full max-w-[768px] h-[520px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] animate-pulse" />
       </div>
     );
   }
@@ -328,36 +328,36 @@ export const TopicPreferencesEditor: React.FC = () => {
       >
         {/* Header Badge */}
         <div className="flex items-center justify-between mb-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F6FFDD] border border-[rgba(0,0,0,0.08)]">
-            <Sliders className="w-3.5 h-3.5 text-black" aria-hidden="true" />
-            <span className="font-sans font-[600] text-[12px] uppercase tracking-wider text-black">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10">
+            <Sliders className="w-3.5 h-3.5 text-white" aria-hidden="true" />
+            <span className="font-sans font-[600] text-[12px] uppercase tracking-wider text-white">
               Topic Preferences
             </span>
           </div>
 
           <Link
             href="/dashboard"
-            className="font-sans font-[500] text-[13px] text-[#666] hover:text-black transition-colors"
+            className="font-sans font-[500] text-[13px] text-[#8E9096] hover:text-white transition-colors"
           >
             Back to Dashboard
           </Link>
         </div>
 
         {/* Title */}
-        <h1 className="font-display font-[700] text-[28px] md:text-[34px] leading-tight text-black">
+        <h1 className="font-display font-[700] text-[28px] md:text-[34px] leading-tight text-white">
           Customize your briefing topics
         </h1>
 
-        <p className="font-sans font-[400] text-[16px] md:text-[17px] leading-[25px] text-[var(--text-muted)] mt-1.5">
+        <p className="font-sans font-[400] text-[16px] md:text-[17px] leading-[25px] text-[#8E9096] mt-1.5">
           Select up to 3 weather metrics and up to 5 editorial news categories. Your updates will be personalized to your selections.
         </p>
 
         {errorMessage && (
           <div
             role="alert"
-            className="mt-4 p-4 rounded-[18px] bg-red-50 border border-red-200 text-red-800 flex items-center gap-2.5 font-sans text-[14px]"
+            className="mt-4 p-4 rounded-[18px] bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-2.5 font-sans text-[14px]"
           >
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-600" aria-hidden="true" />
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" aria-hidden="true" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -370,20 +370,20 @@ export const TopicPreferencesEditor: React.FC = () => {
           <SectionCard>
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                <Sun className="w-4 h-4 text-black" aria-hidden="true" />
-                <h2 className="font-sans font-[600] text-[18px] text-black">
+                <Sun className="w-4 h-4 text-white" aria-hidden="true" />
+                <h2 className="font-sans font-[600] text-[18px] text-white">
                   Your weather details
                 </h2>
               </div>
               <span
                 className={`font-sans font-[600] text-[14px] tabular-nums px-2.5 py-0.5 rounded-full ${
-                  weatherTopics.length === 3 ? "bg-[var(--lime)] text-black" : "bg-neutral-100 text-[#666]"
+                  weatherTopics.length === 3 ? "bg-white text-black" : "bg-white/[0.06] text-[#8E9096]"
                 }`}
               >
                 {weatherTopics.length}/3
               </span>
             </div>
-            <p className="font-sans font-[400] text-[14px] text-[var(--text-muted-sm)] mb-4">
+            <p className="font-sans font-[400] text-[14px] text-[#8E9096] mb-4">
               Choose up to 3 weather telemetry points for {prefs.city || "your city"}.
             </p>
 
@@ -415,7 +415,7 @@ export const TopicPreferencesEditor: React.FC = () => {
             </div>
 
             {weatherTopics.length >= 3 && (
-              <p className="text-[12px] text-[var(--text-muted-sm)] mt-3">
+              <p className="text-[12px] text-[#8E9096] mt-3">
                 Maximum 3 weather points reached. Deselect one to add another.
               </p>
             )}
@@ -425,20 +425,20 @@ export const TopicPreferencesEditor: React.FC = () => {
           <SectionCard>
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-black" aria-hidden="true" />
-                <h2 className="font-sans font-[600] text-[18px] text-black">
+                <Sparkles className="w-4 h-4 text-white" aria-hidden="true" />
+                <h2 className="font-sans font-[600] text-[18px] text-white">
                   Your news categories
                 </h2>
               </div>
               <span
                 className={`font-sans font-[600] text-[14px] tabular-nums px-2.5 py-0.5 rounded-full ${
-                  newsTopics.length === 5 ? "bg-[var(--lime)] text-black" : "bg-neutral-100 text-[#666]"
+                  newsTopics.length === 5 ? "bg-white text-black" : "bg-white/[0.06] text-[#8E9096]"
                 }`}
               >
                 {newsTopics.length}/5
               </span>
             </div>
-            <p className="font-sans font-[400] text-[14px] text-[var(--text-muted-sm)] mb-4">
+            <p className="font-sans font-[400] text-[14px] text-[#8E9096] mb-4">
               Choose up to 5 editorial topics for your daily briefing.
             </p>
 
@@ -470,7 +470,7 @@ export const TopicPreferencesEditor: React.FC = () => {
             </div>
 
             {newsTopics.length >= 5 && (
-              <p className="text-[12px] text-[var(--text-muted-sm)] mt-3">
+              <p className="text-[12px] text-[#8E9096] mt-3">
                 Maximum 5 news topics reached. Deselect one to add another.
               </p>
             )}

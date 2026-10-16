@@ -33,7 +33,7 @@ export default function RootLayout({
       lang="en"
       className={`${redHatDisplay.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[var(--canvas)] text-[var(--text)] selection:bg-[var(--lime)] selection:text-black">
+      <body className="min-h-full flex flex-col bg-[var(--canvas)] text-[var(--text)] selection:bg-[#6b62f2] selection:text-white">
         {/* Hidden SVG defining linearGradient for icons */}
         <svg
           width="0"
@@ -44,8 +44,13 @@ export default function RootLayout({
         >
           <defs>
             <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#E5A3D8" />
-              <stop offset="100%" stopColor="#E2DB7C" />
+              <stop offset="0%" stopColor="#FFFFFF" />
+              <stop offset="100%" stopColor="#6B62F2" />
+            </linearGradient>
+            <linearGradient id="duskGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="transparent" />
+              <stop offset="50%" stopColor="#6B62F2" stopOpacity="0.565" />
+              <stop offset="100%" stopColor="transparent" />
             </linearGradient>
           </defs>
         </svg>

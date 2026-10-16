@@ -18,38 +18,38 @@ export default function CreditsPage() {
       <Header />
 
       <main className="flex-grow flex items-center justify-center p-4 py-8">
-        <div className="w-full max-w-2xl bg-white border border-[var(--line)] rounded-[32px] md:rounded-[40px] p-6 sm:p-10 shadow-[var(--shadow-float)] flex flex-col gap-6">
+        <div className="w-full max-w-2xl bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] p-6 sm:p-10 shadow-2xl flex flex-col gap-6">
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-black hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8E9096] hover:text-white transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
               Back to BetaDigest
             </Link>
           </div>
 
-          <div className="border-b border-[var(--line)] pb-4">
-            <span className="font-sans text-[12px] font-bold text-[var(--text-muted-sm)] uppercase tracking-wider">
+          <div className="border-b border-white/10 pb-4">
+            <span className="font-sans text-[12px] font-bold text-[#8E9096] uppercase tracking-wider">
               LICENSING &amp; ATTRIBUTION
             </span>
-            <h1 className="font-display font-[700] text-2xl sm:text-3xl text-black mt-1">
+            <h1 className="font-display font-[700] text-2xl sm:text-3xl text-white mt-1">
               Terms, Privacy &amp; Credits
             </h1>
-            <p className="font-sans text-sm mt-2 text-[var(--text-muted-sm)]">
+            <p className="font-sans text-sm mt-2 text-[#8E9096]">
               BetaDigest provides daily weather and news summaries. All photographic assets referenced in public previews are licensed under the Unsplash License:
             </p>
           </div>
 
-          <ul className="divide-y divide-[var(--line)] text-sm">
+          <ul className="divide-y divide-white/10 text-sm">
             {ALL_IMAGE_CREDITS.map((item, idx) => (
               <li
                 key={idx}
                 className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1"
               >
                 <div>
-                  <span className="font-semibold text-black">{item.photographer}</span>
-                  <span className="text-xs text-[var(--text-muted-sm)] block sm:inline sm:ml-2">
+                  <span className="font-semibold text-white">{item.photographer}</span>
+                  <span className="text-xs text-[#8E9096] block sm:inline sm:ml-2">
                     ({item.role})
                   </span>
                 </div>
@@ -57,17 +57,17 @@ export default function CreditsPage() {
                   href={`https://unsplash.com/photos/${item.unsplashId}`}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="text-xs text-black font-medium hover:underline self-start sm:self-auto tabular-nums"
+                  className="text-xs text-[#8E9096] hover:text-white font-medium hover:underline self-start sm:self-auto tabular-nums transition-colors"
                 >
-                  View on Unsplash ↗
+                  View on Unsplash
                 </a>
               </li>
             ))}
           </ul>
 
-          <div className="pt-4 border-t border-[var(--line)] text-xs text-[var(--text-muted-sm)] flex justify-between items-center">
+          <div className="pt-4 border-t border-white/10 text-xs text-[#8E9096] flex justify-between items-center">
             <span>BetaDigest Editorial Engine</span>
-            <Link href="/" className="hover:text-black font-medium">
+            <Link href="/" className="hover:text-white font-medium transition-colors">
               BetaDigest Home
             </Link>
           </div>

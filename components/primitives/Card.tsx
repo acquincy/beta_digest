@@ -23,7 +23,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <Component
       className={clsx(
-        "bg-white border border-[var(--line)] rounded-[24px] transition-colors duration-150",
+        "bg-[#161616] text-[#ededed] border border-white/10 rounded-[24px] transition-colors duration-150 shadow-[0_4px_20px_rgba(0,0,0,0.3)]",
         paddingStyles[padding],
         className
       )}

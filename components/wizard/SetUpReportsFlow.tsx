@@ -242,11 +242,11 @@ export const SetUpReportsFlow: React.FC = () => {
         >
           <Stepper currentStep={1} />
 
-          <h1 className="font-display font-[600] text-[26px] md:text-[32px] leading-[37px] text-black">
+          <h1 className="font-display font-[600] text-[26px] md:text-[32px] leading-[37px] text-white tracking-tight">
             When do you want your digest?
           </h1>
 
-          <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1">
+          <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] text-[#8E9096] mt-1">
             Choose the time you would like to receive your daily digest.
           </p>
 
@@ -254,13 +254,13 @@ export const SetUpReportsFlow: React.FC = () => {
 
           {/* SectionCard "Delivery time" with 24 hourly options */}
           <SectionCard>
-            <h2 className="font-sans font-[600] text-[18px] leading-[24px] text-black">
+            <h2 className="font-sans font-[600] text-[18px] leading-[24px] text-white">
               Delivery time
             </h2>
-            <p className="font-sans font-[400] text-[14px] leading-[20px] text-[var(--text-muted-sm)] mt-1">
+            <p className="font-sans font-[400] text-[14px] leading-[20px] text-[#8E9096] mt-1">
               What time would you like to receive your daily digest?
             </p>
-            <div className="mt-6 flex items-center gap-2 font-sans text-[16px] text-black">
+            <div className="mt-6 flex items-center gap-2 font-sans text-[16px] text-[#ededed]">
               <span>Receive digests at</span>
               <select
                 value={prefs.deliveryHour}
@@ -270,10 +270,10 @@ export const SetUpReportsFlow: React.FC = () => {
                     deliveryHour: parseInt(e.target.value, 10),
                   }))
                 }
-                className="bg-transparent border-0 border-b border-black font-semibold text-black p-0 pr-4 pb-0.5 outline-none focus:outline-none focus:border-b-2 cursor-pointer tabular-nums"
+                className="bg-transparent border-0 border-b border-white/30 font-semibold text-white p-0 pr-4 pb-0.5 outline-none focus:outline-none focus:border-b-2 focus:border-white cursor-pointer tabular-nums transition-colors"
               >
                 {HOURLY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
+                  <option key={opt.value} value={opt.value} className="bg-[#161616] text-white">
                     {opt.label}
                   </option>
                 ))}
@@ -300,11 +300,11 @@ export const SetUpReportsFlow: React.FC = () => {
         >
           <Stepper currentStep={2} />
 
-          <h1 className="font-display font-[600] text-[26px] md:text-[32px] leading-[37px] text-black">
+          <h1 className="font-display font-[600] text-[26px] md:text-[32px] leading-[37px] text-white tracking-tight">
             What do you want in your digest?
           </h1>
 
-          <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1">
+          <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] text-[#8E9096] mt-1">
             Pick up to 3 weather details and up to 5 news topics.
           </p>
 
@@ -315,14 +315,14 @@ export const SetUpReportsFlow: React.FC = () => {
             {/* 1. Your weather */}
             <SectionCard>
               <div className="flex items-center justify-between mb-1">
-                <h2 className="font-sans font-[600] text-[18px] text-black">
+                <h2 className="font-sans font-[600] text-[18px] text-white">
                   Your weather
                 </h2>
-                <span className="font-sans font-[600] text-[14px] text-[var(--text-muted-sm)] tabular-nums">
+                <span className="font-sans font-[600] text-[14px] text-[#8E9096] tabular-nums">
                   ({weatherTopics.length}/3)
                 </span>
               </div>
-              <p className="font-sans font-[400] text-[14px] text-[var(--text-muted-sm)] mb-4">
+              <p className="font-sans font-[400] text-[14px] text-[#8E9096] mb-4">
                 Choose up to 3 details
               </p>
 
@@ -359,14 +359,14 @@ export const SetUpReportsFlow: React.FC = () => {
             {/* 2. Your news */}
             <SectionCard>
               <div className="flex items-center justify-between mb-1">
-                <h2 className="font-sans font-[600] text-[18px] text-black">
+                <h2 className="font-sans font-[600] text-[18px] text-white">
                   Your news
                 </h2>
-                <span className="font-sans font-[600] text-[14px] text-[var(--text-muted-sm)] tabular-nums">
+                <span className="font-sans font-[600] text-[14px] text-[#8E9096] tabular-nums">
                   ({newsTopics.length}/5)
                 </span>
               </div>
-              <p className="font-sans font-[400] text-[14px] text-[var(--text-muted-sm)] mb-4">
+              <p className="font-sans font-[400] text-[14px] text-[#8E9096] mb-4">
                 Choose up to 5 topics
               </p>
 
@@ -394,7 +394,7 @@ export const SetUpReportsFlow: React.FC = () => {
               </div>
 
               {newsTopics.length >= 5 && (
-                <p className="text-[13px] text-[var(--text-muted-sm)] mt-3">
+                <p className="text-[13px] text-[#8E9096] mt-3">
                   You&apos;ve reached the limit. Deselect one to choose another.
                 </p>
               )}
@@ -416,10 +416,10 @@ export const SetUpReportsFlow: React.FC = () => {
         >
           <Stepper currentStep={3} />
 
-          <h1 className="font-display font-[600] text-[28px] md:text-[32px] leading-[37px] text-black">
+          <h1 className="font-display font-[600] text-[28px] md:text-[32px] leading-[37px] text-white tracking-tight">
             Review your digest
           </h1>
-          <p className="font-sans font-[400] text-[18px] leading-[26px] text-[var(--text-muted)] mt-1">
+          <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] text-[#8E9096] mt-1">
             Here&apos;s a preview of what lands in your inbox.
           </p>
 
@@ -427,22 +427,22 @@ export const SetUpReportsFlow: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8 items-start">
             {/* Left 340px summary SectionCard */}
             <div className="lg:col-span-4 w-full">
-              <SectionCard className="divide-y divide-[rgba(0,0,0,0.08)]">
+              <SectionCard className="divide-y divide-white/10">
                 {/* Delivery time row */}
                 <div className="py-4 first:pt-0 flex items-center justify-between">
                   <div>
-                    <span className="font-sans font-[600] text-[14px] text-black">
+                    <span className="font-sans font-[600] text-[14px] text-white">
                       Delivery time
                     </span>
                     <button
                       type="button"
                       onClick={() => setStep(1)}
-                      className="block text-[14px] text-[var(--text-muted-sm)] underline hover:text-black cursor-pointer text-left mt-0.5"
+                      className="block text-[14px] text-[#8E9096] underline hover:text-white cursor-pointer text-left mt-0.5 transition-colors"
                     >
                       Edit
                     </button>
                   </div>
-                  <span className="font-sans font-[600] text-[14px] text-black tabular-nums">
+                  <span className="font-sans font-[600] text-[14px] text-white tabular-nums">
                     {deliveryTimeFormatted}
                   </span>
                 </div>
@@ -450,16 +450,16 @@ export const SetUpReportsFlow: React.FC = () => {
                 {/* Location row */}
                 <div className="py-4 flex items-center justify-between">
                   <div>
-                    <span className="font-sans font-[600] text-[14px] text-black">
+                    <span className="font-sans font-[600] text-[14px] text-white">
                       Location
                     </span>
-                    <div className="font-sans text-[13px] text-[var(--text-muted-sm)] mt-0.5">
+                    <div className="font-sans text-[13px] text-[#8E9096] mt-0.5">
                       {locationLabel}
                     </div>
                   </div>
                   <Link
                     href="/basic-info"
-                    className="text-[14px] text-[var(--text-muted-sm)] underline hover:text-black shrink-0 ml-3"
+                    className="text-[14px] text-[#8E9096] underline hover:text-white shrink-0 ml-3 transition-colors"
                   >
                     Edit
                   </Link>
@@ -470,18 +470,18 @@ export const SetUpReportsFlow: React.FC = () => {
                   <div className="py-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-sans font-[600] text-[14px] text-black">
+                        <span className="font-sans font-[600] text-[14px] text-white">
                           Weather topics
                         </span>
                         <button
                           type="button"
                           onClick={() => setStep(2)}
-                          className="text-[14px] text-[var(--text-muted-sm)] underline hover:text-black cursor-pointer"
+                          className="text-[14px] text-[#8E9096] underline hover:text-white cursor-pointer transition-colors"
                         >
                           Edit
                         </button>
                       </div>
-                      <span className="font-sans text-[13px] text-[var(--text-muted-sm)] tabular-nums">
+                      <span className="font-sans text-[13px] text-[#8E9096] tabular-nums">
                         ({weatherTopics.length}/3)
                       </span>
                     </div>
@@ -492,11 +492,10 @@ export const SetUpReportsFlow: React.FC = () => {
                         return (
                           <div
                             key={topId}
-                            className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-[var(--lime)] select-none"
-                            style={{ backgroundColor: "var(--lime-tint)" }}
+                            className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-white/10 bg-white/[0.04] text-white select-none"
                           >
                             <GradientIcon icon={Icon} size={16} />
-                            <span className="font-sans text-[13px] text-black font-medium">
+                            <span className="font-sans text-[13px] text-white font-medium">
                               {WEATHER_TOPIC_LABELS[topId]}
                             </span>
                           </div>
@@ -511,18 +510,18 @@ export const SetUpReportsFlow: React.FC = () => {
                   <div className="py-4 last:pb-0">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-sans font-[600] text-[14px] text-black">
+                        <span className="font-sans font-[600] text-[14px] text-white">
                           News topics
                         </span>
                         <button
                           type="button"
                           onClick={() => setStep(2)}
-                          className="text-[14px] text-[var(--text-muted-sm)] underline hover:text-black cursor-pointer"
+                          className="text-[14px] text-[#8E9096] underline hover:text-white cursor-pointer transition-colors"
                         >
                           Edit
                         </button>
                       </div>
-                      <span className="font-sans text-[13px] text-[var(--text-muted-sm)] tabular-nums">
+                      <span className="font-sans text-[13px] text-[#8E9096] tabular-nums">
                         ({newsTopics.length}/5)
                       </span>
                     </div>
@@ -533,11 +532,10 @@ export const SetUpReportsFlow: React.FC = () => {
                         return (
                           <div
                             key={topId}
-                            className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-[var(--lime)] select-none"
-                            style={{ backgroundColor: "var(--lime-tint)" }}
+                            className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-white/10 bg-white/[0.04] text-white select-none"
                           >
                             <GradientIcon icon={Icon} size={16} />
-                            <span className="font-sans text-[13px] text-black font-medium">
+                            <span className="font-sans text-[13px] text-white font-medium">
                               {NEWS_TOPIC_LABELS[topId]}
                             </span>
                           </div>
@@ -551,44 +549,44 @@ export const SetUpReportsFlow: React.FC = () => {
 
             {/* Right flexible email preview panel */}
             <div className="lg:col-span-8 w-full flex flex-col">
-              <div className="w-full bg-white rounded-[24px] border border-[var(--line)] overflow-hidden">
-                {/* Header band bg #F2F2F2, padding 20px */}
-                <div className="bg-[#F2F2F2] p-5 flex flex-col gap-3">
+              <div className="w-full bg-[#161616] rounded-[24px] border border-white/10 overflow-hidden shadow-lg">
+                {/* Header band bg white/[0.04], padding 20px */}
+                <div className="bg-white/[0.03] border-b border-white/10 p-5 flex flex-col gap-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
                         <Mail className="w-5 h-5 text-white stroke-[2]" aria-hidden="true" />
                       </div>
                       <div>
-                        <div className="font-sans font-[600] text-[15px] text-black">
+                        <div className="font-sans font-[600] text-[15px] text-white">
                           BetaDigest &lt;dispatch@betadigest.com&gt;
                         </div>
-                        <div className="font-sans text-[13px] text-[#6B6F76]">
+                        <div className="font-sans text-[13px] text-[#8E9096]">
                           To: {prefs.name}
                         </div>
                       </div>
                     </div>
 
-                    <span className="font-sans text-[13px] text-[#6B6F76] tabular-nums">
+                    <span className="font-sans text-[13px] text-[#8E9096] tabular-nums">
                       Thu, Oct 8 · {deliveryTimeFormatted}
                     </span>
                   </div>
 
-                  <h3 className="font-display font-[700] text-[20px] text-black mt-2">
+                  <h3 className="font-display font-[700] text-[20px] text-white mt-2">
                     Your BetaDigest for Thursday, October 8
                   </h3>
                 </div>
 
                 {/* Email Body padding 24px */}
                 <div className="p-6 flex flex-col gap-6">
-                  <div className="font-sans font-[500] text-[18px] text-black">
+                  <div className="font-sans font-[500] text-[18px] text-white">
                     Good morning, {prefs.name}
                   </div>
 
                   {/* Weather block (only if weather topics selected) */}
                   {weatherTopics.length > 0 && (
-                    <div className="border-t border-[rgba(0,0,0,0.08)] pt-4">
-                      <h4 className="font-sans font-[700] text-[16px] text-black mb-3">
+                    <div className="border-t border-white/10 pt-4">
+                      <h4 className="font-sans font-[700] text-[16px] text-white mb-3">
                         Weather in {prefs.city}
                       </h4>
 
@@ -599,9 +597,9 @@ export const SetUpReportsFlow: React.FC = () => {
                             return (
                               <div
                                 key={topId}
-                                className="sm:col-span-3 p-3.5 rounded-[16px] bg-[var(--lime-tint)] border border-[rgba(0,0,0,0.06)] flex flex-col gap-2"
+                                className="sm:col-span-3 p-3.5 rounded-[16px] bg-white/[0.04] border border-white/10 flex flex-col gap-2"
                               >
-                                <div className="flex items-center gap-1.5 font-sans font-[600] text-[13px] text-black">
+                                <div className="flex items-center gap-1.5 font-sans font-[600] text-[13px] text-white">
                                   <GradientIcon icon={Icon} size={15} />
                                   <span>3-Hour Breakdown</span>
                                 </div>
@@ -609,9 +607,9 @@ export const SetUpReportsFlow: React.FC = () => {
                                   {weatherData.hourly.map((h, idx) => (
                                     <div
                                       key={idx}
-                                      className="text-center font-sans text-[12px] tabular-nums text-black"
+                                      className="text-center font-sans text-[12px] tabular-nums text-white"
                                     >
-                                      <div className="text-[#6B6F76]">{h.time}</div>
+                                      <div className="text-[#8E9096]">{h.time}</div>
                                       <div className="font-bold">{h.temp}{weatherData.tempUnit}</div>
                                     </div>
                                   ))}
@@ -624,9 +622,9 @@ export const SetUpReportsFlow: React.FC = () => {
                             return (
                               <div
                                 key={topId}
-                                className="sm:col-span-3 p-3.5 rounded-[16px] bg-white border border-[rgba(0,0,0,0.1)] flex flex-col gap-2"
+                                className="sm:col-span-3 p-3.5 rounded-[16px] bg-white/[0.04] border border-white/10 flex flex-col gap-2"
                               >
-                                <div className="flex items-center gap-1.5 font-sans font-[600] text-[13px] text-black">
+                                <div className="flex items-center gap-1.5 font-sans font-[600] text-[13px] text-white">
                                   <GradientIcon icon={Icon} size={15} />
                                   <span>3-Day Forecast</span>
                                 </div>
@@ -634,10 +632,10 @@ export const SetUpReportsFlow: React.FC = () => {
                                   {weatherData.threeDay.map((d, idx) => (
                                     <div
                                       key={idx}
-                                      className="p-2 rounded-[12px] bg-[#F9F9F9] text-center font-sans text-[12px] tabular-nums text-black"
+                                      className="p-2 rounded-[12px] bg-white/[0.04] border border-white/5 text-center font-sans text-[12px] tabular-nums text-white"
                                     >
                                       <div className="font-semibold">{d.day}</div>
-                                      <div className="text-[11px] text-[#6B6F76] truncate">{d.condition}</div>
+                                      <div className="text-[11px] text-[#8E9096] truncate">{d.condition}</div>
                                       <div className="font-bold mt-1">
                                         {d.high}° / {d.low}{weatherData.tempUnit}
                                       </div>
@@ -685,13 +683,13 @@ export const SetUpReportsFlow: React.FC = () => {
                           return (
                             <div
                               key={topId}
-                              className="p-3 rounded-[16px] bg-[#F9F9F9] border border-[rgba(0,0,0,0.06)] flex flex-col justify-between"
+                              className="p-3 rounded-[16px] bg-white/[0.04] border border-white/10 flex flex-col justify-between"
                             >
-                              <div className="flex items-center gap-1.5 font-sans font-[500] text-[12px] text-[#6B6F76]">
+                              <div className="flex items-center gap-1.5 font-sans font-[500] text-[12px] text-[#8E9096]">
                                 <GradientIcon icon={Icon} size={14} />
                                 <span className="truncate">{WEATHER_TOPIC_LABELS[topId]}</span>
                               </div>
-                              <div className="font-sans font-[700] text-[14px] text-black mt-2 tabular-nums">
+                              <div className="font-sans font-[700] text-[14px] text-white mt-2 tabular-nums">
                                 {labelVal}
                               </div>
                             </div>
@@ -703,8 +701,8 @@ export const SetUpReportsFlow: React.FC = () => {
 
                   {/* News block (only if news topics selected) */}
                   {newsTopics.length > 0 && (
-                    <div className="border-t border-[rgba(0,0,0,0.08)] pt-4">
-                      <h4 className="font-sans font-[700] text-[16px] text-black mb-3">
+                    <div className="border-t border-white/10 pt-4">
+                      <h4 className="font-sans font-[700] text-[16px] text-white mb-3">
                         Top 5 stories
                       </h4>
 
@@ -712,19 +710,13 @@ export const SetUpReportsFlow: React.FC = () => {
                         {stories.map((story, idx) => (
                           <div
                             key={`${story.id}-${idx}`}
-                            className="flex flex-col gap-1.5 pb-4 border-b border-[rgba(0,0,0,0.06)] last:border-0"
+                            className="flex flex-col gap-1.5 pb-4 border-b border-white/10 last:border-0"
                           >
                             <div className="flex items-center gap-2">
                               <span className="font-sans text-[12px] font-bold text-[#8E9096] tabular-nums">
                                 0{idx + 1}
                               </span>
-                              <span
-                                className="font-sans text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                                style={{
-                                  backgroundColor: "var(--lime-tint)",
-                                  color: "#000000",
-                                }}
-                              >
+                              <span className="font-sans text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/10">
                                 {story.topicLabel}
                               </span>
                               <span className="text-[12px] text-[#8E9096]">
@@ -732,17 +724,17 @@ export const SetUpReportsFlow: React.FC = () => {
                               </span>
                             </div>
 
-                            <div className="font-sans font-[600] text-[16px] leading-snug text-black">
+                            <div className="font-sans font-[600] text-[16px] leading-snug text-white">
                               {story.headline}
                             </div>
 
-                            <p className="font-sans font-[400] text-[14px] leading-relaxed text-[#6B6F76]">
+                            <p className="font-sans font-[400] text-[14px] leading-relaxed text-[#8E9096]">
                               {story.summary}
                             </p>
 
                             <a
                               href={story.url}
-                              className="font-sans font-[500] text-[14px] text-black underline hover:opacity-80 self-start"
+                              className="font-sans font-[500] text-[14px] text-white underline hover:opacity-80 self-start"
                             >
                               Read full story
                             </a>

@@ -46,29 +46,28 @@ export default function LoginPage() {
       <Header />
 
       <main className="flex-grow flex items-center justify-center p-4 py-8">
-        <div className="w-full max-w-[540px] bg-white rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-[var(--shadow-float)] step-enter">
+        <div className="w-full max-w-[540px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-xl step-enter">
           {sentMagicLink ? (
             <div role="status" aria-live="polite" className="flex flex-col items-center text-center">
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mb-6"
-                style={{ backgroundColor: "var(--lime)" }}
+                className="w-12 h-12 rounded-full flex items-center justify-center mb-6 bg-white shadow-sm"
               >
                 <Check className="w-6 h-6 text-black stroke-[3]" aria-hidden="true" />
               </div>
-              <h1 className="font-display font-[700] text-[32px] leading-tight text-black">
+              <h1 className="font-display font-[600] text-[32px] leading-tight text-white">
                 Check your inbox.
               </h1>
-              <p className="font-sans font-[400] text-[16px] text-[var(--text)] leading-relaxed mt-3">
+              <p className="font-sans font-[400] text-[16px] text-[#8E9096] leading-relaxed mt-3">
                 We sent a one-click reader key to{" "}
-                <strong className="text-black font-semibold">
+                <strong className="text-white font-semibold">
                   {email.trim()}
                 </strong>
                 . Use it to manage your topics, delivery window, and digest settings.
               </p>
-              <div className="pt-6 mt-6 border-t border-[var(--line)] w-full">
+              <div className="pt-6 mt-6 border-t border-white/10 w-full">
                 <Link
                   href="/"
-                  className="font-sans font-[600] text-[15px] underline text-black hover:opacity-80 inline-flex items-center gap-1.5"
+                  className="font-sans font-[500] text-[15px] underline text-white hover:opacity-80 inline-flex items-center gap-1.5"
                 >
                   <span>Return to front page</span>
                   <ArrowLeft className="w-4 h-4 rotate-180" aria-hidden="true" />
@@ -79,15 +78,15 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <IconTile icon={Mail} size={48} radius={14} iconSize={26} />
-                <span className="font-sans font-[600] text-[13px] tracking-wider text-[var(--text-muted-sm)] uppercase">
+                <span className="font-sans font-[600] text-[12px] tracking-widest text-[#8E9096] uppercase">
                   SUBSCRIBER PORTAL
                 </span>
               </div>
 
-              <h1 className="font-display font-[700] text-[32px] md:text-[36px] leading-tight text-black">
+              <h1 className="font-display font-[600] text-[32px] md:text-[36px] leading-tight text-white">
                 Welcome back.
               </h1>
-              <p className="font-sans font-[400] text-[16px] text-[var(--text)] leading-relaxed mt-2">
+              <p className="font-sans font-[400] text-[16px] text-[#8E9096] leading-relaxed mt-2">
                 Enter your subscriber email to receive an instant sign-in link
                 and manage your daily digest preferences.
               </p>
@@ -106,23 +105,23 @@ export default function LoginPage() {
                   required
                 />
 
-                <DarkButton type="submit" disabled={loading} className="w-full h-[56px] mt-2 flex items-center justify-center gap-2">
+                <DarkButton type="submit" disabled={loading} className="w-full h-[54px] mt-2 flex items-center justify-center gap-2 !bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-sm">
                   {loading && <Loader2 className="w-5 h-5 animate-spin" />}
                   <span>{loading ? "Sending link..." : "Send sign-in link"}</span>
                 </DarkButton>
               </form>
 
-              <div className="mt-6 pt-6 border-t border-[var(--line)] flex items-center justify-between text-[14px]">
+              <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between text-[14px]">
                 <Link
                   href="/"
-                  className="font-sans text-[var(--text-muted-sm)] hover:text-black inline-flex items-center gap-1"
+                  className="font-sans text-[#8E9096] hover:text-white inline-flex items-center gap-1 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Back to home</span>
                 </Link>
                 <Link
                   href="/signup"
-                  className="font-sans font-semibold text-black underline"
+                  className="font-sans font-medium text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
                 >
                   New subscriber? Join free
                 </Link>

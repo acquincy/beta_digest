@@ -67,14 +67,13 @@ export const IconTile: React.FC<IconTileProps> = ({
   return (
     <div
       className={clsx(
-        "relative bg-white flex items-center justify-center shrink-0 select-none",
+        "relative bg-[#161616] border border-white/10 flex items-center justify-center shrink-0 select-none shadow-[0_4px_20px_rgba(0,0,0,0.4)] backdrop-blur-md",
         className
       )}
       style={{
         width: `${size}px`,
         height: `${size}px`,
         borderRadius: `${effectiveRadius}px`,
-        boxShadow: "var(--shadow-tile)",
       }}
     >
       <GradientIcon icon={Icon} size={effectiveIconSize} />

@@ -30,28 +30,28 @@ export const DigestPreview: React.FC<DigestPreviewProps> = ({
       <div className="relative w-full flex items-center justify-center p-2 sm:p-4">
         <article
           aria-label="Email Digest Preview"
-          className="relative z-10 w-full max-w-[490px] p-6 sm:p-7 rounded-[32px] border border-[var(--line)] bg-white shadow-sm transition-all duration-200"
+          className="relative z-10 w-full max-w-[490px] p-6 sm:p-7 rounded-[32px] border border-white/10 bg-[#161616] text-[#ededed] shadow-[0_16px_48px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-all duration-200"
         >
-          <div className="flex flex-col gap-1.5 pb-3 border-b border-[var(--line)] text-xs font-sans">
+          <div className="flex flex-col gap-1.5 pb-3 border-b border-white/10 text-xs font-sans">
             <div className="flex items-center justify-between">
-              <span className="text-[var(--text-muted-sm)] flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-black" aria-hidden="true" />
-                From: <strong className="text-black font-semibold">BetaDigest</strong> &lt;dispatch@betadigest.com&gt;
+              <span className="text-[#8E9096] flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-white" aria-hidden="true" />
+                From: <strong className="text-white font-semibold">BetaDigest</strong> &lt;dispatch@betadigest.com&gt;
               </span>
-              <span className="tabular-nums text-[var(--text-muted-sm)] font-medium">
+              <span className="tabular-nums text-[#8E9096] font-medium">
                 07:00 AM
               </span>
             </div>
-            <div className="text-black font-medium">
+            <div className="text-white font-medium">
               Subject: Your morning digest · {city.city} ({city.currentTemp}{city.tempUnit})
             </div>
           </div>
 
           <div className="pt-4 flex flex-col gap-2">
-            <div className="font-sans text-[11px] font-bold uppercase tracking-wider text-black">
+            <div className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#686868]">
               DAILY DIGEST
             </div>
-            <p className="font-sans text-sm sm:text-base leading-relaxed text-black font-normal">
+            <p className="font-sans text-sm sm:text-base leading-relaxed text-[#ededed] font-normal whitespace-pre-wrap">
               {previewText}
             </p>
           </div>
