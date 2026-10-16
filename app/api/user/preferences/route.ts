@@ -40,8 +40,8 @@ export async function GET(req: NextRequest) {
         user: userData,
         preferences: {
           name: userData.name || "",
-          city: userData.city || "Seattle",
-          countryCode: userData.country_code || "US",
+          city: userData.city || "",
+          countryCode: userData.country_code || "",
           newsTopics: Array.isArray(userData.news_categories) ? userData.news_categories : [],
           weatherTopics: Array.isArray(userData.weather_categories) ? userData.weather_categories : [],
           sendTime: userData.send_time || "07:00:00",

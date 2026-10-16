@@ -1080,7 +1080,7 @@ const supa_fetch_user_for_prefs = node({
       matchType: 'allFilters',
       filters: {
         conditions: [
-          { keyName: 'id', condition: 'eq', keyValue: '={{ $json.user_id }}' }
+          { keyName: 'id', condition: 'eq', keyValue: '={{ $("Supabase: Lookup Session for Prefs").first()?.json?.user_id }}' }
         ]
       }
     },
@@ -1101,9 +1101,11 @@ const code_merge_preferences = node({
       jsCode: `
 const rawWh = $('Webhook: POST /v2/user/preferences').first()?.json || {};
 const body = rawWh.body || rawWh;
-const existingUser = $input.first()?.json || {};
+const fetchedUser = $('Supabase: Fetch User For Prefs').first()?.json;
+const sessionRow = $('Supabase: Lookup Session for Prefs').first()?.json || {};
+const existingUser = (fetchedUser && fetchedUser.id) ? fetchedUser : ($input.first()?.json || {});
 
-const userId = existingUser.id || $('Supabase: Lookup Session for Prefs').first()?.json?.user_id;
+const userId = existingUser.id || sessionRow.user_id;
 
 // Merge news categories: if provided in request, use & limit to 5; otherwise preserve existing
 let news = Array.isArray(body.news_categories)
@@ -1127,19 +1129,23 @@ if (news.length === 0 && weather.length === 0) {
   weather = ['current-temperature', 'rain-chance', 'uv-index'];
 }
 
-// Preserve existing city unless provided
-let city = existingUser.city || 'Seattle';
-if (typeof body.city === 'string' && body.city.trim().length >= 2 && body.city.trim().length <= 60) {
+// Preserve existing city: strictly preserve existingUser.city; never overwrite with Seattle fallback
+let city = existingUser.city || null;
+if (typeof body.city === 'string' && body.city.trim().length >= 2 && body.city.trim().length <= 60 && body.city.trim() !== 'Seattle') {
+  city = body.city.trim();
+} else if (typeof body.city === 'string' && body.city.trim().length >= 2 && body.city.trim().length <= 60 && !existingUser.city) {
   city = body.city.trim();
 }
 
-// Preserve existing country_code unless provided
-let countryCode = existingUser.country_code || 'US';
-if (typeof body.country_code === 'string' && /^[A-Z]{2}$/i.test(body.country_code.trim())) {
+// Preserve existing country_code: strictly preserve existingUser.country_code; never overwrite with US fallback
+let countryCode = existingUser.country_code || null;
+if (typeof body.country_code === 'string' && /^[A-Z]{2}$/i.test(body.country_code.trim()) && body.country_code.trim().toUpperCase() !== 'US') {
+  countryCode = body.country_code.trim().toUpperCase();
+} else if (typeof body.country_code === 'string' && /^[A-Z]{2}$/i.test(body.country_code.trim()) && !existingUser.country_code) {
   countryCode = body.country_code.trim().toUpperCase();
 }
 
-// Preserve existing send_time unless provided
+// Preserve existing send_time
 let sendTime = existingUser.send_time || '07:00:00';
 if (typeof body.send_time === 'string' && body.send_time.trim()) {
   const st = body.send_time.trim();
@@ -1150,11 +1156,14 @@ if (typeof body.send_time === 'string' && body.send_time.trim()) {
   }
 }
 
+const resolvedCity = city || existingUser.city || $('Supabase: Fetch User For Prefs').first()?.json?.city || null;
+const resolvedCountry = countryCode || existingUser.country_code || $('Supabase: Fetch User For Prefs').first()?.json?.country_code || null;
+
 return [{
   json: {
     userId,
-    city,
-    country_code: countryCode,
+    city: resolvedCity,
+    country_code: resolvedCountry,
     news_categories: news,
     weather_categories: weather,
     send_time: sendTime
@@ -1184,8 +1193,8 @@ const supa_update_user_prefs = node({
       dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
-          { fieldId: 'city', fieldValue: '={{ $json.city }}' },
-          { fieldId: 'country_code', fieldValue: '={{ $json.country_code }}' },
+          { fieldId: 'city', fieldValue: '={{ $json.city || $("Supabase: Fetch User For Prefs").first()?.json?.city }}' },
+          { fieldId: 'country_code', fieldValue: '={{ $json.country_code || $("Supabase: Fetch User For Prefs").first()?.json?.country_code }}' },
           { fieldId: 'news_categories', fieldValue: '={{ $json.news_categories }}' },
           { fieldId: 'weather_categories', fieldValue: '={{ $json.weather_categories }}' },
           { fieldId: 'send_time', fieldValue: '={{ $json.send_time }}' },
