@@ -1,7 +1,5 @@
 import { workflow, node, trigger, ifElse, newCredential } from '@n8n/workflow-sdk';
 
-
-
 // -------------------------------------------------------------
 // 1. CONFIG & SIGNUP
 // -------------------------------------------------------------
@@ -50,7 +48,81 @@ const code_validate_signup = node({
     name: 'Validate & Prepare Signup',
     parameters: {
       jsCode: `
-const crypto = require('crypto');
+function sha256(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let lengthProperty = 'length';
+  let i, j;
+  let result = '';
+  const words = [];
+  const asciiBitLength = ascii[lengthProperty] * 8;
+  let hash = [];
+  let k = [];
+  let primeCounter = 0;
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
+    }
+  }
+  hash = hash.slice(0, 8);
+  ascii += '\x80';
+  while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    j = ascii.charCodeAt(i);
+    if (j >> 8) return;
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+  words[words[lengthProperty]] = (asciiBitLength) | 0;
+  for (j = 0; j < words[lengthProperty];) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const a = hash[0], e = hash[4];
+      const temp1 = hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ ((~e) & hash[6]))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+            w[i - 16]
+            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7]
+            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0
+        );
+      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? 0 : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+function generateHexToken(len) {
+  let res = '';
+  const chars = '0123456789abcdef';
+  for (let i = 0; i < (len || 64); i++) {
+    res += chars[Math.floor(Math.random() * 16)];
+  }
+  return res;
+}
+
 const input = $input.first()?.json || {};
 const body = input.body || input;
 
@@ -59,8 +131,8 @@ if (!rawEmail || !rawEmail.includes('@') || rawEmail.length < 5) {
   return [{ json: { error: 'invalid_email', email: '' } }];
 }
 
-const rawToken = crypto.randomBytes(32).toString('hex');
-const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+const rawToken = generateHexToken(64);
+const tokenHash = sha256(rawToken);
 const now = new Date();
 const expiresAt24h = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
 const expiresAt15m = new Date(now.getTime() + 15 * 60 * 1000).toISOString();
@@ -68,8 +140,7 @@ const expiresAt15m = new Date(now.getTime() + 15 * 60 * 1000).toISOString();
 const appBaseUrl = $('Config: Signup Base URL').first()?.json?.APP_BASE_URL || 'https://betadigest.online';
 const verificationUrl = appBaseUrl + '/verify?token=' + rawToken;
 
-return [{
-  json: {
+return [{\n  json: {
     error: null,
     email: rawEmail,
     name: body.name || rawEmail.split('@')[0] || 'Reader',
@@ -131,9 +202,13 @@ const supa_lookup_signup_user = node({
   config: {
     name: 'Supabase: Lookup Signup Email',
     parameters: {
+      resource: 'row',
       operation: 'getAll',
       tableId: 'users',
+      returnAll: false,
       limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           {
@@ -146,10 +221,10 @@ const supa_lookup_signup_user = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const code_determine_signup_action = node({
@@ -216,7 +291,10 @@ const supa_create_user = node({
   config: {
     name: 'Supabase: Create New User',
     parameters: {
+      resource: 'row',
+      operation: 'create',
       tableId: 'users',
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'email', fieldValue: '={{ $json.email }}' },
@@ -237,10 +315,10 @@ const supa_create_user = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const if_signup_action_verified = ifElse({
@@ -270,13 +348,17 @@ const supa_update_login_token = node({
   config: {
     name: 'Supabase: Set Login Token',
     parameters: {
+      resource: 'row',
       operation: 'update',
       tableId: 'users',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'email', condition: 'eq', keyValue: '={{ $json.email }}' }
         ]
       },
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'verification_token', fieldValue: '={{ $json.tokenHash }}' },
@@ -287,10 +369,10 @@ const supa_update_login_token = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const supa_update_refresh_token = node({
@@ -299,13 +381,17 @@ const supa_update_refresh_token = node({
   config: {
     name: 'Supabase: Refresh Verification Token',
     parameters: {
+      resource: 'row',
       operation: 'update',
       tableId: 'users',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'email', condition: 'eq', keyValue: '={{ $json.email }}' }
         ]
       },
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'verification_token', fieldValue: '={{ $json.tokenHash }}' },
@@ -316,10 +402,10 @@ const supa_update_refresh_token = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const resend_send_verification = node({
@@ -337,10 +423,10 @@ const resend_send_verification = node({
     },
     credentials: {
       resendApi: newCredential('Resend account')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const resend_send_login_link = node({
@@ -358,10 +444,10 @@ const resend_send_login_link = node({
     },
     credentials: {
       resendApi: newCredential('Resend account')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const respond_signup_generic_success = node({
@@ -405,7 +491,81 @@ const code_hash_verify_token = node({
     name: 'Hash Verify Input Token',
     parameters: {
       jsCode: `
-const crypto = require('crypto');
+function sha256(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let lengthProperty = 'length';
+  let i, j;
+  let result = '';
+  const words = [];
+  const asciiBitLength = ascii[lengthProperty] * 8;
+  let hash = [];
+  let k = [];
+  let primeCounter = 0;
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
+    }
+  }
+  hash = hash.slice(0, 8);
+  ascii += '\x80';
+  while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    j = ascii.charCodeAt(i);
+    if (j >> 8) return;
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+  words[words[lengthProperty]] = (asciiBitLength) | 0;
+  for (j = 0; j < words[lengthProperty];) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const a = hash[0], e = hash[4];
+      const temp1 = hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ ((~e) & hash[6]))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+            w[i - 16]
+            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7]
+            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0
+        );
+      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? 0 : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+function generateHexToken(len) {
+  let res = '';
+  const chars = '0123456789abcdef';
+  for (let i = 0; i < (len || 64); i++) {
+    res += chars[Math.floor(Math.random() * 16)];
+  }
+  return res;
+}
+
 const input = $input.first()?.json || {};
 const body = input.body || input;
 
@@ -417,7 +577,7 @@ if (!rawToken || !sessionHash) {
   return [{ json: { error: 'missing_params', tokenHash: '', sessionHash: '' } }];
 }
 
-const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+const tokenHash = sha256(rawToken);
 return [{
   json: {
     error: null,
@@ -472,9 +632,13 @@ const supa_find_verify_token = node({
   config: {
     name: 'Supabase: Find Verification Token',
     parameters: {
+      resource: 'row',
       operation: 'getAll',
       tableId: 'users',
+      returnAll: false,
       limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'verification_token', condition: 'eq', keyValue: '={{ $json.tokenHash }}' }
@@ -483,10 +647,10 @@ const supa_find_verify_token = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const if_verify_token_valid = ifElse({
@@ -529,13 +693,17 @@ const supa_mark_user_verified = node({
   config: {
     name: 'Supabase: Mark User Verified',
     parameters: {
+      resource: 'row',
       operation: 'update',
       tableId: 'users',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'id', condition: 'eq', keyValue: '={{ $json.id }}' }
         ]
       },
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'verified', fieldValue: '={{ true }}' },
@@ -547,10 +715,10 @@ const supa_mark_user_verified = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const supa_insert_verified_session = node({
@@ -559,7 +727,10 @@ const supa_insert_verified_session = node({
   config: {
     name: 'Supabase: Insert Verified Session',
     parameters: {
+      resource: 'row',
+      operation: 'create',
       tableId: 'user_sessions',
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'user_id', fieldValue: '={{ $("Supabase: Find Verification Token").first()?.json?.id }}' },
@@ -571,10 +742,10 @@ const supa_insert_verified_session = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const respond_verify_success = node({
@@ -617,21 +788,25 @@ const supa_lookup_session = node({
   config: {
     name: 'Supabase: Lookup Session',
     parameters: {
+      resource: 'row',
       operation: 'getAll',
       tableId: 'user_sessions',
+      returnAll: false,
       limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
-          { keyName: 'token_hash', condition: 'eq', keyValue: '={{ ($json.body || $json).session_token_hash }}' }
+          { keyName: 'token_hash', condition: 'eq', keyValue: '={{ ($json.body?.session_token_hash || $json.session_token_hash) }}' }
         ]
       }
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const if_session_record_active = ifElse({
@@ -655,28 +830,19 @@ const if_session_record_active = ifElse({
   }
 });
 
-const respond_session_401 = node({
-  type: 'n8n-nodes-base.respondToWebhook',
-  version: 1.5,
-  config: {
-    name: 'Respond Session 401',
-    parameters: {
-      respondWith: 'json',
-      responseBody: '={{ JSON.stringify({ valid: false }) }}',
-      options: { responseCode: 401 }
-    }
-  }
-});
-
 const supa_fetch_user_for_session = node({
   type: 'n8n-nodes-base.supabase',
   version: 1,
   config: {
     name: 'Supabase: Fetch Session User',
     parameters: {
+      resource: 'row',
       operation: 'getAll',
       tableId: 'users',
+      returnAll: false,
       limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'id', condition: 'eq', keyValue: '={{ $json.user_id }}' }
@@ -685,10 +851,10 @@ const supa_fetch_user_for_session = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const code_check_user_verified_and_touch = node({
@@ -772,13 +938,17 @@ const supa_touch_session = node({
   config: {
     name: 'Supabase: Touch Session Expiry',
     parameters: {
+      resource: 'row',
       operation: 'update',
       tableId: 'user_sessions',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'id', condition: 'eq', keyValue: '={{ $json.sessionId }}' }
         ]
       },
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'last_seen_at', fieldValue: '={{ new Date().toISOString() }}' },
@@ -788,10 +958,10 @@ const supa_touch_session = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const respond_session_valid = node({
@@ -803,6 +973,19 @@ const respond_session_valid = node({
       respondWith: 'json',
       responseBody: '={{ JSON.stringify({ valid: true, onboarding_completed: Boolean($("Check User Verified & Touch Session").first()?.json?.onboarding_completed) }) }}',
       options: { responseCode: 200 }
+    }
+  }
+});
+
+const respond_session_401 = node({
+  type: 'n8n-nodes-base.respondToWebhook',
+  version: 1.5,
+  config: {
+    name: 'Respond Session 401',
+    parameters: {
+      respondWith: 'json',
+      responseBody: '={{ JSON.stringify({ valid: false }) }}',
+      options: { responseCode: 401 }
     }
   }
 });
@@ -880,9 +1063,13 @@ const supa_lookup_session_for_prefs = node({
   config: {
     name: 'Supabase: Lookup Session for Prefs',
     parameters: {
+      resource: 'row',
       operation: 'getAll',
       tableId: 'user_sessions',
+      returnAll: false,
       limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'token_hash', condition: 'eq', keyValue: '={{ $json.sessionHash }}' }
@@ -891,10 +1078,10 @@ const supa_lookup_session_for_prefs = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const if_prefs_session_active = ifElse({
@@ -918,32 +1105,23 @@ const if_prefs_session_active = ifElse({
   }
 });
 
-const respond_prefs_401 = node({
-  type: 'n8n-nodes-base.respondToWebhook',
-  version: 1.5,
-  config: {
-    name: 'Respond Prefs 401',
-    parameters: {
-      respondWith: 'json',
-      responseBody: '={{ JSON.stringify({ status: "error", message: "Unauthorized" }) }}',
-      options: { responseCode: 401 }
-    }
-  }
-});
-
 const supa_update_user_prefs = node({
   type: 'n8n-nodes-base.supabase',
   version: 1,
   config: {
     name: 'Supabase: Update Preferences',
     parameters: {
+      resource: 'row',
       operation: 'update',
       tableId: 'users',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'id', condition: 'eq', keyValue: '={{ $json.user_id }}' }
         ]
       },
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'city', fieldValue: '={{ $("Sanitize Preferences Input").first()?.json?.city }}' },
@@ -957,10 +1135,10 @@ const supa_update_user_prefs = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const respond_prefs_success = node({
@@ -972,6 +1150,19 @@ const respond_prefs_success = node({
       respondWith: 'json',
       responseBody: '={{ JSON.stringify({ status: "success", success: true, message: "User onboarding preferences saved." }) }}',
       options: { responseCode: 200 }
+    }
+  }
+});
+
+const respond_prefs_401 = node({
+  type: 'n8n-nodes-base.respondToWebhook',
+  version: 1.5,
+  config: {
+    name: 'Respond Prefs 401',
+    parameters: {
+      respondWith: 'json',
+      responseBody: '={{ JSON.stringify({ status: "error", message: "Unauthorized" }) }}',
+      options: { responseCode: 401 }
     }
   }
 });
@@ -1003,21 +1194,25 @@ const supa_lookup_session_for_dash = node({
   config: {
     name: 'Supabase: Lookup Session for Dashboard',
     parameters: {
+      resource: 'row',
       operation: 'getAll',
       tableId: 'user_sessions',
+      returnAll: false,
       limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
-          { keyName: 'token_hash', condition: 'eq', keyValue: '={{ ($json.body || $json).session_token_hash }}' }
+          { keyName: 'token_hash', condition: 'eq', keyValue: '={{ ($json.body?.session_token_hash || $json.session_token_hash) }}' }
         ]
       }
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const if_dash_session_active = ifElse({
@@ -1041,28 +1236,19 @@ const if_dash_session_active = ifElse({
   }
 });
 
-const respond_dash_401 = node({
-  type: 'n8n-nodes-base.respondToWebhook',
-  version: 1.5,
-  config: {
-    name: 'Respond Dashboard 401',
-    parameters: {
-      respondWith: 'json',
-      responseBody: '={{ JSON.stringify({ status: "error", message: "Unauthorized" }) }}',
-      options: { responseCode: 401 }
-    }
-  }
-});
-
 const supa_fetch_single_user = node({
   type: 'n8n-nodes-base.supabase',
   version: 1,
   config: {
     name: 'Supabase: Fetch Single User',
     parameters: {
+      resource: 'row',
       operation: 'getAll',
       tableId: 'users',
+      returnAll: false,
       limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'id', condition: 'eq', keyValue: '={{ $json.user_id }}' }
@@ -1071,10 +1257,10 @@ const supa_fetch_single_user = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const http_fetch_weather = node({
@@ -1083,7 +1269,7 @@ const http_fetch_weather = node({
   config: {
     name: 'HTTP: Fetch Live Weather',
     parameters: {
-      url: '=https://wttr.in/{{ encodeURIComponent($json.city || "Seattle") }}?format=j1',
+      url: '={{ "https://wttr.in/" + encodeURIComponent($json.city || "Seattle") + "?format=j1" }}',
       options: { timeout: 8000 }
     },
     onError: 'continueRegularOutput'
@@ -1250,6 +1436,19 @@ const respond_dashboard_json = node({
   }
 });
 
+const respond_dash_401 = node({
+  type: 'n8n-nodes-base.respondToWebhook',
+  version: 1.5,
+  config: {
+    name: 'Respond Dashboard 401',
+    parameters: {
+      respondWith: 'json',
+      responseBody: '={{ JSON.stringify({ status: "error", message: "Unauthorized" }) }}',
+      options: { responseCode: 401 }
+    }
+  }
+});
+
 // -------------------------------------------------------------
 // 6. POST /v2/auth/send-link
 // -------------------------------------------------------------
@@ -1298,7 +1497,81 @@ const code_prepare_send_link = node({
     name: 'Prepare Send-Link',
     parameters: {
       jsCode: `
-const crypto = require('crypto');
+function sha256(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let lengthProperty = 'length';
+  let i, j;
+  let result = '';
+  const words = [];
+  const asciiBitLength = ascii[lengthProperty] * 8;
+  let hash = [];
+  let k = [];
+  let primeCounter = 0;
+  const isComposite = {};
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
+    }
+  }
+  hash = hash.slice(0, 8);
+  ascii += '\x80';
+  while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    j = ascii.charCodeAt(i);
+    if (j >> 8) return;
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+  words[words[lengthProperty]] = (asciiBitLength) | 0;
+  for (j = 0; j < words[lengthProperty];) {
+    const w = words.slice(j, j += 16);
+    const oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const a = hash[0], e = hash[4];
+      const temp1 = hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ ((~e) & hash[6]))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+            w[i - 16]
+            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7]
+            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0
+        );
+      const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j + 1; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? 0 : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+function generateHexToken(len) {
+  let res = '';
+  const chars = '0123456789abcdef';
+  for (let i = 0; i < (len || 64); i++) {
+    res += chars[Math.floor(Math.random() * 16)];
+  }
+  return res;
+}
+
 const input = $input.first()?.json || {};
 const body = input.body || input;
 
@@ -1307,8 +1580,8 @@ if (!rawEmail || !rawEmail.includes('@') || rawEmail.length < 5) {
   return [{ json: { shouldProcess: false, email: '' } }];
 }
 
-const rawToken = crypto.randomBytes(32).toString('hex');
-const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+const rawToken = generateHexToken(64);
+const tokenHash = sha256(rawToken);
 const now = new Date();
 const expiresAt15m = new Date(now.getTime() + 15 * 60 * 1000).toISOString();
 const expiresAt24h = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
@@ -1316,8 +1589,7 @@ const expiresAt24h = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString()
 const appBaseUrl = $('Config: Send-Link Base URL').first()?.json?.APP_BASE_URL || 'https://betadigest.online';
 const verificationUrl = appBaseUrl + '/verify?token=' + rawToken;
 
-return [{
-  json: {
+return [{\n  json: {
     shouldProcess: true,
     email: rawEmail,
     rawToken,
@@ -1338,9 +1610,13 @@ const supa_lookup_send_link_user = node({
   config: {
     name: 'Supabase: Lookup User for Send-Link',
     parameters: {
+      resource: 'row',
       operation: 'getAll',
       tableId: 'users',
+      returnAll: false,
       limit: 1,
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'email', condition: 'eq', keyValue: '={{ $json.email }}' }
@@ -1349,10 +1625,10 @@ const supa_lookup_send_link_user = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const code_determine_send_link_action = node({
@@ -1424,13 +1700,17 @@ const supa_update_send_link_token = node({
   config: {
     name: 'Supabase: Update Token for Send-Link',
     parameters: {
+      resource: 'row',
       operation: 'update',
       tableId: 'users',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'id', condition: 'eq', keyValue: '={{ $json.userId }}' }
         ]
       },
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'verification_token', fieldValue: '={{ $json.tokenHash }}' },
@@ -1441,10 +1721,10 @@ const supa_update_send_link_token = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const resend_dispatch_send_link = node({
@@ -1462,10 +1742,10 @@ const resend_dispatch_send_link = node({
     },
     credentials: {
       resendApi: newCredential('Resend account')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const respond_send_link_generic = node({
@@ -1508,13 +1788,17 @@ const supa_revoke_session = node({
   config: {
     name: 'Supabase: Revoke Session',
     parameters: {
+      resource: 'row',
       operation: 'update',
       tableId: 'user_sessions',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
-          { keyName: 'token_hash', condition: 'eq', keyValue: '={{ ($json.body || $json).session_token_hash }}' }
+          { keyName: 'token_hash', condition: 'eq', keyValue: '={{ ($json.body?.session_token_hash || $json.session_token_hash) }}' }
         ]
       },
+      dataToSend: 'defineBelow',
       fieldsUi: {
         fieldValues: [
           { fieldId: 'revoked_at', fieldValue: '={{ new Date().toISOString() }}' }
@@ -1523,10 +1807,10 @@ const supa_revoke_session = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const respond_logout_success = node({
@@ -1586,8 +1870,11 @@ const supa_cleanup_expired_sessions = node({
   config: {
     name: 'Supabase: Delete Expired Sessions',
     parameters: {
+      resource: 'row',
       operation: 'delete',
       tableId: 'user_sessions',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
           { keyName: 'expires_at', condition: 'lt', keyValue: '={{ $json.thirtyDaysAgo }}' }
@@ -1596,10 +1883,10 @@ const supa_cleanup_expired_sessions = node({
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 const supa_cleanup_unverified_users = node({
@@ -1608,21 +1895,24 @@ const supa_cleanup_unverified_users = node({
   config: {
     name: 'Supabase: Delete Old Unverified Users',
     parameters: {
+      resource: 'row',
       operation: 'delete',
       tableId: 'users',
+      filterType: 'manual',
+      matchType: 'allFilters',
       filters: {
         conditions: [
-          { keyName: 'is_verified', condition: 'eq', keyValue: 'false' },
+          { keyName: 'is_verified', condition: 'is', keyValue: 'false' },
           { keyName: 'created_at', condition: 'lt', keyValue: '={{ $("Prepare Cleanup Cutoffs").first()?.json?.sevenDaysAgo }}' }
         ]
       }
     },
     credentials: {
       supabaseApi: newCredential('SLVH')
-    }
-  },
-  alwaysOutputData: true,
-  onError: 'continueRegularOutput'
+    },
+    alwaysOutputData: true,
+    onError: 'continueRegularOutput'
+  }
 });
 
 // -------------------------------------------------------------
