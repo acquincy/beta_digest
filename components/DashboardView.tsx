@@ -3,20 +3,13 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Sliders,
-  Clock,
-  ArrowRight,
-  Sun,
+  SlidersHorizontal,
   CloudSun,
-  Droplets,
-  CloudLightning,
-  Cloud,
-  ShieldAlert,
-  Wind,
-  Sunrise,
-  FileText,
-  Sparkles,
+  MailCheck,
   LogOut,
+  ArrowRight,
+  X,
+  FileText,
 } from "lucide-react";
 import { TopLeftLogo } from "./TopLeftLogo";
 import { CanvasB } from "./CanvasB";
@@ -24,27 +17,19 @@ import {
   Preferences,
   WeatherTopicId,
   NewsTopicId,
-  WEATHER_TOPIC_ORDER,
-  WEATHER_TOPIC_LABELS,
   CityWeatherData,
   EditorialStory,
 } from "@/lib/types";
 import { loadPreferences, savePreferences, parseDeliveryHour, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
-import { getTimeUntilNextDispatch, formatHourOption, TimeRemaining } from "@/lib/time-utils";
+import { formatHourOption } from "@/lib/time-utils";
 import { fetchDashboardViaN8n, N8nDashboardResult, N8nDashboardArticle, logoutViaApi } from "@/lib/n8n";
 
 export const DashboardView: React.FC = () => {
   const [hydrated, setHydrated] = useState(false);
   const [prefs, setPrefs] = useState<Preferences>(INITIAL_PREFERENCES);
-
-  const [countdown, setCountdown] = useState<TimeRemaining>({
-    hours: 2,
-    minutes: 45,
-    seconds: 30,
-    totalSeconds: 9930,
-    formatted: "02:45:30",
-  });
+  const [tempUnit, setTempUnit] = useState<"F" | "C">("F");
+  const [selectedStory, setSelectedStory] = useState<EditorialStory | null>(null);
 
   const [n8nDigest, setN8nDigest] = useState<N8nDashboardResult | null>(null);
   const [realWeather, setRealWeather] = useState<CityWeatherData | null>(null);
@@ -59,13 +44,16 @@ export const DashboardView: React.FC = () => {
     let mounted = true;
 
     // Fetch real live weather from Open-Meteo API
-    const city = loaded.city || "London";
-    const country = loaded.countryCode || "GB";
+    const city = loaded.city || "Seattle";
+    const country = loaded.countryCode || "US";
     fetch(`/api/weather?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&format=full`)
       .then((r) => r.json())
       .then((data) => {
         if (mounted && data && typeof data.currentTemp === "number") {
           setRealWeather(data);
+          if (typeof data.tempUnit === "string" && data.tempUnit.includes("C")) {
+            setTempUnit("C");
+          }
         }
       })
       .catch((err) => console.warn("Live weather fetch error:", err));
@@ -131,51 +119,6 @@ export const DashboardView: React.FC = () => {
     };
   }, []);
 
-  // Update countdown only after hydration
-  useEffect(() => {
-    if (!hydrated) return;
-
-    const tz =
-      typeof Intl !== "undefined"
-        ? Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles"
-        : "America/Los_Angeles";
-
-    const tick = () => {
-      const remaining = getTimeUntilNextDispatch(prefs.deliveryHour, tz);
-      setCountdown(remaining);
-    };
-
-    tick();
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
-  }, [prefs.deliveryHour, hydrated]);
-
-  const digestSummary: string | null = React.useMemo(() => {
-    if (!n8nDigest) return null;
-    if (typeof n8nDigest.weekly_digest === "string" && n8nDigest.weekly_digest.trim()) {
-      return n8nDigest.weekly_digest.trim();
-    }
-    if (n8nDigest.weekly_digest && typeof n8nDigest.weekly_digest === "object") {
-      const wd = n8nDigest.weekly_digest;
-      if (typeof wd.summary === "string" && wd.summary.trim()) {
-        return wd.summary.trim();
-      }
-      if (Array.isArray(wd.articles) && wd.articles.length > 0) {
-        const topArticle = wd.articles[0];
-        const weatherPart = n8nDigest.weather?.summary ? `${n8nDigest.weather.summary}\n\n` : "";
-        const articlePart = topArticle?.title
-          ? `Top briefing: ${topArticle.title}${topArticle.summary ? ` — ${topArticle.summary}` : ""}`
-          : "";
-        const combined = `${weatherPart}${articlePart}`.trim();
-        if (combined) return combined;
-      }
-    }
-    if (typeof n8nDigest.weather?.summary === "string" && n8nDigest.weather.summary.trim()) {
-      return n8nDigest.weather.summary.trim();
-    }
-    return null;
-  }, [n8nDigest]);
-
   const n8nStories: EditorialStory[] = React.useMemo(() => {
     if (!n8nDigest?.weekly_digest || typeof n8nDigest.weekly_digest !== "object") return [];
     const wd = n8nDigest.weekly_digest;
@@ -203,439 +146,413 @@ export const DashboardView: React.FC = () => {
       ? n8nStories
       : getTop5Stories(prefs.newsTopics);
 
+  // Sync initial temperature unit from weather data
+  useEffect(() => {
+    if (weather.tempUnit?.includes("C")) {
+      setTempUnit("C");
+    } else if (weather.tempUnit?.includes("F")) {
+      setTempUnit("F");
+    }
+  }, [weather.tempUnit]);
+
   const todayFormatted = hydrated
     ? new Intl.DateTimeFormat("en-US", {
+        weekday: "long",
         month: "long",
         day: "numeric",
         year: "numeric",
-      }).format(new Date())
+      })
+        .format(new Date())
+        .replace(/, ([A-Za-z]+ \d+)/, " · $1")
     : "";
 
-  const selectedWeather = WEATHER_TOPIC_ORDER.filter((t) =>
-    prefs.weatherTopics.includes(t)
-  );
-
-  const gridColsClass =
-    selectedWeather.length === 1
-      ? "grid grid-cols-1 gap-4"
-      : selectedWeather.length === 2
-      ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
-      : "grid grid-cols-1 sm:grid-cols-3 gap-4";
-
-  const wideSpanClass =
-    selectedWeather.length === 2
-      ? "sm:col-span-2"
-      : selectedWeather.length >= 3
-      ? "sm:col-span-3"
-      : "col-span-1";
-
-  const renderWeatherWidget = (topicId: WeatherTopicId, index: number) => {
-    const isWide = topicId === "hourly-3h" || topicId === "forecast-3day";
-
-    return (
-      <div
-        key={topicId}
-        className={`rounded-[24px] p-5 md:p-6 bg-white/[0.04] backdrop-blur-md border border-white/12 hover:border-white/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] transition-all flex flex-col justify-between ${
-          isWide ? wideSpanClass : ""
-        }`}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <span className="font-sans font-[600] text-[13px] text-white uppercase tracking-wide">
-            {WEATHER_TOPIC_LABELS[topicId]}
-          </span>
-          {topicId === "current-temperature" && (
-            <Sun className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "high-low" && (
-            <CloudSun className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "rain-chance" && (
-            <Droplets className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "thunderstorm-chance" && (
-            <CloudLightning className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "cloudiness" && (
-            <Cloud className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "uv-index" && (
-            <Sun className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "air-quality" && (
-            <ShieldAlert className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "wind" && (
-            <Wind className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "humidity" && (
-            <Droplets className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-          {topicId === "sun-times" && (
-            <Sunrise className="w-5 h-5 text-white" aria-hidden="true" />
-          )}
-        </div>
-
-        {topicId === "current-temperature" && (
-          <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
-              {weather.currentTemp}{weather.tempUnit}
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 capitalize mt-1">
-              {weather.condition}
-            </div>
-          </div>
-        )}
-
-        {topicId === "high-low" && (
-          <div>
-            <div className="font-sans font-[700] text-[24px] md:text-[28px] text-white tabular-nums">
-              High {weather.high ?? "—"}{weather.tempUnit} / Low {weather.low ?? "—"}{weather.tempUnit}
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1 tabular-nums">
-              Spread: {typeof weather.high === "number" && typeof weather.low === "number" ? `${weather.high - weather.low}°` : "—"}
-            </div>
-          </div>
-        )}
-
-        {topicId === "hourly-3h" && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
-            {(weather.hourly || []).map((h, i) => (
-              <div
-                key={i}
-                className="bg-white/[0.04] rounded-[18px] p-3 text-center border border-white/5"
-              >
-                <div className="font-sans text-[12px] text-white/70 tabular-nums font-[500]">
-                  {h.time}
-                </div>
-                <div className="font-sans font-[700] text-[18px] text-white tabular-nums my-1">
-                  {h.temp}{weather.tempUnit}
-                </div>
-                <div className="font-sans text-[12px] text-white/70 truncate">
-                  {h.condition}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {topicId === "forecast-3day" && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
-            {(weather.threeDay || []).map((d, i) => (
-              <div
-                key={i}
-                className="bg-white/[0.04] rounded-[18px] p-4 border border-white/5 flex flex-col justify-between"
-              >
-                <div className="font-sans font-[600] text-[14px] text-white">
-                  {d.day}
-                </div>
-                <div className="font-sans text-[12px] text-white/70 mt-0.5">
-                  {d.condition}
-                </div>
-                <div className="font-sans font-[700] text-[16px] text-white tabular-nums mt-2">
-                  {d.high}{weather.tempUnit}{" "}
-                  <span className="font-normal text-white/70">
-                    / {d.low}{weather.tempUnit}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {topicId === "rain-chance" && (
-          <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
-              {weather.rainProb}%
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
-              Afternoon precipitation
-            </div>
-          </div>
-        )}
-
-        {topicId === "thunderstorm-chance" && (
-          <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
-              {weather.thunderstormProb}%
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
-              Isolated afternoon storm risk
-            </div>
-          </div>
-        )}
-
-        {topicId === "cloudiness" && (
-          <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
-              {weather.cloudiness}%
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
-              Sky coverage
-            </div>
-          </div>
-        )}
-
-        {topicId === "uv-index" && (
-          <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
-              {weather.uvIndex}
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
-              {weather.uvDescription} UV
-            </div>
-          </div>
-        )}
-
-        {topicId === "air-quality" && (
-          <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
-              {weather.airQuality}
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
-              AQI · {weather.airQualityDescription}
-            </div>
-          </div>
-        )}
-
-        {topicId === "wind" && (
-          <div>
-            <div className="font-sans font-[700] text-[28px] md:text-[32px] text-white tabular-nums">
-              {weather.windSpeed} {weather.windUnit}
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
-              Direction {weather.windDirection}
-            </div>
-          </div>
-        )}
-
-        {topicId === "humidity" && (
-          <div>
-            <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
-              {weather.humidity}%
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
-              Relative humidity
-            </div>
-          </div>
-        )}
-
-        {topicId === "sun-times" && (
-          <div>
-            <div className="font-sans font-[700] text-[20px] md:text-[22px] text-white tabular-nums">
-              ↑ {weather.sunrise} · ↓ {weather.sunset}
-            </div>
-            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
-              Daylight window
-            </div>
-          </div>
-        )}
-      </div>
-    );
+  // Convert temperature between F and C dynamically
+  const convertTemp = (val: number | undefined | null): number | "—" => {
+    if (typeof val !== "number" || isNaN(val)) return "—";
+    const sourceIsC = weather.tempUnit?.includes("C");
+    if (tempUnit === "F") {
+      if (sourceIsC) return Math.round((val * 9) / 5 + 32);
+      return Math.round(val);
+    } else {
+      if (!sourceIsC) return Math.round(((val - 32) * 5) / 9);
+      return Math.round(val);
+    }
   };
+
+  const displayCurrentTemp = convertTemp(weather.currentTemp);
+  const displayHigh = convertTemp(weather.high);
+  const displayLow = convertTemp(weather.low);
+  const displaySpread =
+    typeof displayHigh === "number" && typeof displayLow === "number"
+      ? Math.abs(displayHigh - displayLow)
+      : typeof weather.high === "number" && typeof weather.low === "number"
+      ? Math.abs(weather.high - weather.low)
+      : "—";
+
+  const displayThreeDay = (weather.threeDay || []).map((d) => ({
+    day: d.day,
+    condition: d.condition,
+    high: convertTemp(d.high),
+    low: convertTemp(d.low),
+  }));
+
+  const toggleTempUnit = () => {
+    setTempUnit((prev) => (prev === "F" ? "C" : "F"));
+  };
+
+  const hasSecondaryWeather =
+    typeof weather.rainProb === "number" ||
+    typeof weather.uvIndex === "number" ||
+    typeof weather.airQuality === "number" ||
+    !!weather.windSpeed;
 
   return (
     <div className="relative min-h-screen text-[var(--text)] flex flex-col pb-16">
       {/* Canvas B background */}
       <CanvasB showConcentricCircles={false} />
 
-      {/* Top-left Brand Logo */}
-      <header className="w-full px-6 md:px-10 pt-6 pb-2 flex items-center justify-start z-20">
+      {/* Top Utility Bar & Logo */}
+      <header className="relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-10 pt-7 pb-4 flex items-center justify-between">
         <TopLeftLogo />
+        <span className="hidden sm:inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/75">
+          <span>Morning Edition</span>
+          <span className="text-white/40">·</span>
+          <span>Daily Briefing</span>
+        </span>
       </header>
 
-      {/* Main dashboard content: Single centered card, max-width 1120px */}
-      <main className="w-full max-w-[1120px] mx-auto px-4 md:px-6 flex flex-col gap-6">
-        <div className="w-full bg-[#141418]/85 backdrop-blur-2xl rounded-[32px] md:rounded-[48px] p-6 md:p-10 border border-white/15 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] flex flex-col gap-8">
-          {/* Header row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+      {/* Translucent Frosted Main Dashboard Board */}
+      <main className="relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="main-glass-board p-6 sm:p-9 lg:p-11">
+          {/* Greeting & Header Action Bar */}
+          <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 pb-7 mb-8 border-b border-white/[0.16]">
             <div>
-              <h1 className="font-display font-[700] text-[32px] md:text-[36px] leading-tight text-white">
-                {hydrated && prefs.name ? `Hi, ${prefs.name}` : "Hi"}
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/75 mb-1.5">
+                {todayFormatted || "Daily Edition"}
+              </p>
+              <h1 className="editorial-title text-[36px] sm:text-[42px] font-medium tracking-tight text-white leading-none">
+                {prefs.name ? `Hi, ${prefs.name}` : "Welcome back"}
               </h1>
-              {hydrated && todayFormatted && (
-                <p className="font-sans font-[500] text-[15px] text-white/70 tabular-nums mt-1">
-                  {todayFormatted}
-                </p>
-              )}
             </div>
-            <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+
+            {/* Right Side: Dark-Glass Daily Delivery Schedule Pill + Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Static Daily Delivery Status Pill (Replaces Countdown) */}
               <Link
                 href="/preferences"
-                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-white/20 bg-white/5 text-white hover:bg-white/10 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap min-w-max"
+                title="Click to adjust delivery schedule"
+                className="dark-glass-pill px-4 py-2 text-left flex items-center gap-2.5 group cursor-pointer"
               >
-                <Sliders className="w-4 h-4 text-white" aria-hidden="true" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0" />
+                <span className="font-mono text-[11px] tracking-tight text-white/90">
+                  Daily at <strong className="text-white font-semibold">{formatHourOption(prefs.deliveryHour)}</strong>
+                </span>
+                {prefs.email && (
+                  <>
+                    <span className="text-white/30">·</span>
+                    <span className="font-mono text-[11px] text-white/65 hidden sm:inline">{prefs.email}</span>
+                  </>
+                )}
+              </Link>
+
+              {/* Dark-Glass Edit Preferences Button */}
+              <Link
+                href="/preferences"
+                className="dark-glass-pill px-4 py-2 text-[12px] font-medium text-white flex items-center gap-2 cursor-pointer"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-white/75" aria-hidden="true" />
                 <span>Edit preferences</span>
               </Link>
+
+              {/* Dark-Glass Sign Out Button */}
               <button
                 type="button"
                 onClick={async () => {
                   await logoutViaApi();
                 }}
-                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-white/10 text-white/70 hover:text-white hover:border-white/30 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap"
+                className="dark-glass-pill px-4 py-2 text-[12px] font-medium text-white/90 flex items-center gap-2 cursor-pointer"
                 aria-label="Sign out"
               >
-                <LogOut className="w-4 h-4" aria-hidden="true" />
+                <LogOut className="w-3.5 h-3.5 text-white/75" aria-hidden="true" />
                 <span>Sign out</span>
               </button>
             </div>
-          </div>
+          </header>
 
           {!hydrated ? (
             /* Skeleton State while hydrating */
-            <div className="flex-grow flex flex-col items-center justify-center py-12 text-center">
-              <div className="relative mb-6">
-                <div className="w-16 h-16 rounded-[20px] bg-white/10 border border-white/10 flex items-center justify-center">
-                  <FileText className="w-8 h-8 text-white" aria-hidden="true" />
-                </div>
-                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#161616] border border-white/10 flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-4 h-4 text-white" aria-hidden="true" />
-                </div>
+            <div className="flex-grow flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-12 h-12 rounded-2xl dark-glass-panel flex items-center justify-center mb-4">
+                <FileText className="w-6 h-6 text-white/80" aria-hidden="true" />
               </div>
-
-              <h2 className="font-display font-[600] text-[20px] text-white mb-2">
-                Preparing your daily report...
+              <h2 className="editorial-title text-[22px] font-medium text-white mb-2">
+                Loading your daily briefing...
               </h2>
-
-              <p className="font-sans font-[400] text-[14px] text-white/70 max-w-sm mb-8">
-                We&apos;re gathering your personalized updates. This usually
-                takes just a moment.
+              <p className="font-sans text-[14px] text-white/70 max-w-sm mb-6">
+                Gathering your personalized updates and local weather.
               </p>
-
-              <div
-                className="w-full max-w-[540px] bg-white/[0.03] rounded-[20px] p-5 border border-white/10 flex flex-col gap-3 animate-pulse"
-                style={{ animationDuration: "1.4s" }}
-              >
-                <div className="w-24 h-4 bg-white/10 rounded-[8px]" />
-                <div className="w-full h-4 bg-white/[0.06] rounded-[8px]" />
-                <div className="w-full h-4 bg-white/[0.06] rounded-[8px]" />
-                <div className="w-[70%] h-4 bg-white/[0.06] rounded-[8px]" />
+              <div className="w-full max-w-[480px] dark-glass-panel p-5 flex flex-col gap-3 animate-pulse">
+                <div className="w-24 h-4 bg-white/10 rounded-full" />
+                <div className="w-full h-3.5 bg-white/[0.06] rounded-full" />
+                <div className="w-4/5 h-3.5 bg-white/[0.06] rounded-full" />
               </div>
             </div>
           ) : (
-            <>
-              {/* Countdown row */}
-              <div className="p-5 md:p-6 rounded-[24px] bg-black/40 backdrop-blur-xl border border-white/15 text-white flex flex-col gap-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <Clock className="w-5 h-5 text-amber-400" aria-hidden="true" />
-                    <span className="font-sans font-[600] text-[16px] text-white">
-                      Next digest arrives in
-                    </span>
-                  </div>
-                  <span className="font-sans font-[700] text-[16px] md:text-[18px] text-black bg-white px-4 py-1.5 rounded-full tabular-nums self-start sm:self-auto">
-                    {countdown.formatted}
-                  </span>
-                </div>
-                <div className="font-sans font-[400] text-[13px] md:text-[14px] text-white/70">
-                  Scheduled for {formatHourOption(prefs.deliveryHour)} daily · Delivered to {prefs.email}
-                </div>
-              </div>
-
-              {/* Weather Section */}
-              <section className="flex flex-col gap-4">
-                <h3 className="font-display font-[600] text-[24px] text-white">
-                  Your weather · {prefs.city}
-                </h3>
-
-                {selectedWeather.length === 0 ? (
-                  <div className="p-6 rounded-[24px] bg-white/[0.03] border border-white/10 text-center font-sans text-[15px] text-white/70">
-                    No weather details selected ·{" "}
-                    <Link
-                      href="/preferences"
-                      className="text-white font-[600] underline hover:no-underline"
+            /* Interior 2-Column Asymmetric Layout */
+            <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-7 lg:gap-8 items-start">
+              {/* LEFT RAIL (340px sticky on desktop): Weather + Daily Dispatch Card */}
+              <aside className="lg:sticky lg:top-6 space-y-5">
+                <div>
+                  <div className="flex items-baseline justify-between mb-3 px-1">
+                    <h2 className="editorial-title text-[22px] font-medium tracking-tight text-white">
+                      Your weather · <span className="italic font-normal">{prefs.city || "Seattle"}</span>
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={toggleTempUnit}
+                      className="font-mono text-[11px] text-white/75 hover:text-white underline underline-offset-4 transition cursor-pointer"
                     >
-                      Edit preferences
-                    </Link>
+                      Switch to °{tempUnit === "F" ? "C" : "F"}
+                    </button>
                   </div>
-                ) : (
-                  <div className={gridColsClass}>
-                    {selectedWeather.map((topicId, i) =>
-                      renderWeatherWidget(topicId, i)
+
+                  {/* Deep Obsidian Dark-Glass Weather Panel */}
+                  <div className="dark-glass-panel p-6">
+                    {/* Top Part: Current Temperature + High/Low */}
+                    <div>
+                      <div className="flex items-center justify-between font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-white/55 mb-3">
+                        <span>CURRENT CONDITIONS</span>
+                        <CloudSun className="w-4 h-4 text-amber-300/85" aria-hidden="true" />
+                      </div>
+
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="editorial-title text-[52px] font-medium tracking-tight text-white leading-none tabular-nums">
+                          {displayCurrentTemp !== "—" ? `${displayCurrentTemp}°${tempUnit}` : "—"}
+                        </span>
+                        <span className="font-mono text-[11px] text-white/65 bg-white/[0.06] border border-white/10 px-2.5 py-1 rounded-full tabular-nums">
+                          Spread <span className="text-white font-medium">{displaySpread}°</span>
+                        </span>
+                      </div>
+
+                      <div className="mt-3.5 flex items-center justify-between text-[13px] text-white/70 pt-3 border-t border-white/[0.07]">
+                        <span className="text-white/90 font-medium capitalize">{weather.condition}</span>
+                        <span className="font-mono text-[12px] text-white/70 tabular-nums">
+                          H: <strong className="text-white font-semibold">{displayHigh !== "—" ? `${displayHigh}°${tempUnit}` : "—"}</strong> · L: <strong className="text-white font-semibold">{displayLow !== "—" ? `${displayLow}°${tempUnit}` : "—"}</strong>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Crisp 1px Horizontal Divider */}
+                    <div className="h-px bg-white/[0.09] my-5" />
+
+                    {/* Bottom Part: 3-Day Forecast */}
+                    <div>
+                      <div className="flex items-center justify-between font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-white/55 mb-2.5">
+                        <span>3-DAY OUTLOOK</span>
+                        <span>HIGH / LOW</span>
+                      </div>
+
+                      <div className="divide-y divide-white/[0.07] text-[13px]">
+                        {displayThreeDay.map((d, i) => (
+                          <div key={i} className="py-2.5 first:pt-1 last:pb-0.5 flex items-center justify-between">
+                            <span className="font-medium text-white">{d.day}</span>
+                            <span className="text-white/50 text-[12px] capitalize truncate max-w-[100px]">{d.condition}</span>
+                            <span className="font-mono text-[12px] text-white/60 tabular-nums">
+                              <strong className="text-white font-medium">{d.high !== "—" ? `${d.high}°${tempUnit}` : "—"}</strong> / <span>{d.low !== "—" ? `${d.low}°${tempUnit}` : "—"}</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Secondary weather topic tags if available */}
+                    {hasSecondaryWeather && (
+                      <div className="mt-4 pt-3 border-t border-white/[0.07] flex flex-wrap gap-1.5">
+                        {typeof weather.rainProb === "number" && (
+                          <span className="dark-category-pill font-mono text-[10px] px-2.5 py-0.5 text-white/80">
+                            Rain: {weather.rainProb}%
+                          </span>
+                        )}
+                        {typeof weather.uvIndex === "number" && (
+                          <span className="dark-category-pill font-mono text-[10px] px-2.5 py-0.5 text-white/80">
+                            UV: {weather.uvIndex}
+                          </span>
+                        )}
+                        {typeof weather.airQuality === "number" && (
+                          <span className="dark-category-pill font-mono text-[10px] px-2.5 py-0.5 text-white/80">
+                            AQI: {weather.airQuality}
+                          </span>
+                        )}
+                        {weather.windSpeed && (
+                          <span className="dark-category-pill font-mono text-[10px] px-2.5 py-0.5 text-white/80">
+                            Wind: {weather.windSpeed} {weather.windUnit || "mph"}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </section>
+                </div>
 
-              {/* Live Digest Summary from n8n Dashboard Workflow */}
-              {digestSummary && (
-                <section className="p-5 md:p-6 rounded-[24px] bg-white/[0.03] border border-white/10 flex flex-col gap-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-white" aria-hidden="true" />
-                    <h3 className="font-display font-[600] text-[20px] text-white">
-                      AI Executive Summary
-                    </h3>
+                {/* Daily Email Delivery Schedule Card */}
+                <div className="dark-glass-panel p-5">
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <div className="flex items-center gap-2">
+                      <MailCheck className="w-4 h-4 text-amber-300/90 shrink-0" aria-hidden="true" />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/60">
+                        Daily Email Dispatch
+                      </span>
+                    </div>
+
+                    <span className="dark-category-pill font-mono text-[11px] font-medium px-2.5 py-0.5 text-white">
+                      {formatHourOption(prefs.deliveryHour)} Daily
+                    </span>
                   </div>
-                  <p className="font-sans font-[400] text-[15px] leading-relaxed text-white/80 whitespace-pre-line">
-                    {digestSummary}
+
+                  <p className="text-[13px] text-white/75 leading-relaxed mt-2">
+                    Your morning briefing is automatically curated and sent every day at{" "}
+                    <strong className="text-white font-semibold">{formatHourOption(prefs.deliveryHour)}</strong> to{" "}
+                    <span className="font-mono text-[12px] text-white underline decoration-white/30 underline-offset-4">
+                      {prefs.email || "betadigest@gmail.com"}
+                    </span>.
                   </p>
-                </section>
-              )}
 
-              {/* News Section */}
-              <section className="flex flex-col gap-4">
-                <h3 className="font-display font-[600] text-[24px] text-white">
-                  Your top 5 stories
-                </h3>
-
-                {prefs.newsTopics.length === 0 ? (
-                  <div className="p-6 rounded-[20px] bg-white/[0.03] border border-white/10 text-center font-sans text-[15px] text-white/70">
-                    No news topics selected ·{" "}
+                  <div className="mt-3.5 pt-3 border-t border-white/[0.07] flex items-center justify-between text-[12px]">
+                    <span className="font-mono text-[11px] text-emerald-400/90 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      Active subscription
+                    </span>
                     <Link
                       href="/preferences"
-                      className="text-white font-[600] underline hover:no-underline"
+                      className="font-mono text-[11px] text-white/75 hover:text-white transition flex items-center gap-1 group"
                     >
-                      Edit preferences
+                      <span>Change time</span>
+                      <ArrowRight className="w-3 h-3 text-white/75 group-hover:text-white group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
                     </Link>
                   </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {stories.map((story, i) => (
-                      <article
-                        key={`${story.id}-${i}`}
-                        className="p-5 md:p-6 rounded-[20px] bg-white/[0.035] backdrop-blur-md border border-white/12 hover:border-white/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-all flex flex-col gap-2"
-                      >
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-sans text-[14px] text-white/70 tabular-nums font-[600]">
-                            {(i + 1).toString().padStart(2, "0")}
-                          </span>
-                          <span className="font-sans font-[600] text-[12px] px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/10">
-                            {story.topicLabel}
-                          </span>
-                          <span className="font-sans text-[13px] text-white/70">
-                            {story.source}
-                          </span>
-                          <span className="text-white/20 text-[13px]">·</span>
-                          <span className="font-sans text-[13px] text-white/70">
-                            {story.timestamp}
-                          </span>
-                        </div>
+                </div>
+              </aside>
 
-                        <h4 className="font-sans font-[600] text-[18px] text-white leading-snug mt-1">
-                          {story.headline}
-                        </h4>
+              {/* RIGHT COLUMN (1fr width): Unified Top 5 Stories Section */}
+              <section>
+                <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
+                  <h2 className="editorial-title text-[22px] font-medium tracking-tight text-white">
+                    Your top 5 stories
+                  </h2>
+                  <span className="font-mono text-[11px] text-white/70">
+                    Curated morning briefing
+                  </span>
+                </div>
 
-                        <p className="font-sans font-[400] text-[14px] leading-[22px] text-white/75 line-clamp-2">
-                          {story.summary}
-                        </p>
+                {/* Strictly Unified Dark-Glass Stories Container */}
+                <div className="dark-glass-panel divide-y divide-white/[0.08] px-6 sm:px-8">
+                  {stories.slice(0, 5).map((story, i) => (
+                    <article
+                      key={story.id || i}
+                      onClick={() => setSelectedStory(story)}
+                      className="py-6 first:pt-6 last:pb-6 group cursor-pointer"
+                    >
+                      <div className="flex flex-wrap items-center gap-2.5 mb-2.5">
+                        <span className="font-mono text-[12px] font-medium text-white/45">
+                          {(i + 1).toString().padStart(2, "0")}
+                        </span>
+                        <span className="dark-category-pill font-mono px-3 py-0.5 text-[11px] font-medium">
+                          {story.topicLabel}
+                        </span>
+                        <span className="font-mono text-[11px] text-white/50">
+                          {story.source} · {story.timestamp}
+                        </span>
+                      </div>
 
-                        <a
-                          href={story.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 font-sans font-[600] text-[13px] text-white hover:text-[#6b62f2] self-start mt-2 transition-colors"
-                        >
-                          <span>Read full story</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-current" aria-hidden="true" />
-                        </a>
-                      </article>
-                    ))}
-                  </div>
-                )}
+                      <h3 className="editorial-title text-[20px] sm:text-[22px] font-medium text-white group-hover:text-amber-200/95 transition leading-snug mb-2">
+                        {story.headline}
+                      </h3>
+
+                      <p className="text-[13.5px] text-white/65 leading-relaxed mb-3.5">
+                        {story.summary}
+                      </p>
+
+                      <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-wider text-white/85 group-hover:text-white group-hover:translate-x-0.5 transition-all">
+                        <span>Read full story</span>
+                        <ArrowRight className="w-3 h-3 text-current" aria-hidden="true" />
+                      </span>
+                    </article>
+                  ))}
+                </div>
               </section>
-            </>
+            </div>
           )}
         </div>
       </main>
+
+      {/* Article Preview Modal */}
+      {selectedStory && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-150"
+          onClick={() => setSelectedStory(null)}
+        >
+          <div
+            className="modal-glass-board w-full max-w-lg p-6 sm:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2.5 text-[12px] flex-wrap">
+                <span className="font-mono font-medium text-white/55">
+                  {stories.findIndex((s) => s === selectedStory) >= 0
+                    ? (stories.findIndex((s) => s === selectedStory) + 1).toString().padStart(2, "0")
+                    : "01"}
+                </span>
+                <span className="dark-category-pill font-mono px-3 py-1 text-[11px]">
+                  {selectedStory.topicLabel}
+                </span>
+                <span className="font-mono text-[11px] text-white/55">
+                  {selectedStory.source} · {selectedStory.timestamp}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedStory(null)}
+                className="p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                aria-label="Close story preview"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </div>
+
+            <h3 className="editorial-title text-[24px] sm:text-[27px] font-medium text-white leading-snug mb-3.5">
+              {selectedStory.headline}
+            </h3>
+            <p className="text-[14px] text-white/75 leading-relaxed mb-6">
+              {selectedStory.summary}
+            </p>
+
+            <div className="pt-4 border-t border-white/[0.1] flex items-center justify-between flex-wrap gap-3">
+              <span className="font-mono text-[11px] text-white/50">
+                Dispatched via {selectedStory.source}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedStory(null)}
+                  className="dark-glass-pill px-4 py-1.5 text-[12px] font-medium text-white/80 hover:text-white cursor-pointer"
+                >
+                  Close
+                </button>
+                <a
+                  href={selectedStory.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-1.5 rounded-full text-[12px] font-semibold bg-white text-[#111115] hover:bg-white/90 transition inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Read on {selectedStory.source}</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-current" aria-hidden="true" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
