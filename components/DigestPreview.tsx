@@ -34,11 +34,11 @@ export const DigestPreview: React.FC<DigestPreviewProps> = ({
         >
           <div className="flex flex-col gap-1.5 pb-3 border-b border-white/10 text-xs font-sans">
             <div className="flex items-center justify-between">
-              <span className="text-[#8E9096] flex items-center gap-1.5">
+              <span className="text-white/70 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-white" aria-hidden="true" />
                 From: <strong className="text-white font-semibold">BetaDigest</strong> &lt;dispatch@betadigest.com&gt;
               </span>
-              <span className="tabular-nums text-[#8E9096] font-medium">
+              <span className="tabular-nums text-white/70 font-medium">
                 07:00 AM
               </span>
             </div>
@@ -48,10 +48,10 @@ export const DigestPreview: React.FC<DigestPreviewProps> = ({
           </div>
 
           <div className="pt-4 flex flex-col gap-2">
-            <div className="font-sans text-[11px] font-semibold uppercase tracking-wider text-[#686868]">
+            <div className="font-sans text-[11px] font-semibold uppercase tracking-wider text-white/60">
               DAILY DIGEST
             </div>
-            <p className="font-sans text-sm sm:text-base leading-relaxed text-[#ededed] font-normal whitespace-pre-wrap">
+            <p className="font-sans text-sm sm:text-base leading-relaxed text-white/80 font-normal whitespace-pre-wrap">
               {previewText}
             </p>
           </div>

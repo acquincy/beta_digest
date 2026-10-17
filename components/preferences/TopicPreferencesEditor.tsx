@@ -337,7 +337,7 @@ export const TopicPreferencesEditor: React.FC = () => {
 
           <Link
             href="/dashboard"
-            className="font-sans font-[500] text-[13px] text-[#8E9096] hover:text-white transition-colors"
+            className="font-sans font-[500] text-[13px] text-white/70 hover:text-white transition-colors"
           >
             Back to Dashboard
           </Link>
@@ -348,7 +348,7 @@ export const TopicPreferencesEditor: React.FC = () => {
           Customize your briefing topics
         </h1>
 
-        <p className="font-sans font-[400] text-[16px] md:text-[17px] leading-[25px] text-[#8E9096] mt-1.5">
+        <p className="font-sans font-[400] text-[16px] md:text-[17px] leading-[25px] text-white/75 mt-1.5">
           Select up to 3 weather metrics and up to 5 editorial news categories. Your updates will be personalized to your selections.
         </p>
 
@@ -377,13 +377,13 @@ export const TopicPreferencesEditor: React.FC = () => {
               </div>
               <span
                 className={`font-sans font-[600] text-[14px] tabular-nums px-2.5 py-0.5 rounded-full ${
-                  weatherTopics.length === 3 ? "bg-white text-black" : "bg-white/[0.06] text-[#8E9096]"
+                  weatherTopics.length === 3 ? "bg-white text-black" : "bg-white/[0.06] text-white/70"
                 }`}
               >
                 {weatherTopics.length}/3
               </span>
             </div>
-            <p className="font-sans font-[400] text-[14px] text-[#8E9096] mb-4">
+            <p className="font-sans font-[400] text-[14px] text-white/75 mb-4">
               Choose up to 3 weather telemetry points for {prefs.city || "your city"}.
             </p>
 
@@ -415,7 +415,7 @@ export const TopicPreferencesEditor: React.FC = () => {
             </div>
 
             {weatherTopics.length >= 3 && (
-              <p className="text-[12px] text-[#8E9096] mt-3">
+              <p className="text-[12px] text-white/70 mt-3">
                 Maximum 3 weather points reached. Deselect one to add another.
               </p>
             )}
@@ -432,13 +432,13 @@ export const TopicPreferencesEditor: React.FC = () => {
               </div>
               <span
                 className={`font-sans font-[600] text-[14px] tabular-nums px-2.5 py-0.5 rounded-full ${
-                  newsTopics.length === 5 ? "bg-white text-black" : "bg-white/[0.06] text-[#8E9096]"
+                  newsTopics.length === 5 ? "bg-white text-black" : "bg-white/[0.06] text-white/70"
                 }`}
               >
                 {newsTopics.length}/5
               </span>
             </div>
-            <p className="font-sans font-[400] text-[14px] text-[#8E9096] mb-4">
+            <p className="font-sans font-[400] text-[14px] text-white/75 mb-4">
               Choose up to 5 editorial topics for your daily briefing.
             </p>
 
@@ -470,7 +470,7 @@ export const TopicPreferencesEditor: React.FC = () => {
             </div>
 
             {newsTopics.length >= 5 && (
-              <p className="text-[12px] text-[#8E9096] mt-3">
+              <p className="text-[12px] text-white/70 mt-3">
                 Maximum 5 news topics reached. Deselect one to add another.
               </p>
             )}

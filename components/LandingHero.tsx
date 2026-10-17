@@ -53,7 +53,7 @@ export const LandingHero: React.FC = () => {
           <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 text-xs font-medium text-[#ededed] shadow-[0_2px_12px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.1)] mb-6 w-max select-none transition-all duration-200">
             <Sparkles className="w-3.5 h-3.5 text-amber-300" aria-hidden="true" />
             <span>The morning digest, in five minutes</span>
-            <ArrowRight className="w-3 h-3 text-[#8E9096]" aria-hidden="true" />
+            <ArrowRight className="w-3 h-3 text-white/70" aria-hidden="true" />
           </div>
 
           {/* H1 "Your Personal Daily News & Weather Digest" */}
@@ -64,7 +64,7 @@ export const LandingHero: React.FC = () => {
           </h1>
 
           {/* Subhead with HandDrawnEllipse */}
-          <p className="font-sans font-[500] text-[20px] sm:text-[22px] md:text-[24px] leading-[30px] md:leading-[34px] text-[#c2c2c2] mt-5">
+          <p className="font-sans font-[500] text-[20px] sm:text-[22px] md:text-[24px] leading-[30px] md:leading-[34px] text-white/85 mt-5">
             Delivered daily to{" "}
             <HandDrawnEllipse>
               <span className="px-1 text-white font-[600]">your inbox</span>
@@ -72,7 +72,7 @@ export const LandingHero: React.FC = () => {
           </p>
 
           {/* Concise Supporting Copy */}
-          <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] md:leading-[28px] text-[#8E9096] max-w-[500px] mt-4">
+          <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] md:leading-[28px] text-white/75 max-w-[500px] mt-4">
             Skip the noisy feeds and weather apps full of ads. Get a simple,
             accurate digest in your inbox every morning. Know exactly what to
             expect before you step outside.
@@ -92,10 +92,10 @@ export const LandingHero: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowSignIn(true)}
-                  className="font-sans font-[500] text-[14px] text-[#c2c2c2] hover:text-white h-[52px] px-5 rounded-full border border-white/10 hover:border-white/25 hover:bg-white/[0.04] active:scale-[0.98] transition-all duration-150 cursor-pointer inline-flex items-center gap-2 select-none"
+                  className="font-sans font-[500] text-[15px] text-white/90 hover:text-white h-[52px] px-6 rounded-full bg-[#141418]/60 backdrop-blur-xl border border-white/20 hover:border-white/35 hover:bg-[#141418]/80 active:scale-[0.98] transition-all duration-150 cursor-pointer inline-flex items-center gap-2 select-none shadow-[0_2px_10px_rgba(0,0,0,0.2)]"
                 >
                   <span>Sign in on this device</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#8E9096]" aria-hidden="true" />
+                  <ArrowRight className="w-3.5 h-3.5 text-white/70" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -114,12 +114,12 @@ export const LandingHero: React.FC = () => {
                       setSignInSent(false);
                       setSignInError(null);
                     }}
-                    className="text-xs text-[#8E9096] hover:text-white cursor-pointer transition-colors"
+                    className="text-xs text-white/70 hover:text-white cursor-pointer transition-colors"
                   >
                     Close
                   </button>
                 </div>
-                <p className="font-sans text-[13px] text-[#8E9096] mb-3">
+                <p className="font-sans text-[13px] text-white/75 mb-3">
                   Enter your verified email. We&apos;ll send a one-click login link to your inbox.
                 </p>
                 {signInSent ? (
@@ -135,7 +135,7 @@ export const LandingHero: React.FC = () => {
                       value={signInEmail}
                       onChange={(e) => setSignInEmail(e.target.value)}
                       placeholder="your.email@example.com"
-                      className="flex-1 px-4 py-2.5 rounded-full border border-white/15 bg-[#101010] text-sm text-white placeholder-[#686868] focus:outline-none focus:border-white transition-colors"
+                      className="flex-1 px-4 py-2.5 rounded-full border border-white/15 bg-[#101010] text-sm text-white placeholder-white/40 focus:outline-none focus:border-white transition-colors"
                       disabled={signInLoading}
                     />
                     <button
@@ -186,16 +186,16 @@ export const LandingHero: React.FC = () => {
                     <span className="font-sans font-semibold text-[15px] text-white">
                       BetaDigest
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-[#c2c2c2] border border-white/10">
+                    <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-white/80 border border-white/10">
                       Daily Dispatch
                     </span>
                   </div>
-                  <span className="font-sans text-[12px] text-[#8E9096]">
+                  <span className="font-sans text-[12px] text-white/70">
                     dispatch@betadigest.com · 07:00 AM
                   </span>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[12px] font-medium text-[#c2c2c2] tabular-nums">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[12px] font-medium text-white/80 tabular-nums">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#6b62f2] animate-pulse" />
                 now
               </span>
@@ -217,27 +217,27 @@ export const LandingHero: React.FC = () => {
                     <div className="font-sans font-semibold text-[15px] text-white">
                       Seattle, WA
                     </div>
-                    <div className="font-sans text-[12px] text-[#8E9096]">
+                    <div className="font-sans text-[12px] text-white/70">
                       Partly cloudy · High 58° / Low 45°
                     </div>
                   </div>
                 </div>
                 <div className="font-display font-[600] text-[32px] leading-none text-white tabular-nums">
-                  52°<span className="text-[18px] font-[400] text-[#8E9096]">F</span>
+                  52°<span className="text-[18px] font-[400] text-white/70">F</span>
                 </div>
               </div>
 
               {/* Weather Metrics Pills */}
               <div className="flex flex-wrap gap-2 pt-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] text-[#c2c2c2] hover:bg-white/[0.08] transition-colors">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] text-white/80 hover:bg-white/[0.08] transition-colors">
                   <Droplets className="w-3 h-3 text-[#6b62f2]" />
                   <span>Rain: 30% afternoon</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] text-[#c2c2c2] hover:bg-white/[0.08] transition-colors">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] text-white/80 hover:bg-white/[0.08] transition-colors">
                   <Sun className="w-3 h-3 text-amber-400" />
                   <span>UV Index: 3 (Mod)</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] text-[#c2c2c2] hover:bg-white/[0.08] transition-colors">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] text-white/80 hover:bg-white/[0.08] transition-colors">
                   <Wind className="w-3 h-3 text-emerald-400" />
                   <span>Air Quality: 28 (Good)</span>
                 </div>
@@ -246,7 +246,7 @@ export const LandingHero: React.FC = () => {
 
             {/* News Module Preview Section */}
             <div className="flex flex-col gap-2.5">
-              <div className="text-[11px] font-sans font-semibold uppercase tracking-wider text-[#686868]">
+              <div className="text-[11px] font-sans font-semibold uppercase tracking-wider text-white/60">
                 TOP 5 ESSENTIAL STORIES
               </div>
 
@@ -260,7 +260,7 @@ export const LandingHero: React.FC = () => {
                     Central banks advance unified liquidity framework
                   </span>
                 </div>
-                <p className="font-sans text-[12px] text-[#8E9096] leading-relaxed line-clamp-1">
+                <p className="font-sans text-[12px] text-white/70 leading-relaxed line-clamp-1">
                   Updated capital adequacy reserves reduce cross-border transfer friction.
                 </p>
               </div>
@@ -275,7 +275,7 @@ export const LandingHero: React.FC = () => {
                     Offshore clean power exceeds seasonal benchmarks
                   </span>
                 </div>
-                <p className="font-sans text-[12px] text-[#8E9096] leading-relaxed line-clamp-1">
+                <p className="font-sans text-[12px] text-white/70 leading-relaxed line-clamp-1">
                   Utility storage clusters produce eighteen percent above projected autumn totals.
                 </p>
               </div>
@@ -290,14 +290,14 @@ export const LandingHero: React.FC = () => {
                     Metropolitan rail deploys automated dispatch
                   </span>
                 </div>
-                <p className="font-sans text-[12px] text-[#8E9096] leading-relaxed line-clamp-1">
+                <p className="font-sans text-[12px] text-white/70 leading-relaxed line-clamp-1">
                   Telemetry upgrades across commuter rail lines cut morning transfer delays.
                 </p>
               </div>
             </div>
 
             {/* Footer Summary Strip */}
-            <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[12px] text-[#8E9096]">
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[12px] text-white/70">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#6b62f2]" />
                 <span>5-minute read</span>

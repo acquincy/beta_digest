@@ -7,7 +7,7 @@ export const Footer: React.FC<{ className?: string }> = ({ className = "" }) => 
       className={`w-full max-w-[1120px] mx-auto text-center flex flex-col items-center select-none pt-12 pb-16 px-6 border-t border-white/10 ${className}`}
     >
       {/* Feedback notice */}
-      <p className="font-sans text-[15px] text-[#c2c2c2] mb-6">
+      <p className="font-sans text-[15px] text-white/80 mb-6">
         Please email{" "}
         <a
           href="mailto:help@betadigest.com"
@@ -19,7 +19,7 @@ export const Footer: React.FC<{ className?: string }> = ({ className = "" }) => 
       </p>
 
       {/* Row 1: Feature links */}
-      <div className="flex flex-wrap items-center justify-center gap-6 text-[14px] text-[#8E9096] font-sans mb-3">
+      <div className="flex flex-wrap items-center justify-center gap-6 text-[14px] text-white/70 font-sans mb-3">
         <Link href="/signup" className="hover:text-white transition-colors">
           Daily Weather Digest
         </Link>
@@ -29,7 +29,7 @@ export const Footer: React.FC<{ className?: string }> = ({ className = "" }) => 
       </div>
 
       {/* Row 2: Legal links */}
-      <div className="flex items-center justify-center gap-6 text-[14px] text-[#8E9096] font-sans mb-6">
+      <div className="flex items-center justify-center gap-6 text-[14px] text-white/70 font-sans mb-6">
         <Link href="/credits" className="hover:text-white transition-colors">
           Terms &amp; Conditions
         </Link>
@@ -38,7 +38,7 @@ export const Footer: React.FC<{ className?: string }> = ({ className = "" }) => 
         </Link>
       </div>
 
-      <div className="text-xs text-[#686868] font-sans">
+      <div className="text-xs text-white/55 font-sans">
         BetaDigest · The day, in five minutes.
       </div>
     </footer>

@@ -220,7 +220,7 @@ export const SignupFlow: React.FC = () => {
             <Link
               href="/"
               aria-label="Close"
-              className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-[#8E9096] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
+              className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" aria-hidden="true" />
             </Link>
@@ -236,7 +236,7 @@ export const SignupFlow: React.FC = () => {
             </h1>
 
             {/* Subtitle */}
-            <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[#8E9096] text-center mt-2">
+            <p className="font-sans font-[400] text-[16px] md:text-[18px] text-white/75 text-center mt-2">
               Select your country and city to get started.
             </p>
 
@@ -257,7 +257,7 @@ export const SignupFlow: React.FC = () => {
                     onChange={handleCountryChange}
                     className="w-full h-[46px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-4 font-sans font-medium text-[14px] text-white cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 appearance-none"
                   >
-                    <option value="" disabled className="bg-[#161616] text-[#8E9096]">
+                    <option value="" disabled className="bg-[#161616] text-white/50">
                       Select your country
                     </option>
                     {COUNTRIES.map((c) => (
@@ -266,7 +266,7 @@ export const SignupFlow: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#8E9096]">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/70">
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                       <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
@@ -290,7 +290,7 @@ export const SignupFlow: React.FC = () => {
                     disabled={!countryCode}
                     className="w-full h-[46px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-4 font-sans font-medium text-[14px] text-white cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
                   >
-                    <option value="" disabled className="bg-[#161616] text-[#8E9096]">
+                    <option value="" disabled className="bg-[#161616] text-white/50">
                       Select your city
                     </option>
                     {availableCities.map((c) => (
@@ -300,7 +300,7 @@ export const SignupFlow: React.FC = () => {
                     ))}
                     {countryCode && <option value="__other__" className="bg-[#161616] text-white">Other</option>}
                   </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#8E9096]">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/70">
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                       <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                     </svg>
@@ -348,7 +348,7 @@ export const SignupFlow: React.FC = () => {
             <Link
               href="/"
               aria-label="Close"
-              className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-[#8E9096] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
+              className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" aria-hidden="true" />
             </Link>
@@ -363,7 +363,7 @@ export const SignupFlow: React.FC = () => {
               Start your journey to smarter updates
             </h1>
 
-            <p className="font-sans font-[400] text-[15px] md:text-[17px] text-[#8E9096] text-center mt-3">
+            <p className="font-sans font-[400] text-[15px] md:text-[17px] text-white/75 text-center mt-3">
               We just need your name and email to create your account.
             </p>
 
@@ -412,7 +412,7 @@ export const SignupFlow: React.FC = () => {
                     ariaLabel="I agree to Terms & Conditions and Privacy Policy"
                   />
                 </div>
-                <div className="font-sans font-[400] text-[14px] leading-[22px] text-[#8E9096]">
+                <div className="font-sans font-[400] text-[14px] leading-[22px] text-white/75">
                   I agree to the{" "}
                   <Link
                     href="/credits"

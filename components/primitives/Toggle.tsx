@@ -34,7 +34,7 @@ export const Toggle: React.FC<ToggleProps> = ({
         >
           {label && <span className="font-[500] text-[#ededed] text-sm sm:text-base">{label}</span>}
           {description && (
-            <span className="text-xs sm:text-sm text-[#8E9096]">{description}</span>
+            <span className="text-xs sm:text-sm text-white/70">{description}</span>
           )}
         </label>
       )}

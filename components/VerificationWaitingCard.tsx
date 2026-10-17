@@ -141,7 +141,7 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-[#8E9096] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
+          className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" aria-hidden="true" />
         </button>
@@ -149,7 +149,7 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
         <Link
           href="/"
           aria-label="Close"
-          className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-[#8E9096] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
+          className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" aria-hidden="true" />
         </Link>
@@ -178,7 +178,7 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
         {isVerified ? "Account verified!" : "Check your email"}
       </h1>
 
-      <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[#8E9096] text-center mt-3 max-w-md">
+      <p className="font-sans font-[400] text-[16px] md:text-[18px] text-white/75 text-center mt-3 max-w-md">
         {isVerified ? (
           <span className="text-emerald-400 font-medium">
             Your verification was confirmed. Refreshing page...
@@ -215,8 +215,8 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
             <span>This page will automatically refresh once verified</span>
           </div>
 
-          <div className="mt-2 pt-3 border-t border-white/10 flex items-center gap-2 text-[12px] text-[#8E9096]">
-            <AlertCircle className="w-4 h-4 shrink-0 text-[#686868]" />
+          <div className="mt-2 pt-3 border-t border-white/10 flex items-center gap-2 text-[12px] text-white/70">
+            <AlertCircle className="w-4 h-4 shrink-0 text-white/50" />
             <span>Don&apos;t see the email? Check your spam or promotions folder.</span>
           </div>
         </div>
@@ -226,7 +226,7 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
       {!isVerified && (
         <div className="mt-6 flex items-center gap-2.5 px-4 py-2 bg-white/[0.04] rounded-full border border-white/10">
           <RotateCw className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
-          <span className="font-sans text-[13px] font-[500] text-[#8E9096]">
+          <span className="font-sans text-[13px] font-[500] text-white/70">
             Listening for email verification confirmation...
           </span>
         </div>
@@ -260,7 +260,7 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
             <button
               type="button"
               onClick={onChangeEmail}
-              className="font-sans text-[14px] text-[#8E9096] hover:text-white underline cursor-pointer transition-colors mt-2"
+              className="font-sans text-[14px] text-white/70 hover:text-white underline cursor-pointer transition-colors mt-2"
             >
               Wrong email address? Change email
             </button>

@@ -22,7 +22,7 @@ export default function CreditsPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8E9096] hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/70 hover:text-white transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
               Back to BetaDigest
@@ -30,13 +30,13 @@ export default function CreditsPage() {
           </div>
 
           <div className="border-b border-white/10 pb-4">
-            <span className="font-sans text-[12px] font-bold text-[#8E9096] uppercase tracking-wider">
+            <span className="font-sans text-[12px] font-bold text-white/70 uppercase tracking-wider">
               LICENSING &amp; ATTRIBUTION
             </span>
             <h1 className="font-display font-[700] text-2xl sm:text-3xl text-white mt-1">
               Terms, Privacy &amp; Credits
             </h1>
-            <p className="font-sans text-sm mt-2 text-[#8E9096]">
+            <p className="font-sans text-sm mt-2 text-white/75">
               BetaDigest provides daily weather and news summaries. All photographic assets referenced in public previews are licensed under the Unsplash License:
             </p>
           </div>
@@ -49,7 +49,7 @@ export default function CreditsPage() {
               >
                 <div>
                   <span className="font-semibold text-white">{item.photographer}</span>
-                  <span className="text-xs text-[#8E9096] block sm:inline sm:ml-2">
+                  <span className="text-xs text-white/60 block sm:inline sm:ml-2">
                     ({item.role})
                   </span>
                 </div>
@@ -57,7 +57,7 @@ export default function CreditsPage() {
                   href={`https://unsplash.com/photos/${item.unsplashId}`}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="text-xs text-[#8E9096] hover:text-white font-medium hover:underline self-start sm:self-auto tabular-nums transition-colors"
+                  className="text-xs text-white/70 hover:text-white font-medium hover:underline self-start sm:self-auto tabular-nums transition-colors"
                 >
                   View on Unsplash
                 </a>
@@ -65,7 +65,7 @@ export default function CreditsPage() {
             ))}
           </ul>
 
-          <div className="pt-4 border-t border-white/10 text-xs text-[#8E9096] flex justify-between items-center">
+          <div className="pt-4 border-t border-white/10 text-xs text-white/60 flex justify-between items-center">
             <span>BetaDigest Editorial Engine</span>
             <Link href="/" className="hover:text-white font-medium transition-colors">
               BetaDigest Home

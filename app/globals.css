@@ -23,8 +23,8 @@
   --spring: #98FDCA;
   --black: #000000;
   --text: #ededed;
-  --text-muted: #8E9096;
-  --text-muted-sm: #686868;
+  --text-muted: rgba(255, 255, 255, 0.75);
+  --text-muted-sm: rgba(255, 255, 255, 0.60);
   --canvas: transparent;
   --dawn-blue: #2a54b8;
   --dawn-lavender: #857593;
