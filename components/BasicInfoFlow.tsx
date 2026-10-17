@@ -96,7 +96,7 @@ export const BasicInfoFlow: React.FC = () => {
       <CanvasA />
 
       {/* S3 Card: 768px wide, 48px padding */}
-      <div className="relative w-full max-w-[768px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] p-6 md:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-xl step-enter flex flex-col text-white">
+      <div className="relative w-full max-w-[768px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] p-6 md:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl step-enter flex flex-col text-white">
         {/* Top center IconTile: Smile, 100px tile */}
         <div className="flex justify-center -mt-2 mb-8">
           <IconTile icon={Smile} size={100} radius={28} iconSize={52} />

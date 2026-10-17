@@ -19,15 +19,15 @@ export const CardShell: React.FC<CardShellProps> = ({
   return (
     <div
       className={clsx(
-        "bg-[#161616] border border-white/10 text-[#ededed] mx-auto my-8 relative overflow-hidden transition-all duration-200 backdrop-blur-xl",
+        "bg-[#141418]/85 border border-white/15 text-[#ededed] mx-auto my-8 relative overflow-hidden transition-all duration-200 backdrop-blur-2xl",
         "w-[calc(100%-32px)] sm:w-full",
         isReview ? "max-w-[1024px]" : "max-w-[768px]",
         // Radius: 40px desktop, 32px mobile
         "rounded-[32px] md:rounded-[40px]",
         // Padding: 48px 48px 0 desktop, 24px 24px 0 mobile
         "p-6 pb-0 md:p-12 md:pb-0",
-        // Elevated shadow
-        "shadow-[0_24px_64px_rgba(0,0,0,0.7)]",
+        // Elevated shadow and top specular highlight
+        "shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)]",
         className
       )}
     >

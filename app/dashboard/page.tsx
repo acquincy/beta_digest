@@ -45,7 +45,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--canvas)] text-[var(--text)]">
+    <main className="min-h-screen bg-transparent text-[var(--text)]">
       <DashboardView />
     </main>
   );

@@ -25,7 +25,12 @@
   --text: #ededed;
   --text-muted: #8E9096;
   --text-muted-sm: #686868;
-  --canvas: #0a0a0a;
+  --canvas: transparent;
+  --dawn-blue: #2a54b8;
+  --dawn-lavender: #857593;
+  --dawn-peach: #c98868;
+  --dawn-glow: rgba(238, 164, 122, 0.45);
+  --dawn-surface: rgba(20, 20, 24, 0.85);
   --chip-off: #1c1c1c;
   --white: #FFFFFF;
   --line: rgba(255, 255, 255, 0.10);
@@ -97,7 +102,7 @@
 
 html {
   font-family: var(--font-body);
-  background-color: var(--canvas);
+  background-color: #2a54b8;
   color: var(--text);
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
@@ -105,7 +110,7 @@ html {
 }
 
 body {
-  background-color: var(--canvas);
+  background-color: transparent;
   color: var(--text);
   margin: 0;
   padding: 0;

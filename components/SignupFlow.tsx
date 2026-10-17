@@ -215,7 +215,7 @@ export const SignupFlow: React.FC = () => {
       <main className="flex-grow flex items-center justify-center p-4 py-12 md:py-16">
         {step === 1 && (
           /* S1 Location Modal */
-          <div className="relative w-full max-w-[666px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-xl step-enter flex flex-col items-center select-none">
+          <div className="relative w-full max-w-[666px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl step-enter flex flex-col items-center select-none">
             {/* Close button */}
             <Link
               href="/"
@@ -343,7 +343,7 @@ export const SignupFlow: React.FC = () => {
 
         {step === 2 && (
           /* S2 Credentials Modal */
-          <div className="relative w-full max-w-[666px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-xl step-enter flex flex-col">
+          <div className="relative w-full max-w-[666px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl step-enter flex flex-col">
             {/* Close button */}
             <Link
               href="/"

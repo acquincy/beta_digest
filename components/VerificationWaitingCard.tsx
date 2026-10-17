@@ -134,7 +134,7 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
   };
 
   return (
-    <div className="relative w-full max-w-[666px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.7)] backdrop-blur-xl step-enter flex flex-col items-center text-center">
+    <div className="relative w-full max-w-[666px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] px-8 py-8 md:px-12 md:py-10 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl step-enter flex flex-col items-center text-center">
       {/* Close button */}
       {onClose ? (
         <button

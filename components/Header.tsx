@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ className = "", variant = "float
 
   return (
     <header className={`sticky top-4 md:top-6 z-50 w-full px-4 sm:px-6 flex flex-col items-center pointer-events-none ${className}`}>
-      <div className="pointer-events-auto max-w-[980px] w-full h-[58px] px-3.5 sm:px-5 rounded-full bg-[#161616]/85 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.12)] flex items-center justify-between transition-all duration-200">
+      <div className="pointer-events-auto max-w-[980px] w-full h-[58px] px-3.5 sm:px-5 rounded-full bg-[#141418]/80 backdrop-blur-2xl border border-white/15 hover:border-white/25 shadow-[0_8px_32px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.15)] flex items-center justify-between transition-all duration-200">
         {/* Brand / Logo */}
         <Link
           href="/"
@@ -93,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({ className = "", variant = "float
 
       {/* Mobile Drawer Dropdown */}
       {mobileMenuOpen && (
-        <div className="pointer-events-auto md:hidden w-full max-w-[980px] mt-2 p-4 rounded-[24px] bg-[#161616]/95 backdrop-blur-2xl border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.7)] flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="pointer-events-auto md:hidden w-full max-w-[980px] mt-2 p-4 rounded-[24px] bg-[#141418]/90 backdrop-blur-2xl border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.12)] flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-150">
           <Link
             href="/#features"
             onClick={() => setMobileMenuOpen(false)}

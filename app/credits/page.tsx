@@ -18,7 +18,7 @@ export default function CreditsPage() {
       <Header />
 
       <main className="flex-grow flex items-center justify-center p-4 py-8">
-        <div className="w-full max-w-2xl bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] p-6 sm:p-10 shadow-2xl flex flex-col gap-6">
+        <div className="w-full max-w-2xl bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] p-6 sm:p-10 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl flex flex-col gap-6">
           <div className="flex items-center gap-2">
             <Link
               href="/"
