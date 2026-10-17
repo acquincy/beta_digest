@@ -10,7 +10,6 @@ import {
   Timer,
   Inbox,
   ChevronDown,
-  ArrowRight,
 } from "lucide-react";
 import { Header } from "./Header";
 import { CanvasB } from "./CanvasB";
@@ -115,7 +114,7 @@ export const LandingPage: React.FC = () => {
         >
           <div className="max-w-[1140px] mx-auto flex flex-col items-center">
             {/* Eyebrow badge */}
-            <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+            <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.12] backdrop-blur-md border border-white/15 hover:border-white text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 hover:text-white mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)] transition-all cursor-default">
               Tailored Briefs
             </div>
 
@@ -133,7 +132,7 @@ export const LandingPage: React.FC = () => {
             <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 mt-14 items-stretch">
               {/* Weather Card */}
               <div
-                className="w-full bg-[#141418]/80 backdrop-blur-2xl border border-white/15 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.15)] hover:border-white/30 transition-all duration-200"
+                className="w-full bg-[#141418]/80 hover:bg-white/[0.06] backdrop-blur-2xl border border-white/15 hover:border-white/50 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.15)] hover:shadow-[0_24px_64px_rgba(0,0,0,0.45),0_0_24px_rgba(255,255,255,0.08),inset_0_1px_0_0_rgba(255,255,255,0.25)] transition-all duration-200"
               >
                 <div>
                   {/* Icon */}
@@ -160,7 +159,7 @@ export const LandingPage: React.FC = () => {
                     <span className="font-sans font-[500] text-[14px] text-white">
                       Select weather details
                     </span>
-                    <span className="font-sans font-[500] text-[13px] text-white/75 tabular-nums px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10">
+                    <span className="font-sans font-[500] text-[13px] text-white/75 tabular-nums px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 hover:border-white hover:bg-white/[0.08] transition-colors">
                       ({activeWeather.length}/3)
                     </span>
                   </div>
@@ -192,7 +191,7 @@ export const LandingPage: React.FC = () => {
 
               {/* News Card */}
               <div
-                className="w-full bg-[#141418]/80 backdrop-blur-2xl border border-white/15 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.15)] hover:border-white/30 transition-all duration-200"
+                className="w-full bg-[#141418]/80 hover:bg-white/[0.06] backdrop-blur-2xl border border-white/15 hover:border-white/50 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.15)] hover:shadow-[0_24px_64px_rgba(0,0,0,0.45),0_0_24px_rgba(255,255,255,0.08),inset_0_1px_0_0_rgba(255,255,255,0.25)] transition-all duration-200"
               >
                 <div>
                   {/* Icon */}
@@ -219,7 +218,7 @@ export const LandingPage: React.FC = () => {
                     <span className="font-sans font-[500] text-[14px] text-white">
                       Select news topics
                     </span>
-                    <span className="font-sans font-[500] text-[13px] text-white/75 tabular-nums px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10">
+                    <span className="font-sans font-[500] text-[13px] text-white/75 tabular-nums px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10 hover:border-white hover:bg-white/[0.08] transition-colors">
                       ({activeNews.length}/5)
                     </span>
                   </div>
@@ -258,7 +257,7 @@ export const LandingPage: React.FC = () => {
           aria-label="How It Works"
           className="w-full py-24 px-6 flex flex-col items-center relative"
         >
-          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.12] backdrop-blur-md border border-white/15 hover:border-white text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 hover:text-white mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)] transition-all cursor-default">
             Daily Routine
           </div>
 
@@ -275,61 +274,61 @@ export const LandingPage: React.FC = () => {
           {/* Stack container 920px wide */}
           <div className="w-full max-w-[920px] flex flex-col gap-3.5">
             {/* Step 1 */}
-            <div className="w-full min-h-[84px] bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 hover:bg-white/[0.04] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] group">
+            <div className="w-full min-h-[84px] bg-[#141418]/80 hover:bg-white/[0.08] backdrop-blur-xl border border-white/15 hover:border-white rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.3),0_0_20px_rgba(255,255,255,0.12),inset_0_1px_0_0_rgba(255,255,255,0.25)] group cursor-pointer">
               <div className="flex items-center gap-5">
-                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 group-hover:border-white/30 group-hover:bg-white/[0.12] flex items-center justify-center text-[#ededed] group-hover:text-white transition-all shrink-0">
                   <MailCheck className="w-5 h-5 text-white" />
                 </div>
                 <span className="font-sans font-[500] text-[18px] md:text-[20px] text-white">
                   Sign up with just your email
                 </span>
               </div>
-              <span className="font-mono text-xs text-white/60 uppercase tracking-wider pl-4">
+              <span className="font-mono text-xs text-white/60 group-hover:text-white uppercase tracking-wider pl-4 transition-colors">
                 01
               </span>
             </div>
 
             {/* Step 2 */}
-            <div className="w-full min-h-[84px] bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 hover:bg-white/[0.04] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] group">
+            <div className="w-full min-h-[84px] bg-[#141418]/80 hover:bg-white/[0.08] backdrop-blur-xl border border-white/15 hover:border-white rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.3),0_0_20px_rgba(255,255,255,0.12),inset_0_1px_0_0_rgba(255,255,255,0.25)] group cursor-pointer">
               <div className="flex items-center gap-5">
-                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 group-hover:border-white/30 group-hover:bg-white/[0.12] flex items-center justify-center text-[#ededed] group-hover:text-white transition-all shrink-0">
                   <MessagesSquare className="w-5 h-5 text-white" />
                 </div>
                 <span className="font-sans font-[500] text-[18px] md:text-[20px] text-white">
                   Customize your digest preferences
                 </span>
               </div>
-              <span className="font-mono text-xs text-white/60 uppercase tracking-wider pl-4">
+              <span className="font-mono text-xs text-white/60 group-hover:text-white uppercase tracking-wider pl-4 transition-colors">
                 02
               </span>
             </div>
 
             {/* Step 3 */}
-            <div className="w-full min-h-[84px] bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 hover:bg-white/[0.04] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] group">
+            <div className="w-full min-h-[84px] bg-[#141418]/80 hover:bg-white/[0.08] backdrop-blur-xl border border-white/15 hover:border-white rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.3),0_0_20px_rgba(255,255,255,0.12),inset_0_1px_0_0_rgba(255,255,255,0.25)] group cursor-pointer">
               <div className="flex items-center gap-5">
-                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 group-hover:border-white/30 group-hover:bg-white/[0.12] flex items-center justify-center text-[#ededed] group-hover:text-white transition-all shrink-0">
                   <Timer className="w-5 h-5 text-white" />
                 </div>
                 <span className="font-sans font-[500] text-[18px] md:text-[20px] text-white">
                   Choose when to receive your daily digest
                 </span>
               </div>
-              <span className="font-mono text-xs text-white/60 uppercase tracking-wider pl-4">
+              <span className="font-mono text-xs text-white/60 group-hover:text-white uppercase tracking-wider pl-4 transition-colors">
                 03
               </span>
             </div>
 
             {/* Step 4 */}
-            <div className="w-full min-h-[84px] bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 hover:bg-white/[0.04] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] group">
+            <div className="w-full min-h-[84px] bg-[#141418]/80 hover:bg-white/[0.08] backdrop-blur-xl border border-white/15 hover:border-white rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.3),0_0_20px_rgba(255,255,255,0.12),inset_0_1px_0_0_rgba(255,255,255,0.25)] group cursor-pointer">
               <div className="flex items-center gap-5">
-                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 group-hover:border-white/30 group-hover:bg-white/[0.12] flex items-center justify-center text-[#ededed] group-hover:text-white transition-all shrink-0">
                   <Inbox className="w-5 h-5 text-white" />
                 </div>
                 <span className="font-sans font-[500] text-[18px] md:text-[20px] text-white">
                   Get your digest in your inbox every day
                 </span>
               </div>
-              <span className="font-mono text-xs text-white/60 uppercase tracking-wider pl-4">
+              <span className="font-mono text-xs text-white/60 group-hover:text-white uppercase tracking-wider pl-4 transition-colors">
                 04
               </span>
             </div>
@@ -340,10 +339,9 @@ export const LandingPage: React.FC = () => {
           {/* Primary CTA Pill */}
           <Link
             href="/signup"
-            className="inline-flex items-center justify-center gap-2 h-[52px] px-8 rounded-full bg-white text-black font-sans font-[500] text-[16px] hover:bg-[#eaeaea] active:scale-[0.98] transition-all duration-150 shadow-[0_2px_14px_rgba(255,255,255,0.15)] whitespace-nowrap"
+            className="inline-flex items-center justify-center h-[52px] px-8 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white text-white font-sans font-[500] text-[16px] hover:bg-white hover:text-black hover:border-white active:scale-[0.98] transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25)] select-none whitespace-nowrap cursor-pointer"
           >
-            <span>Get your daily digest</span>
-            <ArrowRight className="w-4 h-4 text-black" aria-hidden="true" />
+            <span>Get your Beta Digest</span>
           </Link>
         </section>
 
@@ -353,7 +351,7 @@ export const LandingPage: React.FC = () => {
           aria-label="Frequently Asked Questions"
           className="w-full py-24 px-6 flex flex-col items-center relative"
         >
-          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.12] backdrop-blur-md border border-white/15 hover:border-white text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 hover:text-white mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)] transition-all cursor-default">
             Questions &amp; Answers
           </div>
 
@@ -371,8 +369,8 @@ export const LandingPage: React.FC = () => {
                   key={idx}
                   className={`w-full rounded-[22px] border transition-all duration-200 overflow-hidden backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] ${
                     isOpen
-                      ? "bg-[#141418]/90 border-white/25 shadow-[0_12px_32px_rgba(0,0,0,0.3)]"
-                      : "bg-[#141418]/70 border-white/15 hover:border-white/25 hover:bg-[#141418]/85"
+                      ? "bg-[#141418]/90 border-white/40 shadow-[0_12px_32px_rgba(0,0,0,0.3)]"
+                      : "bg-[#141418]/70 border-white/15 hover:border-white hover:bg-white/[0.08] hover:shadow-[0_8px_24px_rgba(0,0,0,0.3),0_0_16px_rgba(255,255,255,0.1),inset_0_1px_0_0_rgba(255,255,255,0.25)]"
                   }`}
                 >
                   <button
@@ -450,10 +448,9 @@ export const LandingPage: React.FC = () => {
           {/* Primary CTA Button */}
           <Link
             href="/signup"
-            className="relative z-10 inline-flex items-center justify-center gap-2.5 h-[58px] px-9 rounded-full bg-white text-black font-sans font-[500] text-[17px] hover:bg-[#eaeaea] active:scale-[0.98] transition-all duration-150 shadow-[0_2px_20px_rgba(255,255,255,0.2)] whitespace-nowrap"
+            className="relative z-10 inline-flex items-center justify-center h-[58px] px-9 rounded-full bg-white/[0.08] backdrop-blur-xl border border-white text-white font-sans font-[500] text-[17px] hover:bg-white hover:text-black hover:border-white active:scale-[0.98] transition-all duration-200 shadow-[0_4px_24px_rgba(0,0,0,0.3)] select-none whitespace-nowrap cursor-pointer"
           >
-            <span>Get your daily digest</span>
-            <ArrowRight className="w-4 h-4 text-black" aria-hidden="true" />
+            <span>Get your Beta Digest</span>
           </Link>
 
           <div className="h-20" />

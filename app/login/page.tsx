@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Mail, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { CanvasA } from "@/components/CanvasA";
-import { Header } from "@/components/Header";
+import { TopLeftLogo } from "@/components/TopLeftLogo";
 import { IconTile } from "@/components/primitives/IconTile";
 import { UnderlineInput } from "@/components/primitives/UnderlineInput";
 import { DarkButton } from "@/components/primitives/Button";
@@ -43,7 +44,9 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen text-[var(--text)] flex flex-col justify-between overflow-x-hidden">
       <CanvasA />
-      <Header />
+      <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+        <TopLeftLogo />
+      </header>
 
       <main className="flex-grow flex items-center justify-center p-4 py-8">
         <div className="w-full max-w-[540px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl step-enter">
@@ -77,7 +80,15 @@ export default function LoginPage() {
           ) : (
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <IconTile icon={Mail} size={48} radius={14} iconSize={26} />
+                <div className="w-12 h-12 rounded-[14px] bg-[#181d30] flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
+                  <Image
+                    src="/logo-mark.png"
+                    alt="BetaDigest Logo"
+                    width={30}
+                    height={30}
+                    className="w-[30px] h-[30px] object-contain"
+                  />
+                </div>
                 <span className="font-sans font-[600] text-[12px] tracking-widest text-white/70 uppercase">
                   SUBSCRIBER PORTAL
                 </span>

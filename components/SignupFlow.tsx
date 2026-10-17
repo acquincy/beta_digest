@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Globe, X, Rocket } from "lucide-react";
 import { CanvasA } from "./CanvasA";
+import { TopLeftLogo } from "./TopLeftLogo";
 import { IconTile } from "./primitives/IconTile";
 import { DarkButton, OutlineButton, Button } from "./primitives/Button";
 import { UnderlineInput } from "./primitives/UnderlineInput";
@@ -199,6 +200,9 @@ export const SignupFlow: React.FC = () => {
     return (
       <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
         <CanvasA />
+        <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+          <TopLeftLogo />
+        </header>
         <main className="flex-grow flex items-center justify-center p-4 py-12 md:py-16">
           <div className="w-full max-w-[666px] h-[400px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
         </main>
@@ -210,6 +214,9 @@ export const SignupFlow: React.FC = () => {
   return (
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
       <CanvasA />
+      <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+        <TopLeftLogo />
+      </header>
 
       {/* Main card container */}
       <main className="flex-grow flex items-center justify-center p-4 py-12 md:py-16">

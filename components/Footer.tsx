@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export const Footer: React.FC<{ className?: string }> = ({ className = "" }) => {
   return (
@@ -38,8 +39,15 @@ export const Footer: React.FC<{ className?: string }> = ({ className = "" }) => 
         </Link>
       </div>
 
-      <div className="text-xs text-white/55 font-sans">
-        BetaDigest · The day, in five minutes.
+      <div className="inline-flex items-center justify-center gap-2 text-xs text-white/60 font-sans">
+        <Image
+          src="/logo-mark.png"
+          alt="BetaDigest"
+          width={15}
+          height={15}
+          className="w-3.5 h-3.5 object-contain opacity-80"
+        />
+        <span>BetaDigest · The day, in five minutes.</span>
       </div>
     </footer>
   );

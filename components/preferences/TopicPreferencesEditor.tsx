@@ -37,6 +37,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { CanvasA } from "../CanvasA";
+import { TopLeftLogo } from "../TopLeftLogo";
 import { CardShell } from "../primitives/CardShell";
 import { SectionCard } from "../primitives/SectionCard";
 import { PrimaryButton, OutlineButton } from "../primitives/Button";
@@ -283,16 +284,25 @@ export const TopicPreferencesEditor: React.FC = () => {
 
   if (!hydrated) {
     return (
-      <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8 md:py-12 overflow-x-hidden">
+      <div className="relative min-h-screen flex flex-col justify-between items-center overflow-x-hidden">
         <CanvasA />
-        <div className="w-full max-w-[768px] h-[520px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] animate-pulse" />
+        <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+          <TopLeftLogo />
+        </header>
+        <main className="flex-grow flex items-center justify-center p-4 py-8 md:py-12 w-full">
+          <div className="w-full max-w-[768px] h-[520px] bg-[#161616] border border-white/10 rounded-[32px] md:rounded-[40px] animate-pulse" />
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8 md:py-12 overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col justify-between items-center overflow-x-hidden">
       <CanvasA />
+      <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+        <TopLeftLogo />
+      </header>
+      <main className="flex-grow flex items-center justify-center p-4 py-8 md:py-12 w-full">
 
       <CardShell
         footer={
@@ -477,6 +487,7 @@ export const TopicPreferencesEditor: React.FC = () => {
           </SectionCard>
         </div>
       </CardShell>
+      </main>
     </div>
   );
 };

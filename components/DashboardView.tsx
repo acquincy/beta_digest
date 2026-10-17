@@ -18,7 +18,7 @@ import {
   Sparkles,
   LogOut,
 } from "lucide-react";
-import { Header } from "./Header";
+import { TopLeftLogo } from "./TopLeftLogo";
 import { CanvasB } from "./CanvasB";
 import {
   Preferences,
@@ -438,8 +438,10 @@ export const DashboardView: React.FC = () => {
       {/* Canvas B background */}
       <CanvasB showConcentricCircles={false} />
 
-      {/* Header */}
-      <Header />
+      {/* Top-left Brand Logo */}
+      <header className="w-full px-6 md:px-10 pt-6 pb-2 flex items-center justify-start z-20">
+        <TopLeftLogo />
+      </header>
 
       {/* Main dashboard content: Single centered card, max-width 1120px */}
       <main className="w-full max-w-[1120px] mx-auto px-4 md:px-6 flex flex-col gap-6">

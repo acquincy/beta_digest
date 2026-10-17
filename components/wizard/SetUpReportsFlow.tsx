@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Mail,
   CloudSun,
@@ -33,6 +34,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { CanvasA } from "../CanvasA";
+import { TopLeftLogo } from "../TopLeftLogo";
 import { CardShell } from "../primitives/CardShell";
 import { SectionCard } from "../primitives/SectionCard";
 import { GradientIcon } from "../primitives/IconTile";
@@ -218,9 +220,14 @@ export const SetUpReportsFlow: React.FC = () => {
   const stories = realStories.length > 0 ? realStories : mockService.getStories(prefs.newsTopics);
   if (!hydrated) {
     return (
-      <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8 md:py-12 overflow-x-hidden">
+      <div className="relative min-h-screen flex flex-col justify-between items-center overflow-x-hidden">
         <CanvasA />
-        <div className="w-full max-w-[768px] h-[520px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+        <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+          <TopLeftLogo />
+        </header>
+        <main className="flex-grow flex items-center justify-center p-4 py-8 md:py-12 w-full">
+          <div className="w-full max-w-[768px] h-[520px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+        </main>
       </div>
     );
   }
@@ -228,8 +235,12 @@ export const SetUpReportsFlow: React.FC = () => {
   const deliveryTimeFormatted = formatHourOption(prefs.deliveryHour);
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-8 md:py-12 overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col justify-between items-center overflow-x-hidden">
       <CanvasA />
+      <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+        <TopLeftLogo />
+      </header>
+      <main className="flex-grow flex items-center justify-center p-4 py-8 md:py-12 w-full">
 
       {/* STEP 1: Delivery time only */}
       {currentStep === 1 && (
@@ -554,8 +565,14 @@ export const SetUpReportsFlow: React.FC = () => {
                 <div className="bg-white/[0.03] border-b border-white/10 p-5 flex flex-col gap-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                        <Mail className="w-5 h-5 text-white stroke-[2]" aria-hidden="true" />
+                      <div className="w-10 h-10 rounded-full bg-[#181d30] flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                        <Image
+                          src="/logo-mark.png"
+                          alt="BetaDigest"
+                          width={24}
+                          height={24}
+                          className="w-6 h-6 object-contain"
+                        />
                       </div>
                       <div>
                         <div className="font-sans font-[600] text-[15px] text-white">
@@ -749,6 +766,7 @@ export const SetUpReportsFlow: React.FC = () => {
           </div>
         </CardShell>
       )}
+      </main>
     </div>
   );
 };

@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
-import { Header } from "@/components/Header";
+import { TopLeftLogo } from "@/components/TopLeftLogo";
 import { CanvasB } from "@/components/CanvasB";
 
 export default function DashboardError({
@@ -20,7 +20,9 @@ export default function DashboardError({
   return (
     <div className="relative min-h-screen text-[var(--text)] flex flex-col pb-16">
       <CanvasB showConcentricCircles={false} />
-      <Header />
+      <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+        <TopLeftLogo />
+      </header>
       <main className="w-full max-w-[640px] mx-auto px-4 md:px-6 flex flex-col items-center justify-center py-16 text-center my-auto">
         <div
           className="w-full bg-white rounded-[32px] p-8 md:p-12 border border-[var(--line)] shadow-sm flex flex-col items-center gap-6"
