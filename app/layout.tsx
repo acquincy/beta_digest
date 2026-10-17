@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Red_Hat_Display, Inter } from "next/font/google";
+import { DM_Sans, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-const redHatDisplay = Red_Hat_Display({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-red-hat-display",
+  variable: "--font-dm-sans",
 });
 
 const inter = Inter({
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${redHatDisplay.variable} ${inter.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--canvas)] text-[var(--text)] selection:bg-[#6b62f2] selection:text-white">
         {/* Hidden SVG defining linearGradient for icons */}

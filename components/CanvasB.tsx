@@ -15,9 +15,9 @@ export const CanvasB: React.FC<CanvasBProps> = ({ showConcentricCircles = true }
         className="absolute inset-0 w-full h-full"
         style={{
           background: `
-            radial-gradient(110% 55% at 50% -5%, rgba(107, 98, 242, 0.18) 0%, rgba(245, 158, 11, 0.05) 45%, transparent 75%),
-            radial-gradient(70% 50% at 85% 25%, rgba(107, 98, 242, 0.12) 0%, transparent 60%),
-            radial-gradient(60% 60% at 15% 65%, rgba(107, 98, 242, 0.06) 0%, transparent 70%)
+            radial-gradient(120% 60% at 50% -10%, rgba(107, 98, 242, 0.22) 0%, rgba(79, 70, 229, 0.12) 35%, rgba(6, 182, 212, 0.04) 55%, transparent 75%),
+            radial-gradient(75% 50% at 85% 25%, rgba(107, 98, 242, 0.14) 0%, transparent 60%),
+            radial-gradient(60% 60% at 15% 65%, rgba(107, 98, 242, 0.07) 0%, transparent 70%)
           `,
         }}
       />
