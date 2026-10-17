@@ -95,7 +95,7 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen text-[var(--text)] flex flex-col bg-[#0a0a0a]">
+    <div className="relative min-h-screen text-[var(--text)] flex flex-col bg-transparent">
       {/* Canvas B background fixed behind hero */}
       <CanvasB />
 
@@ -133,7 +133,7 @@ export const LandingPage: React.FC = () => {
             <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 mt-14 items-stretch">
               {/* Weather Card */}
               <div
-                className="w-full bg-[#161616] border border-white/10 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.10)] hover:border-white/25 transition-all duration-200"
+                className="w-full bg-[#141418]/80 backdrop-blur-2xl border border-white/15 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.15)] hover:border-white/30 transition-all duration-200"
               >
                 <div>
                   {/* Icon */}
@@ -192,7 +192,7 @@ export const LandingPage: React.FC = () => {
 
               {/* News Card */}
               <div
-                className="w-full bg-[#161616] border border-white/10 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.10)] hover:border-white/25 transition-all duration-200"
+                className="w-full bg-[#141418]/80 backdrop-blur-2xl border border-white/15 rounded-[32px] p-8 md:p-10 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.15)] hover:border-white/30 transition-all duration-200"
               >
                 <div>
                   {/* Icon */}
@@ -275,7 +275,7 @@ export const LandingPage: React.FC = () => {
           {/* Stack container 920px wide */}
           <div className="w-full max-w-[920px] flex flex-col gap-3.5">
             {/* Step 1 */}
-            <div className="w-full min-h-[84px] bg-[#161616] border border-white/10 hover:border-white/25 hover:bg-white/[0.02] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.06)] group">
+            <div className="w-full min-h-[84px] bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 hover:bg-white/[0.04] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] group">
               <div className="flex items-center gap-5">
                 <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
                   <MailCheck className="w-5 h-5 text-white" />
@@ -290,7 +290,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Step 2 */}
-            <div className="w-full min-h-[84px] bg-[#161616] border border-white/10 hover:border-white/25 hover:bg-white/[0.02] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.06)] group">
+            <div className="w-full min-h-[84px] bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 hover:bg-white/[0.04] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] group">
               <div className="flex items-center gap-5">
                 <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
                   <MessagesSquare className="w-5 h-5 text-white" />
@@ -305,7 +305,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Step 3 */}
-            <div className="w-full min-h-[84px] bg-[#161616] border border-white/10 hover:border-white/25 hover:bg-white/[0.02] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.06)] group">
+            <div className="w-full min-h-[84px] bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 hover:bg-white/[0.04] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] group">
               <div className="flex items-center gap-5">
                 <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
                   <Timer className="w-5 h-5 text-white" />
@@ -320,7 +320,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Step 4 */}
-            <div className="w-full min-h-[84px] bg-[#161616] border border-white/10 hover:border-white/25 hover:bg-white/[0.02] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.06)] group">
+            <div className="w-full min-h-[84px] bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 hover:bg-white/[0.04] rounded-[22px] px-6 py-4 flex items-center justify-between transition-all duration-200 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_0_0_rgba(255,255,255,0.10)] group">
               <div className="flex items-center gap-5">
                 <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#ededed] group-hover:text-white transition-colors shrink-0">
                   <Inbox className="w-5 h-5 text-white" />
@@ -369,10 +369,10 @@ export const LandingPage: React.FC = () => {
               return (
                 <div
                   key={idx}
-                  className={`w-full rounded-[22px] border transition-all duration-200 overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] ${
+                  className={`w-full rounded-[22px] border transition-all duration-200 overflow-hidden backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] ${
                     isOpen
-                      ? "bg-[#181818] border-white/20"
-                      : "bg-[#141414] border-white/10 hover:border-white/20"
+                      ? "bg-[#141418]/90 border-white/25 shadow-[0_12px_32px_rgba(0,0,0,0.3)]"
+                      : "bg-[#141418]/70 border-white/15 hover:border-white/25 hover:bg-[#141418]/85"
                   }`}
                 >
                   <button
@@ -409,7 +409,7 @@ export const LandingPage: React.FC = () => {
           aria-label="Get Started"
           className="relative w-full py-28 px-6 text-center flex flex-col items-center overflow-hidden"
         >
-          {/* Radial Spotlight Accent behind CTA */}
+          {/* Radial Sunrise Dawn Spotlight Accent behind CTA */}
           <div
             className="absolute pointer-events-none"
             style={{
@@ -418,17 +418,17 @@ export const LandingPage: React.FC = () => {
               top: "10%",
               left: "50%",
               transform: "translateX(-50%)",
-              background: "radial-gradient(ellipse at center, rgba(107, 98, 242, 0.22) 0%, transparent 70%)",
+              background: "radial-gradient(ellipse at center, rgba(201, 136, 104, 0.28) 0%, rgba(107, 98, 242, 0.12) 50%, transparent 75%)",
               zIndex: 0,
             }}
             aria-hidden="true"
           />
 
-          {/* Dusk Violet Wash Strip */}
+          {/* Sunrise Dawn Glow Strip */}
           <div
             className="w-full max-w-[400px] h-[1px] mb-12"
             style={{
-              background: "linear-gradient(90deg, transparent, rgba(107, 98, 242, 0.6) 50%, transparent)",
+              background: "linear-gradient(90deg, transparent, rgba(238, 164, 122, 0.6) 50%, transparent)",
             }}
             aria-hidden="true"
           />

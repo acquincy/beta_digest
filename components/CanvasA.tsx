@@ -4,21 +4,31 @@ export const CanvasA: React.FC = () => {
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-[#0a0a0a]"
+      className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
     >
-      {/* Radial Gradient Ambient Highlights */}
+      {/* Dimension Dawn / Sunrise Sky Gradient */}
       <div
         className="absolute inset-0 w-full h-full"
         style={{
           background: `
-            radial-gradient(80% 50% at 50% 0%, rgba(107, 98, 242, 0.16) 0%, transparent 60%),
-            radial-gradient(60% 45% at 90% 80%, rgba(107, 98, 242, 0.08) 0%, transparent 60%),
-            radial-gradient(50% 40% at 10% 40%, rgba(107, 98, 242, 0.05) 0%, transparent 50%)
+            radial-gradient(130% 95% at 8% 8%, rgba(56, 110, 228, 0.95) 0%, rgba(42, 86, 194, 0.72) 32%, transparent 72%),
+            radial-gradient(115% 95% at 92% 92%, rgba(218, 140, 98, 0.95) 0%, rgba(198, 120, 84, 0.78) 30%, rgba(158, 96, 76, 0.45) 58%, transparent 85%),
+            radial-gradient(85% 65% at 76% 62%, rgba(238, 164, 122, 0.45) 0%, transparent 58%),
+            radial-gradient(100% 80% at 46% 46%, rgba(126, 116, 150, 0.55) 0%, transparent 68%),
+            linear-gradient(140deg, #2a54b8 0%, #3a68ca 20%, #5d74ae 38%, #857593 55%, #ad7c7b 72%, #c98868 88%, #b57457 100%)
           `,
         }}
       />
 
-      {/* Hairline geometric background arcs */}
+      {/* Subtle atmospheric dawn warmth overlay */}
+      <div
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-40 mix-blend-overlay"
+        style={{
+          background: "radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 80%)",
+        }}
+      />
+
+      {/* Hairline geometric background arcs catching dawn light */}
       <div
         className="absolute rounded-full pointer-events-none"
         style={{
@@ -26,7 +36,7 @@ export const CanvasA: React.FC = () => {
           height: "1400px",
           left: "-500px",
           top: "-200px",
-          border: "1px solid rgba(255, 255, 255, 0.03)",
+          border: "1px solid rgba(255, 255, 255, 0.10)",
         }}
       />
       <div
@@ -36,7 +46,7 @@ export const CanvasA: React.FC = () => {
           height: "1000px",
           left: "-300px",
           top: "50px",
-          border: "1px solid rgba(255, 255, 255, 0.025)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
         }}
       />
 
@@ -48,8 +58,8 @@ export const CanvasA: React.FC = () => {
           height: "800px",
           right: "-200px",
           top: "10%",
-          border: "1px solid rgba(255, 255, 255, 0.03)",
-          background: "radial-gradient(circle, rgba(107, 98, 242, 0.05) 0%, transparent 70%)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+          background: "radial-gradient(circle, rgba(238, 164, 122, 0.12) 0%, transparent 70%)",
         }}
       />
     </div>

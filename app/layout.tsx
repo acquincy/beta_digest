@@ -33,7 +33,7 @@ export default function RootLayout({
       lang="en"
       className={`${dmSans.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[var(--canvas)] text-[var(--text)] selection:bg-[#6b62f2] selection:text-white">
+      <body className="min-h-full flex flex-col bg-transparent text-[var(--text)] selection:bg-[#6b62f2] selection:text-white">
         {/* Hidden SVG defining linearGradient for icons */}
         <svg
           width="0"

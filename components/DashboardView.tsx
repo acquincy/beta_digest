@@ -235,7 +235,7 @@ export const DashboardView: React.FC = () => {
     return (
       <div
         key={topicId}
-        className={`rounded-[24px] p-5 md:p-6 bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between ${
+        className={`rounded-[24px] p-5 md:p-6 bg-white/[0.04] backdrop-blur-md border border-white/12 hover:border-white/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] transition-all flex flex-col justify-between ${
           isWide ? wideSpanClass : ""
         }`}
       >
@@ -443,7 +443,7 @@ export const DashboardView: React.FC = () => {
 
       {/* Main dashboard content: Single centered card, max-width 1120px */}
       <main className="w-full max-w-[1120px] mx-auto px-4 md:px-6 flex flex-col gap-6">
-        <div className="w-full bg-[#161616] rounded-[32px] md:rounded-[48px] p-6 md:p-10 border border-white/10 shadow-2xl flex flex-col gap-8">
+        <div className="w-full bg-[#141418]/85 backdrop-blur-2xl rounded-[32px] md:rounded-[48px] p-6 md:p-10 border border-white/15 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] flex flex-col gap-8">
           {/* Header row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
             <div>
@@ -512,10 +512,10 @@ export const DashboardView: React.FC = () => {
           ) : (
             <>
               {/* Countdown row */}
-              <div className="p-5 md:p-6 rounded-[24px] bg-[#111111] border border-white/10 text-white flex flex-col gap-3">
+              <div className="p-5 md:p-6 rounded-[24px] bg-black/40 backdrop-blur-xl border border-white/15 text-white flex flex-col gap-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <Clock className="w-5 h-5 text-[#6b62f2]" aria-hidden="true" />
+                    <Clock className="w-5 h-5 text-amber-400" aria-hidden="true" />
                     <span className="font-sans font-[600] text-[16px] text-white">
                       Next digest arrives in
                     </span>
@@ -590,7 +590,7 @@ export const DashboardView: React.FC = () => {
                     {stories.map((story, i) => (
                       <article
                         key={`${story.id}-${i}`}
-                        className="p-5 md:p-6 rounded-[20px] bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col gap-2"
+                        className="p-5 md:p-6 rounded-[20px] bg-white/[0.035] backdrop-blur-md border border-white/12 hover:border-white/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-all flex flex-col gap-2"
                       >
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-sans text-[14px] text-[#8E9096] tabular-nums font-[600]">

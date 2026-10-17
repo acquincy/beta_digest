@@ -50,10 +50,10 @@ export const LandingHero: React.FC = () => {
         {/* Left Column */}
         <div className="w-full lg:w-[52%] flex flex-col pt-2 lg:pt-6">
           {/* Status Announcement Pill */}
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#161616]/90 border border-white/10 hover:border-[#6b62f2]/40 text-xs font-medium text-[#ededed] shadow-[0_2px_12px_rgba(0,0,0,0.4),0_0_12px_rgba(107,98,242,0.12)] mb-6 w-max select-none transition-all duration-200">
-            <Sparkles className="w-3.5 h-3.5 text-[#6b62f2]" aria-hidden="true" />
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#141418]/80 backdrop-blur-xl border border-white/15 hover:border-white/30 text-xs font-medium text-[#ededed] shadow-[0_2px_12px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.1)] mb-6 w-max select-none transition-all duration-200">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" aria-hidden="true" />
             <span>The morning digest, in five minutes</span>
-            <ArrowRight className="w-3 h-3 text-[#686868]" aria-hidden="true" />
+            <ArrowRight className="w-3 h-3 text-[#8E9096]" aria-hidden="true" />
           </div>
 
           {/* H1 "Your Personal Daily News & Weather Digest" */}
@@ -158,7 +158,7 @@ export const LandingHero: React.FC = () => {
 
         {/* Right Column: Visually Compelling Product Preview */}
         <div className="w-full lg:w-[46%] relative flex justify-center lg:justify-end">
-          {/* Dusk Violet Radial Spotlight behind the preview */}
+          {/* Sunrise Dawn Radial Spotlight behind the preview */}
           <div
             className="absolute pointer-events-none"
             style={{
@@ -166,14 +166,14 @@ export const LandingHero: React.FC = () => {
               height: "480px",
               top: "-40px",
               right: "-20px",
-              background: "radial-gradient(circle, rgba(107, 98, 242, 0.18) 0%, transparent 70%)",
+              background: "radial-gradient(circle, rgba(218, 140, 98, 0.22) 0%, rgba(107, 98, 242, 0.10) 45%, transparent 70%)",
               zIndex: 0,
             }}
             aria-hidden="true"
           />
 
           {/* Product Preview Card */}
-          <div className="relative z-10 w-full max-w-[490px] rounded-[32px] bg-[#161616]/95 backdrop-blur-2xl border border-white/10 hover:border-white/20 shadow-[0_24px_64px_rgba(0,0,0,0.8),inset_0_1px_0_0_rgba(255,255,255,0.12)] p-6 sm:p-7 flex flex-col gap-5 transition-all duration-300">
+          <div className="relative z-10 w-full max-w-[490px] rounded-[32px] bg-[#141418]/85 backdrop-blur-2xl border border-white/15 hover:border-white/25 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] p-6 sm:p-7 flex flex-col gap-5 transition-all duration-300">
             {/* Dispatch Header Row */}
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
