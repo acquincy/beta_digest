@@ -30,7 +30,7 @@ export const DigestPreview: React.FC<DigestPreviewProps> = ({
       <div className="relative w-full flex items-center justify-center p-2 sm:p-4">
         <article
           aria-label="Email Digest Preview"
-          className="relative z-10 w-full max-w-[490px] p-6 sm:p-7 rounded-[32px] border border-white/10 bg-[#161616] text-[#ededed] shadow-[0_16px_48px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-all duration-200"
+          className="relative z-10 w-full max-w-[490px] p-6 sm:p-7 rounded-[32px] border border-white/10 hover:border-white/20 bg-[#161616] text-[#ededed] shadow-[0_16px_48px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl transition-all duration-200"
         >
           <div className="flex flex-col gap-1.5 pb-3 border-b border-white/10 text-xs font-sans">
             <div className="flex items-center justify-between">
