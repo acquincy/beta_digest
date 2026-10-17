@@ -115,8 +115,8 @@ export const LandingPage: React.FC = () => {
         >
           <div className="max-w-[1140px] mx-auto flex flex-col items-center">
             {/* Eyebrow badge */}
-            <div className="text-[12px] font-sans font-semibold uppercase tracking-widest text-[#8E9096] mb-3">
-              TAILORED BRIEFS
+            <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+              Tailored Briefs
             </div>
 
             {/* Centered header: H2 max-width 720px */}
@@ -125,7 +125,7 @@ export const LandingPage: React.FC = () => {
             </h2>
 
             {/* Paragraph */}
-            <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] md:leading-[28px] text-[#8E9096] text-center max-w-[620px] mt-4">
+            <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] md:leading-[28px] text-white/75 text-center max-w-[620px] mt-4">
               Pick up to 3 weather details and up to 5 news topics. Your digest arrives in your inbox at the hour you choose.
             </p>
 
@@ -149,7 +149,7 @@ export const LandingPage: React.FC = () => {
                   </h3>
 
                   {/* Description */}
-                  <p className="font-sans font-[400] text-[16px] leading-[26px] text-[#8E9096] mt-3">
+                  <p className="font-sans font-[400] text-[16px] leading-[26px] text-white/75 mt-3">
                     Precise weather for your exact city, tailored to your preferences.
                   </p>
                 </div>
@@ -160,7 +160,7 @@ export const LandingPage: React.FC = () => {
                     <span className="font-sans font-[500] text-[14px] text-white">
                       Select weather details
                     </span>
-                    <span className="font-sans font-[500] text-[13px] text-[#8E9096] tabular-nums px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10">
+                    <span className="font-sans font-[500] text-[13px] text-white/75 tabular-nums px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10">
                       ({activeWeather.length}/3)
                     </span>
                   </div>
@@ -208,7 +208,7 @@ export const LandingPage: React.FC = () => {
                   </h3>
 
                   {/* Description */}
-                  <p className="font-sans font-[400] text-[16px] leading-[26px] text-[#8E9096] mt-3">
+                  <p className="font-sans font-[400] text-[16px] leading-[26px] text-white/75 mt-3">
                     The 5 stories that matter, on the topics you choose.
                   </p>
                 </div>
@@ -219,7 +219,7 @@ export const LandingPage: React.FC = () => {
                     <span className="font-sans font-[500] text-[14px] text-white">
                       Select news topics
                     </span>
-                    <span className="font-sans font-[500] text-[13px] text-[#8E9096] tabular-nums px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10">
+                    <span className="font-sans font-[500] text-[13px] text-white/75 tabular-nums px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/10">
                       ({activeNews.length}/5)
                     </span>
                   </div>
@@ -258,15 +258,15 @@ export const LandingPage: React.FC = () => {
           aria-label="How It Works"
           className="w-full py-24 px-6 flex flex-col items-center relative"
         >
-          <div className="text-[12px] font-sans font-semibold uppercase tracking-widest text-[#8E9096] mb-3">
-            DAILY ROUTINE
+          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+            Daily Routine
           </div>
 
           <h2 className="font-display font-[700] text-[32px] leading-[38px] md:text-[46px] md:leading-[54px] text-center tracking-[-0.035em] bg-clip-text text-transparent bg-gradient-to-b from-white via-[#f4f4f6] to-white/70">
             How It Works
           </h2>
 
-          <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[#8E9096] text-center max-w-[560px] mt-4">
+          <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] md:leading-[28px] text-white/75 text-center max-w-[560px] mt-4">
             Four simple steps to starting every morning with clarity and peace of mind.
           </p>
 
@@ -284,7 +284,7 @@ export const LandingPage: React.FC = () => {
                   Sign up with just your email
                 </span>
               </div>
-              <span className="font-mono text-xs text-[#8E9096] uppercase tracking-wider pl-4">
+              <span className="font-mono text-xs text-white/60 uppercase tracking-wider pl-4">
                 01
               </span>
             </div>
@@ -299,7 +299,7 @@ export const LandingPage: React.FC = () => {
                   Customize your digest preferences
                 </span>
               </div>
-              <span className="font-mono text-xs text-[#8E9096] uppercase tracking-wider pl-4">
+              <span className="font-mono text-xs text-white/60 uppercase tracking-wider pl-4">
                 02
               </span>
             </div>
@@ -314,7 +314,7 @@ export const LandingPage: React.FC = () => {
                   Choose when to receive your daily digest
                 </span>
               </div>
-              <span className="font-mono text-xs text-[#8E9096] uppercase tracking-wider pl-4">
+              <span className="font-mono text-xs text-white/60 uppercase tracking-wider pl-4">
                 03
               </span>
             </div>
@@ -329,7 +329,7 @@ export const LandingPage: React.FC = () => {
                   Get your digest in your inbox every day
                 </span>
               </div>
-              <span className="font-mono text-xs text-[#8E9096] uppercase tracking-wider pl-4">
+              <span className="font-mono text-xs text-white/60 uppercase tracking-wider pl-4">
                 04
               </span>
             </div>
@@ -353,8 +353,8 @@ export const LandingPage: React.FC = () => {
           aria-label="Frequently Asked Questions"
           className="w-full py-24 px-6 flex flex-col items-center relative"
         >
-          <div className="text-[12px] font-sans font-semibold uppercase tracking-widest text-[#8E9096] mb-3">
-            QUESTIONS &amp; ANSWERS
+          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 text-[11px] font-sans font-semibold uppercase tracking-widest text-white/80 mb-3 shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+            Questions &amp; Answers
           </div>
 
           <h2 className="font-display font-[700] text-[32px] leading-[38px] md:text-[46px] md:leading-[54px] text-center tracking-[-0.035em] bg-clip-text text-transparent bg-gradient-to-b from-white via-[#f4f4f6] to-white/70">
@@ -385,7 +385,7 @@ export const LandingPage: React.FC = () => {
                       {item.q}
                     </span>
                     <ChevronDown
-                      className={`w-5 h-5 text-[#8E9096] shrink-0 transition-transform duration-200 ${
+                      className={`w-5 h-5 text-white/70 shrink-0 transition-transform duration-200 ${
                         isOpen ? "rotate-180 text-white" : ""
                       }`}
                       aria-hidden="true"
@@ -393,7 +393,7 @@ export const LandingPage: React.FC = () => {
                   </button>
                   {isOpen && (
                     <div className="px-7 pb-6 pt-1 border-t border-white/5">
-                      <p className="font-sans font-[400] text-[15px] md:text-[16px] leading-[26px] text-[#8E9096]">
+                      <p className="font-sans font-[400] text-[15px] md:text-[16px] leading-[26px] text-white/75">
                         {item.a}
                       </p>
                     </div>
@@ -441,7 +441,7 @@ export const LandingPage: React.FC = () => {
           <div className="h-5" />
 
           {/* Paragraph */}
-          <p className="relative z-10 font-sans font-[400] text-[17px] md:text-[19px] leading-[28px] text-[#8E9096] max-w-xl">
+          <p className="relative z-10 font-sans font-[400] text-[17px] md:text-[19px] leading-[28px] text-white/75 max-w-xl">
             Join thousands of users who start their day informed. Free forever.
           </p>
 

@@ -280,7 +280,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.currentTemp}{weather.tempUnit}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] capitalize mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 capitalize mt-1">
               {weather.condition}
             </div>
           </div>
@@ -291,7 +291,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[24px] md:text-[28px] text-white tabular-nums">
               High {weather.high ?? "—"}{weather.tempUnit} / Low {weather.low ?? "—"}{weather.tempUnit}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1 tabular-nums">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1 tabular-nums">
               Spread: {typeof weather.high === "number" && typeof weather.low === "number" ? `${weather.high - weather.low}°` : "—"}
             </div>
           </div>
@@ -304,13 +304,13 @@ export const DashboardView: React.FC = () => {
                 key={i}
                 className="bg-white/[0.04] rounded-[18px] p-3 text-center border border-white/5"
               >
-                <div className="font-sans text-[12px] text-[#8E9096] tabular-nums font-[500]">
+                <div className="font-sans text-[12px] text-white/70 tabular-nums font-[500]">
                   {h.time}
                 </div>
                 <div className="font-sans font-[700] text-[18px] text-white tabular-nums my-1">
                   {h.temp}{weather.tempUnit}
                 </div>
-                <div className="font-sans text-[12px] text-[#8E9096] truncate">
+                <div className="font-sans text-[12px] text-white/70 truncate">
                   {h.condition}
                 </div>
               </div>
@@ -328,12 +328,12 @@ export const DashboardView: React.FC = () => {
                 <div className="font-sans font-[600] text-[14px] text-white">
                   {d.day}
                 </div>
-                <div className="font-sans text-[12px] text-[#8E9096] mt-0.5">
+                <div className="font-sans text-[12px] text-white/70 mt-0.5">
                   {d.condition}
                 </div>
                 <div className="font-sans font-[700] text-[16px] text-white tabular-nums mt-2">
                   {d.high}{weather.tempUnit}{" "}
-                  <span className="font-normal text-[#8E9096]">
+                  <span className="font-normal text-white/70">
                     / {d.low}{weather.tempUnit}
                   </span>
                 </div>
@@ -347,7 +347,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.rainProb}%
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
               Afternoon precipitation
             </div>
           </div>
@@ -358,7 +358,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.thunderstormProb}%
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
               Isolated afternoon storm risk
             </div>
           </div>
@@ -369,7 +369,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.cloudiness}%
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
               Sky coverage
             </div>
           </div>
@@ -380,7 +380,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.uvIndex}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
               {weather.uvDescription} UV
             </div>
           </div>
@@ -391,7 +391,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.airQuality}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
               AQI · {weather.airQualityDescription}
             </div>
           </div>
@@ -402,7 +402,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[28px] md:text-[32px] text-white tabular-nums">
               {weather.windSpeed} {weather.windUnit}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
               Direction {weather.windDirection}
             </div>
           </div>
@@ -413,7 +413,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[32px] md:text-[36px] text-white tabular-nums">
               {weather.humidity}%
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
               Relative humidity
             </div>
           </div>
@@ -424,7 +424,7 @@ export const DashboardView: React.FC = () => {
             <div className="font-sans font-[700] text-[20px] md:text-[22px] text-white tabular-nums">
               ↑ {weather.sunrise} · ↓ {weather.sunset}
             </div>
-            <div className="font-sans font-[500] text-[14px] text-[#8E9096] mt-1">
+            <div className="font-sans font-[500] text-[14px] text-white/70 mt-1">
               Daylight window
             </div>
           </div>
@@ -451,7 +451,7 @@ export const DashboardView: React.FC = () => {
                 {hydrated && prefs.name ? `Hi, ${prefs.name}` : "Hi"}
               </h1>
               {hydrated && todayFormatted && (
-                <p className="font-sans font-[500] text-[15px] text-[#8E9096] tabular-nums mt-1">
+                <p className="font-sans font-[500] text-[15px] text-white/70 tabular-nums mt-1">
                   {todayFormatted}
                 </p>
               )}
@@ -469,7 +469,7 @@ export const DashboardView: React.FC = () => {
                 onClick={async () => {
                   await logoutViaApi();
                 }}
-                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-white/10 text-[#8E9096] hover:text-white hover:border-white/30 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap"
+                className="inline-flex items-center gap-2 h-[44px] px-5 rounded-full border border-white/10 text-white/70 hover:text-white hover:border-white/30 font-sans font-[600] text-[14px] transition-colors whitespace-nowrap"
                 aria-label="Sign out"
               >
                 <LogOut className="w-4 h-4" aria-hidden="true" />
@@ -494,7 +494,7 @@ export const DashboardView: React.FC = () => {
                 Preparing your daily report...
               </h2>
 
-              <p className="font-sans font-[400] text-[14px] text-[#8E9096] max-w-sm mb-8">
+              <p className="font-sans font-[400] text-[14px] text-white/70 max-w-sm mb-8">
                 We&apos;re gathering your personalized updates. This usually
                 takes just a moment.
               </p>
@@ -524,7 +524,7 @@ export const DashboardView: React.FC = () => {
                     {countdown.formatted}
                   </span>
                 </div>
-                <div className="font-sans font-[400] text-[13px] md:text-[14px] text-[#8E9096]">
+                <div className="font-sans font-[400] text-[13px] md:text-[14px] text-white/70">
                   Scheduled for {formatHourOption(prefs.deliveryHour)} daily · Delivered to {prefs.email}
                 </div>
               </div>
@@ -536,7 +536,7 @@ export const DashboardView: React.FC = () => {
                 </h3>
 
                 {selectedWeather.length === 0 ? (
-                  <div className="p-6 rounded-[24px] bg-white/[0.03] border border-white/10 text-center font-sans text-[15px] text-[#8E9096]">
+                  <div className="p-6 rounded-[24px] bg-white/[0.03] border border-white/10 text-center font-sans text-[15px] text-white/70">
                     No weather details selected ·{" "}
                     <Link
                       href="/preferences"
@@ -563,7 +563,7 @@ export const DashboardView: React.FC = () => {
                       AI Executive Summary
                     </h3>
                   </div>
-                  <p className="font-sans font-[400] text-[15px] leading-relaxed text-[#c2c2c2] whitespace-pre-line">
+                  <p className="font-sans font-[400] text-[15px] leading-relaxed text-white/80 whitespace-pre-line">
                     {digestSummary}
                   </p>
                 </section>
@@ -576,7 +576,7 @@ export const DashboardView: React.FC = () => {
                 </h3>
 
                 {prefs.newsTopics.length === 0 ? (
-                  <div className="p-6 rounded-[20px] bg-white/[0.03] border border-white/10 text-center font-sans text-[15px] text-[#8E9096]">
+                  <div className="p-6 rounded-[20px] bg-white/[0.03] border border-white/10 text-center font-sans text-[15px] text-white/70">
                     No news topics selected ·{" "}
                     <Link
                       href="/preferences"
@@ -593,17 +593,17 @@ export const DashboardView: React.FC = () => {
                         className="p-5 md:p-6 rounded-[20px] bg-white/[0.035] backdrop-blur-md border border-white/12 hover:border-white/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] transition-all flex flex-col gap-2"
                       >
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-sans text-[14px] text-[#8E9096] tabular-nums font-[600]">
+                          <span className="font-sans text-[14px] text-white/70 tabular-nums font-[600]">
                             {(i + 1).toString().padStart(2, "0")}
                           </span>
                           <span className="font-sans font-[600] text-[12px] px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/10">
                             {story.topicLabel}
                           </span>
-                          <span className="font-sans text-[13px] text-[#8E9096]">
+                          <span className="font-sans text-[13px] text-white/70">
                             {story.source}
                           </span>
                           <span className="text-white/20 text-[13px]">·</span>
-                          <span className="font-sans text-[13px] text-[#8E9096]">
+                          <span className="font-sans text-[13px] text-white/70">
                             {story.timestamp}
                           </span>
                         </div>
@@ -612,7 +612,7 @@ export const DashboardView: React.FC = () => {
                           {story.headline}
                         </h4>
 
-                        <p className="font-sans font-[400] text-[14px] leading-[22px] text-[#8E9096] line-clamp-2">
+                        <p className="font-sans font-[400] text-[14px] leading-[22px] text-white/75 line-clamp-2">
                           {story.summary}
                         </p>
 

@@ -29,7 +29,7 @@ export const Stepper: React.FC<StepperProps> = ({ currentStep }) => {
                   ? "bg-white text-black shadow-sm"
                   : isActive
                   ? "bg-white text-black ring-2 ring-white/50"
-                  : "bg-[#222222] border border-white/10 text-[#686868]"
+                  : "bg-[#222222] border border-white/10 text-white/45"
               }`}
             >
               {isCompleted ? (

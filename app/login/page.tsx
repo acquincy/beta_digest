@@ -57,7 +57,7 @@ export default function LoginPage() {
               <h1 className="font-display font-[600] text-[32px] leading-tight text-white">
                 Check your inbox.
               </h1>
-              <p className="font-sans font-[400] text-[16px] text-[#8E9096] leading-relaxed mt-3">
+              <p className="font-sans font-[400] text-[16px] text-white/75 leading-relaxed mt-3">
                 We sent a one-click reader key to{" "}
                 <strong className="text-white font-semibold">
                   {email.trim()}
@@ -78,7 +78,7 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <IconTile icon={Mail} size={48} radius={14} iconSize={26} />
-                <span className="font-sans font-[600] text-[12px] tracking-widest text-[#8E9096] uppercase">
+                <span className="font-sans font-[600] text-[12px] tracking-widest text-white/70 uppercase">
                   SUBSCRIBER PORTAL
                 </span>
               </div>
@@ -86,7 +86,7 @@ export default function LoginPage() {
               <h1 className="font-display font-[600] text-[32px] md:text-[36px] leading-tight text-white">
                 Welcome back.
               </h1>
-              <p className="font-sans font-[400] text-[16px] text-[#8E9096] leading-relaxed mt-2">
+              <p className="font-sans font-[400] text-[16px] text-white/75 leading-relaxed mt-2">
                 Enter your subscriber email to receive an instant sign-in link
                 and manage your daily digest preferences.
               </p>
@@ -114,7 +114,7 @@ export default function LoginPage() {
               <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between text-[14px]">
                 <Link
                   href="/"
-                  className="font-sans text-[#8E9096] hover:text-white inline-flex items-center gap-1 transition-colors"
+                  className="font-sans text-white/70 hover:text-white inline-flex items-center gap-1 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Back to home</span>

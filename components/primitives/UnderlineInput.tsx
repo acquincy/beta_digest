@@ -45,7 +45,7 @@ export const UnderlineInput = React.forwardRef<HTMLInputElement, UnderlineInputP
             aria-describedby={error ? errorId : undefined}
             onBlur={onBlur}
             className={clsx(
-              "w-full bg-transparent rounded-none font-sans font-[400] text-[18px] text-[#ededed] placeholder-[#686868]",
+              "w-full bg-transparent rounded-none font-sans font-[400] text-[18px] text-[#ededed] placeholder-white/40",
               "border-0 border-b-[1.5px] border-white/20 p-0 outline-none focus:outline-none focus:ring-0 focus:border-b-[2px] focus:border-white transition-colors",
               error && "!border-b-[2px] !border-[var(--error)] text-[var(--error)]",
               className

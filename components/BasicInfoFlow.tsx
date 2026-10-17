@@ -120,7 +120,7 @@ export const BasicInfoFlow: React.FC = () => {
               />
             </span>
 
-            <span className="text-[20px] font-sans font-normal text-[#8E9096]">, </span>
+            <span className="text-[20px] font-sans font-normal text-white/70">, </span>
             <span>I live in </span>
 
             {/* City select control */}
@@ -131,7 +131,7 @@ export const BasicInfoFlow: React.FC = () => {
                 disabled={!countryCode}
                 className="inline-flex items-center h-[44px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-3 pr-8 font-sans font-medium text-[16px] md:text-[18px] text-white cursor-pointer align-middle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-50 appearance-none"
               >
-                <option value="" disabled className="bg-[#161616] text-[#8E9096]">
+                <option value="" disabled className="bg-[#161616] text-white/50">
                   Select city
                 </option>
                 {availableCities.map((c) => (
@@ -141,14 +141,14 @@ export const BasicInfoFlow: React.FC = () => {
                 ))}
                 {countryCode && <option value="__other__" className="bg-[#161616] text-white">Other</option>}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#8E9096]">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white/70">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                   <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                 </svg>
               </div>
             </span>
 
-            <span className="text-[20px] font-sans font-normal text-[#8E9096]">, </span>
+            <span className="text-[20px] font-sans font-normal text-white/70">, </span>
 
             {/* Country select control */}
             <span className="relative inline-block align-baseline">
@@ -157,7 +157,7 @@ export const BasicInfoFlow: React.FC = () => {
                 onChange={handleCountryChange}
                 className="inline-flex items-center h-[44px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-3 pr-8 font-sans font-medium text-[16px] md:text-[18px] text-white cursor-pointer align-middle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 appearance-none"
               >
-                <option value="" disabled className="bg-[#161616] text-[#8E9096]">
+                <option value="" disabled className="bg-[#161616] text-white/50">
                   Select country
                 </option>
                 {COUNTRIES.map((c) => (
@@ -166,14 +166,14 @@ export const BasicInfoFlow: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#8E9096]">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white/70">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                   <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                 </svg>
               </div>
             </span>
 
-            <span className="text-[20px] font-sans font-normal text-[#8E9096]">.</span>
+            <span className="text-[20px] font-sans font-normal text-white/70">.</span>
           </div>
 
           {/* Typed-city input below the sentence when Other is chosen */}
