@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ALL_IMAGE_CREDITS } from "@/lib/image-data";
 import { ArrowLeft } from "lucide-react";
 import { CanvasA } from "@/components/CanvasA";
-import { Header } from "@/components/Header";
+import { TopLeftLogo } from "@/components/TopLeftLogo";
 import { Footer } from "@/components/Footer";
 
 export const metadata = {
@@ -15,7 +15,9 @@ export default function CreditsPage() {
   return (
     <div className="relative min-h-screen text-[var(--text)] flex flex-col justify-between overflow-x-hidden">
       <CanvasA />
-      <Header />
+      <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+        <TopLeftLogo />
+      </header>
 
       <main className="flex-grow flex items-center justify-center p-4 py-8">
         <div className="w-full max-w-2xl bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] p-6 sm:p-10 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl flex flex-col gap-6">

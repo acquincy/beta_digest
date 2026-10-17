@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Smile } from "lucide-react";
 import { CanvasA } from "./CanvasA";
+import { TopLeftLogo } from "./TopLeftLogo";
 import { IconTile } from "./primitives/IconTile";
 import { DarkButton } from "./primitives/Button";
 import { UnderlineInput } from "./primitives/UnderlineInput";
@@ -84,19 +85,28 @@ export const BasicInfoFlow: React.FC = () => {
 
   if (!hydrated) {
     return (
-      <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-12 md:py-16 overflow-x-hidden">
+      <div className="relative min-h-screen flex flex-col justify-between items-center overflow-x-hidden">
         <CanvasA />
-        <div className="w-full max-w-[768px] h-[480px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+        <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+          <TopLeftLogo />
+        </header>
+        <main className="flex-grow flex items-center justify-center p-4 py-8 md:py-12 w-full">
+          <div className="w-full max-w-[768px] h-[480px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center p-4 py-12 md:py-16 overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col justify-between items-center overflow-x-hidden">
       <CanvasA />
+      <header className="w-full px-6 md:px-10 pt-6 flex items-center justify-start z-20">
+        <TopLeftLogo />
+      </header>
 
       {/* S3 Card: 768px wide, 48px padding */}
-      <div className="relative w-full max-w-[768px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] p-6 md:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl step-enter flex flex-col text-white">
+      <main className="flex-grow flex items-center justify-center p-4 py-8 md:py-12 w-full">
+        <div className="relative w-full max-w-[768px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] p-6 md:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl step-enter flex flex-col text-white">
         {/* Top center IconTile: Smile, 100px tile */}
         <div className="flex justify-center -mt-2 mb-8">
           <IconTile icon={Smile} size={100} radius={28} iconSize={52} />
@@ -206,6 +216,7 @@ export const BasicInfoFlow: React.FC = () => {
           </div>
         </form>
       </div>
+      </main>
     </div>
   );
 };

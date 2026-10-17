@@ -39,8 +39,8 @@ export const Chip: React.FC<ChipProps> = ({
           ? "h-[38px] px-[16px] text-[14px]"
           : "h-[34px] px-[14px] text-[13px]",
         active
-          ? "bg-white text-black font-medium border border-white shadow-[0_2px_10px_rgba(255,255,255,0.15)]"
-          : "bg-[#1c1c1c] text-[#c2c2c2] border border-white/10 hover:border-white/25 hover:text-white hover:bg-white/[0.06]",
+          ? "bg-white/[0.14] text-white font-medium border border-white shadow-[0_0_16px_rgba(255,255,255,0.2),inset_0_1px_0_0_rgba(255,255,255,0.25)] backdrop-blur-md hover:bg-white/[0.20] hover:border-white"
+          : "bg-[#141418]/80 text-[#c2c2c2] border border-white/15 backdrop-blur-md hover:border-white hover:text-white hover:bg-white/[0.08] hover:shadow-[0_0_14px_rgba(255,255,255,0.15)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0a0a0a]",
         disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
         className

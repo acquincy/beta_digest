@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   title: "BetaDigest — The day, in five minutes.",
   description:
     "A daily news and weather digest delivered each morning. Curated top stories, hyperlocal weather, and commute conditions.",
+  icons: {
+    icon: "/logo-square.png",
+    shortcut: "/logo-square.png",
+    apple: "/logo-square.png",
+  },
 };
 
 export default function RootLayout({
