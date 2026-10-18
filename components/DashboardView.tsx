@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   SlidersHorizontal,
   CloudSun,
-  MailCheck,
   LogOut,
   ArrowRight,
   X,
@@ -22,13 +21,11 @@ import {
 } from "@/lib/types";
 import { loadPreferences, savePreferences, parseDeliveryHour, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
-import { formatHourOption } from "@/lib/time-utils";
 import { fetchDashboardViaN8n, N8nDashboardResult, N8nDashboardArticle, logoutViaApi } from "@/lib/n8n";
 
 export const DashboardView: React.FC = () => {
   const [hydrated, setHydrated] = useState(false);
   const [prefs, setPrefs] = useState<Preferences>(INITIAL_PREFERENCES);
-  const [tempUnit, setTempUnit] = useState<"F" | "C">("F");
   const [selectedStory, setSelectedStory] = useState<EditorialStory | null>(null);
 
   const [n8nDigest, setN8nDigest] = useState<N8nDashboardResult | null>(null);
@@ -51,9 +48,6 @@ export const DashboardView: React.FC = () => {
       .then((data) => {
         if (mounted && data && typeof data.currentTemp === "number") {
           setRealWeather(data);
-          if (typeof data.tempUnit === "string" && data.tempUnit.includes("C")) {
-            setTempUnit("C");
-          }
         }
       })
       .catch((err) => console.warn("Live weather fetch error:", err));
@@ -146,15 +140,6 @@ export const DashboardView: React.FC = () => {
       ? n8nStories
       : getTop5Stories(prefs.newsTopics);
 
-  // Sync initial temperature unit from weather data
-  useEffect(() => {
-    if (weather.tempUnit?.includes("C")) {
-      setTempUnit("C");
-    } else if (weather.tempUnit?.includes("F")) {
-      setTempUnit("F");
-    }
-  }, [weather.tempUnit]);
-
   const todayFormatted = hydrated
     ? new Intl.DateTimeFormat("en-US", {
         weekday: "long",
@@ -166,39 +151,30 @@ export const DashboardView: React.FC = () => {
         .replace(/, ([A-Za-z]+ \d+)/, " · $1")
     : "";
 
-  // Convert temperature between F and C dynamically
-  const convertTemp = (val: number | undefined | null): number | "—" => {
+  // Always convert temperature to Celsius
+  const toCelsius = (val: number | undefined | null): number | "—" => {
     if (typeof val !== "number" || isNaN(val)) return "—";
-    const sourceIsC = weather.tempUnit?.includes("C");
-    if (tempUnit === "F") {
-      if (sourceIsC) return Math.round((val * 9) / 5 + 32);
-      return Math.round(val);
-    } else {
-      if (!sourceIsC) return Math.round(((val - 32) * 5) / 9);
+    const sourceUnit = weather.tempUnit || "";
+    if (sourceUnit.includes("C")) {
       return Math.round(val);
     }
+    return Math.round(((val - 32) * 5) / 9);
   };
 
-  const displayCurrentTemp = convertTemp(weather.currentTemp);
-  const displayHigh = convertTemp(weather.high);
-  const displayLow = convertTemp(weather.low);
+  const displayCurrentTemp = toCelsius(weather.currentTemp);
+  const displayHigh = toCelsius(weather.high);
+  const displayLow = toCelsius(weather.low);
   const displaySpread =
     typeof displayHigh === "number" && typeof displayLow === "number"
       ? Math.abs(displayHigh - displayLow)
-      : typeof weather.high === "number" && typeof weather.low === "number"
-      ? Math.abs(weather.high - weather.low)
       : "—";
 
   const displayThreeDay = (weather.threeDay || []).map((d) => ({
     day: d.day,
     condition: d.condition,
-    high: convertTemp(d.high),
-    low: convertTemp(d.low),
+    high: toCelsius(d.high),
+    low: toCelsius(d.low),
   }));
-
-  const toggleTempUnit = () => {
-    setTempUnit((prev) => (prev === "F" ? "C" : "F"));
-  };
 
   const hasSecondaryWeather =
     typeof weather.rainProb === "number" ||
@@ -212,20 +188,15 @@ export const DashboardView: React.FC = () => {
       <CanvasB showConcentricCircles={false} />
 
       {/* Top Utility Bar & Logo */}
-      <header className="relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-10 pt-7 pb-4 flex items-center justify-between">
+      <header className="relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-10 pt-7 pb-4 flex items-center justify-start">
         <TopLeftLogo />
-        <span className="hidden sm:inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/75">
-          <span>Morning Edition</span>
-          <span className="text-white/40">·</span>
-          <span>Daily Briefing</span>
-        </span>
       </header>
 
       {/* Translucent Frosted Main Dashboard Board */}
       <main className="relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="main-glass-board p-6 sm:p-9 lg:p-11">
           {/* Greeting & Header Action Bar */}
-          <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 pb-7 mb-8 border-b border-white/[0.16]">
+          <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 pb-7 mb-8 border-b border-white/[0.16]">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/75 mb-1.5">
                 {todayFormatted || "Daily Edition"}
@@ -235,26 +206,8 @@ export const DashboardView: React.FC = () => {
               </h1>
             </div>
 
-            {/* Right Side: Dark-Glass Daily Delivery Schedule Pill + Action Buttons */}
+            {/* Right Side: Action Buttons */}
             <div className="flex flex-wrap items-center gap-2.5">
-              {/* Static Daily Delivery Status Pill (Replaces Countdown) */}
-              <Link
-                href="/preferences"
-                title="Click to adjust delivery schedule"
-                className="dark-glass-pill px-4 py-2 text-left flex items-center gap-2.5 group cursor-pointer"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0" />
-                <span className="font-mono text-[11px] tracking-tight text-white/90">
-                  Daily at <strong className="text-white font-semibold">{formatHourOption(prefs.deliveryHour)}</strong>
-                </span>
-                {prefs.email && (
-                  <>
-                    <span className="text-white/30">·</span>
-                    <span className="font-mono text-[11px] text-white/65 hidden sm:inline">{prefs.email}</span>
-                  </>
-                )}
-              </Link>
-
               {/* Dark-Glass Edit Preferences Button */}
               <Link
                 href="/preferences"
@@ -300,20 +253,13 @@ export const DashboardView: React.FC = () => {
           ) : (
             /* Interior 2-Column Asymmetric Layout */
             <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-7 lg:gap-8 items-start">
-              {/* LEFT RAIL (340px sticky on desktop): Weather + Daily Dispatch Card */}
+              {/* LEFT RAIL (340px sticky on desktop): Weather Card */}
               <aside className="lg:sticky lg:top-6 space-y-5">
                 <div>
                   <div className="flex items-baseline justify-between mb-3 px-1">
                     <h2 className="editorial-title text-[22px] font-medium tracking-tight text-white">
                       Your weather · <span className="italic font-normal">{prefs.city || "Seattle"}</span>
                     </h2>
-                    <button
-                      type="button"
-                      onClick={toggleTempUnit}
-                      className="font-mono text-[11px] text-white/75 hover:text-white underline underline-offset-4 transition cursor-pointer"
-                    >
-                      Switch to °{tempUnit === "F" ? "C" : "F"}
-                    </button>
                   </div>
 
                   {/* Deep Obsidian Dark-Glass Weather Panel */}
@@ -327,7 +273,7 @@ export const DashboardView: React.FC = () => {
 
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="editorial-title text-[52px] font-medium tracking-tight text-white leading-none tabular-nums">
-                          {displayCurrentTemp !== "—" ? `${displayCurrentTemp}°${tempUnit}` : "—"}
+                          {displayCurrentTemp !== "—" ? `${displayCurrentTemp}°C` : "—"}
                         </span>
                         <span className="font-mono text-[11px] text-white/65 bg-white/[0.06] border border-white/10 px-2.5 py-1 rounded-full tabular-nums">
                           Spread <span className="text-white font-medium">{displaySpread}°</span>
@@ -337,7 +283,7 @@ export const DashboardView: React.FC = () => {
                       <div className="mt-3.5 flex items-center justify-between text-[13px] text-white/70 pt-3 border-t border-white/[0.07]">
                         <span className="text-white/90 font-medium capitalize">{weather.condition}</span>
                         <span className="font-mono text-[12px] text-white/70 tabular-nums">
-                          H: <strong className="text-white font-semibold">{displayHigh !== "—" ? `${displayHigh}°${tempUnit}` : "—"}</strong> · L: <strong className="text-white font-semibold">{displayLow !== "—" ? `${displayLow}°${tempUnit}` : "—"}</strong>
+                          H: <strong className="text-white font-semibold">{displayHigh !== "—" ? `${displayHigh}°C` : "—"}</strong> · L: <strong className="text-white font-semibold">{displayLow !== "—" ? `${displayLow}°C` : "—"}</strong>
                         </span>
                       </div>
                     </div>
@@ -358,7 +304,7 @@ export const DashboardView: React.FC = () => {
                             <span className="font-medium text-white">{d.day}</span>
                             <span className="text-white/50 text-[12px] capitalize truncate max-w-[100px]">{d.condition}</span>
                             <span className="font-mono text-[12px] text-white/60 tabular-nums">
-                              <strong className="text-white font-medium">{d.high !== "—" ? `${d.high}°${tempUnit}` : "—"}</strong> / <span>{d.low !== "—" ? `${d.low}°${tempUnit}` : "—"}</span>
+                              <strong className="text-white font-medium">{d.high !== "—" ? `${d.high}°C` : "—"}</strong> / <span>{d.low !== "—" ? `${d.low}°C` : "—"}</span>
                             </span>
                           </div>
                         ))}
@@ -385,49 +331,11 @@ export const DashboardView: React.FC = () => {
                         )}
                         {weather.windSpeed && (
                           <span className="dark-category-pill font-mono text-[10px] px-2.5 py-0.5 text-white/80">
-                            Wind: {weather.windSpeed} {weather.windUnit || "mph"}
+                            Wind: {weather.windSpeed} {weather.windUnit || "km/h"}
                           </span>
                         )}
                       </div>
                     )}
-                  </div>
-                </div>
-
-                {/* Daily Email Delivery Schedule Card */}
-                <div className="dark-glass-panel p-5">
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-2">
-                      <MailCheck className="w-4 h-4 text-amber-300/90 shrink-0" aria-hidden="true" />
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/60">
-                        Daily Email Dispatch
-                      </span>
-                    </div>
-
-                    <span className="dark-category-pill font-mono text-[11px] font-medium px-2.5 py-0.5 text-white">
-                      {formatHourOption(prefs.deliveryHour)} Daily
-                    </span>
-                  </div>
-
-                  <p className="text-[13px] text-white/75 leading-relaxed mt-2">
-                    Your morning briefing is automatically curated and sent every day at{" "}
-                    <strong className="text-white font-semibold">{formatHourOption(prefs.deliveryHour)}</strong> to{" "}
-                    <span className="font-mono text-[12px] text-white underline decoration-white/30 underline-offset-4">
-                      {prefs.email || "betadigest@gmail.com"}
-                    </span>.
-                  </p>
-
-                  <div className="mt-3.5 pt-3 border-t border-white/[0.07] flex items-center justify-between text-[12px]">
-                    <span className="font-mono text-[11px] text-emerald-400/90 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      Active subscription
-                    </span>
-                    <Link
-                      href="/preferences"
-                      className="font-mono text-[11px] text-white/75 hover:text-white transition flex items-center gap-1 group"
-                    >
-                      <span>Change time</span>
-                      <ArrowRight className="w-3 h-3 text-white/75 group-hover:text-white group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
-                    </Link>
                   </div>
                 </div>
               </aside>
