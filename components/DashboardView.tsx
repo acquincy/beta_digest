@@ -47,62 +47,72 @@ import { clsx } from "clsx";
 interface CompactMetricConfig {
   icon: LucideIcon;
   label: string;
+  isAvailable?: (w: CityWeatherData) => boolean;
   getValue: (w: CityWeatherData) => React.ReactNode;
+  getSecondary?: (w: CityWeatherData) => React.ReactNode;
 }
 
 const COMPACT_METRICS: Record<string, CompactMetricConfig> = {
   "current-temperature": {
     icon: Thermometer,
-    label: "Current temp",
-    getValue: (w) => `${w.currentTemp}${w.tempUnit}`,
+    label: "Feels like",
+    isAvailable: (w) => typeof w.feelsLike === "number",
+    getValue: (w) => `${w.feelsLike}${w.tempUnit}`,
+    getSecondary: (w) => {
+      if (typeof w.feelsLike !== "number") return null;
+      const diff = w.feelsLike - w.currentTemp;
+      if (diff > 0) return `${diff}° warmer than actual`;
+      if (diff < 0) return `${Math.abs(diff)}° cooler than actual`;
+      return "Same as actual";
+    },
   },
   "high-low": {
     icon: ArrowUpDown,
     label: "Day's High / Low",
-    getValue: (w) => `H: ${w.high}° · L: ${w.low}°`,
+    getValue: (w) => `${w.high}° / ${w.low}°`,
+    getSecondary: (w) => `Daily range (${w.tempUnit})`,
   },
   "rain-chance": {
     icon: CloudRain,
     label: "Rain chance",
     getValue: (w) => `${w.rainProb}%`,
+    getSecondary: (w) => (w.rainProb > 40 ? "Precipitation likely" : "Low precipitation risk"),
   },
   "thunderstorm-chance": {
     icon: CloudLightning,
     label: "Thunderstorm",
     getValue: (w) => `${w.thunderstormProb || 0}%`,
+    getSecondary: (w) =>
+      (w.thunderstormProb || 0) > 30 ? "Storm warning" : "Minimal storm activity",
   },
   cloudiness: {
     icon: Cloud,
     label: "Cloudiness",
     getValue: (w) => `${w.cloudiness}%`,
+    getSecondary: (w) =>
+      w.cloudiness > 70
+        ? "Overcast skies"
+        : w.cloudiness > 30
+        ? "Scattered clouds"
+        : "Clear skies",
   },
   "uv-index": {
     icon: Sun,
     label: "UV index",
-    getValue: (w) => (
-      <span className="flex items-center gap-1.5">
-        <span>{w.uvIndex}</span>
-        {w.uvDescription && (
-          <span className="text-[11px] font-normal text-white/60 truncate">({w.uvDescription})</span>
-        )}
-      </span>
-    ),
+    getValue: (w) => `${w.uvIndex}`,
+    getSecondary: (w) => (w.uvDescription ? `(${w.uvDescription})` : null),
   },
   "air-quality": {
     icon: Wind,
     label: "Air quality",
-    getValue: (w) => {
+    getValue: (w) => `AQI ${w.airQuality ?? 0}`,
+    getSecondary: (w) => {
       const aqi = w.airQuality ?? 0;
       const color =
         aqi <= 50 ? "text-emerald-400" : aqi <= 100 ? "text-amber-400" : "text-rose-400";
       return (
-        <span className="flex items-center gap-1.5 flex-wrap">
-          <span>AQI {aqi}</span>
-          {w.airQualityDescription && (
-            <span className={clsx("text-[11px] font-semibold", color)}>
-              · {w.airQualityDescription}
-            </span>
-          )}
+        <span className={clsx("font-semibold", color)}>
+          {w.airQualityDescription || "Moderate"}
         </span>
       );
     },
@@ -110,21 +120,21 @@ const COMPACT_METRICS: Record<string, CompactMetricConfig> = {
   wind: {
     icon: Compass,
     label: "Wind",
-    getValue: (w) => w.windFormatted || `${w.windSpeed} ${w.windUnit}`,
+    getValue: (w) => `${w.windSpeed} ${w.windUnit}`,
+    getSecondary: (w) => (w.windDirection ? `Direction: ${w.windDirection}` : null),
   },
   humidity: {
     icon: Droplets,
     label: "Humidity",
     getValue: (w) => `${w.humidity}%`,
+    getSecondary: (w) =>
+      w.humidity > 70 ? "Humid" : w.humidity < 35 ? "Dry" : "Comfortable",
   },
   "sun-times": {
     icon: Sunrise,
     label: "Sun times",
-    getValue: (w) => (
-      <span className="text-[12px] truncate">
-        ↑ {w.sunrise} · ↓ {w.sunset}
-      </span>
-    ),
+    getValue: (w) => `${w.sunrise} / ${w.sunset}`,
+    getSecondary: () => "Sunrise & sunset",
   },
 };
 
@@ -356,9 +366,13 @@ export const DashboardView: React.FC = () => {
 
   // Weather preference filters
   const selectedWeatherTopics = prefs.weatherTopics || [];
-  const selectedCompactTopics = selectedWeatherTopics.filter(
-    (t) => t in COMPACT_METRICS && t !== "hourly-3h" && t !== "forecast-3day"
-  );
+  const compactItems = selectedWeatherTopics.filter((t) => {
+    if (t === "hourly-3h" || t === "forecast-3day") return false;
+    const config = COMPACT_METRICS[t];
+    if (!config) return false;
+    if (config.isAvailable && !config.isAvailable(weather)) return false;
+    return true;
+  });
   const showHourlySection = selectedWeatherTopics.includes("hourly-3h");
   const showForecastSection = selectedWeatherTopics.includes("forecast-3day");
 
@@ -423,30 +437,24 @@ export const DashboardView: React.FC = () => {
           {/* Asymmetric 2-Column Responsive Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8 items-start">
             
-            {/* LEFT COLUMN: Weather Section (Respecting Saved Preferences) */}
-            <aside className="w-full space-y-4">
-              <div className="flex items-center justify-between mb-2 px-1">
+            {/* LEFT COLUMN: Weather Section (Sticky on desktop, fluid on mobile) */}
+            <aside className="w-full lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-48px)] flex flex-col space-y-3">
+              <div className="flex items-center justify-between px-1 shrink-0">
                 <h2 className="font-sans font-[600] text-[18px] text-white">
                   Your weather
                 </h2>
-                <Link
-                  href="/preferences"
-                  className="font-sans text-[13px] text-white/60 hover:text-white underline transition-colors"
-                >
-                  Preferences
-                </Link>
               </div>
 
               {/* Weather Content Card */}
-              <SectionCard className="p-6">
+              <SectionCard className="p-6 flex-1 min-h-0 lg:overflow-y-auto thin-scrollbar">
                 {weatherLoading && !realWeather ? (
                   /* Weather Loading Skeleton */
                   <div className="space-y-4 animate-pulse">
                     <div className="h-6 w-36 bg-white/10 rounded-full" />
-                    <div className="h-16 w-full bg-white/[0.04] rounded-2xl" />
-                    <div className="grid grid-cols-2 gap-2.5 pt-2">
-                      <div className="h-16 bg-white/[0.03] rounded-xl" />
-                      <div className="h-16 bg-white/[0.03] rounded-xl" />
+                    <div className="h-20 w-full bg-white/[0.04] rounded-2xl" />
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                      <div className="h-24 bg-white/[0.03] rounded-[20px]" />
+                      <div className="h-24 bg-white/[0.03] rounded-[20px]" />
                     </div>
                   </div>
                 ) : weatherError && !realWeather ? (
@@ -497,90 +505,106 @@ export const DashboardView: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Selected Compact Metrics (Max 3, rendered only if selected) */}
-                    {selectedCompactTopics.length > 0 && (
-                      <div className="pt-4 border-t border-white/10">
-                        <div className="font-sans text-[11px] font-semibold uppercase tracking-wider text-white/50 mb-2.5">
-                          Selected Details ({selectedCompactTopics.length}/3)
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          {selectedCompactTopics.map((topId) => {
-                            const config = COMPACT_METRICS[topId];
-                            if (!config) return null;
-                            const Icon = config.icon;
-                            return (
-                              <div
-                                key={topId}
-                                className="p-3 rounded-[16px] bg-white/[0.04] border border-white/10 flex flex-col justify-between transition-all hover:border-white/20"
-                              >
-                                <div className="flex items-center gap-1.5 text-white/60 text-[12px] font-sans font-medium">
-                                  <Icon className="w-3.5 h-3.5 text-[#8a7cfb] shrink-0" aria-hidden="true" />
-                                  <span className="truncate">{config.label}</span>
-                                </div>
-                                <div className="font-sans text-[13.5px] font-[600] text-white mt-1.5 tabular-nums">
-                                  {config.getValue(weather)}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                    {/* Tiles under divider with no heading */}
+                    {(compactItems.length > 0 ||
+                      (showHourlySection && weather.hourly?.length) ||
+                      (showForecastSection && weather.threeDay?.length)) && (
+                      <div className="pt-4 border-t border-white/10 space-y-3">
+                        {/* 2-Column Grid of Compact Tiles */}
+                        {compactItems.length > 0 && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {compactItems.map((topId, index) => {
+                              const config = COMPACT_METRICS[topId];
+                              if (!config) return null;
+                              const Icon = config.icon;
+                              const secondary = config.getSecondary ? config.getSecondary(weather) : null;
+                              const isOddLast = compactItems.length % 2 !== 0 && index === compactItems.length - 1;
+                              const spanClass = isOddLast || compactItems.length === 1 ? "sm:col-span-2" : "";
 
-                    {/* 3-Hour Breakdown (rendered ONLY if selected in preferences) */}
-                    {showHourlySection && weather.hourly && weather.hourly.length > 0 && (
-                      <div className="pt-4 border-t border-white/10">
-                        <div className="flex items-center gap-1.5 font-sans text-[11px] font-semibold uppercase tracking-wider text-white/50 mb-2.5">
-                          <Clock className="w-3.5 h-3.5 text-[#8a7cfb]" aria-hidden="true" />
-                          <span>3-Hour Breakdown</span>
-                        </div>
-                        <div className="grid grid-cols-4 gap-1.5 text-center">
-                          {weather.hourly.slice(0, 4).map((h, idx) => (
-                            <div
-                              key={idx}
-                              className="p-2 rounded-[14px] bg-white/[0.04] border border-white/10 flex flex-col items-center"
-                            >
-                              <span className="font-sans text-[11px] text-white/60 tabular-nums">
-                                {h.time}
-                              </span>
-                              <WeatherWidgetIcon condition={h.condition} size={22} className="my-1" />
-                              <span className="font-sans text-[12px] font-bold text-white tabular-nums">
-                                {h.temp}°
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                              return (
+                                <div
+                                  key={topId}
+                                  className={clsx(
+                                    "p-4 sm:p-5 rounded-[20px] bg-white/[0.04] border border-white/10 flex flex-col justify-between transition-all hover:border-white/20",
+                                    spanClass
+                                  )}
+                                >
+                                  <div className="flex items-center gap-2 text-white/60 text-[13px] font-sans font-medium">
+                                    <Icon className="w-4 h-4 text-[#8a7cfb] shrink-0" aria-hidden="true" />
+                                    <span className="truncate">{config.label}</span>
+                                  </div>
+                                  <div className="mt-2.5">
+                                    <div className="font-sans font-[700] text-[24px] sm:text-[26px] text-white tracking-tight leading-none tabular-nums">
+                                      {config.getValue(weather)}
+                                    </div>
+                                    {secondary && (
+                                      <div className="font-sans text-[12px] text-white/50 font-normal mt-1.5 truncate">
+                                        {secondary}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
 
-                    {/* 3-Day Forecast Outlook (rendered ONLY if selected in preferences) */}
-                    {showForecastSection && weather.threeDay && weather.threeDay.length > 0 && (
-                      <div className="pt-4 border-t border-white/10">
-                        <div className="flex items-center gap-1.5 font-sans text-[11px] font-semibold uppercase tracking-wider text-white/50 mb-2.5">
-                          <Calendar className="w-3.5 h-3.5 text-[#8a7cfb]" aria-hidden="true" />
-                          <span>3-Day Forecast</span>
-                        </div>
-                        <div className="divide-y divide-white/[0.08]">
-                          {weather.threeDay.map((d, idx) => (
-                            <div
-                              key={idx}
-                              className="py-2 first:pt-0 last:pb-0 flex items-center justify-between text-[13px]"
-                            >
-                              <span className="font-sans font-medium text-white/90 w-[70px]">
-                                {d.day}
-                              </span>
-                              <div className="flex items-center gap-1.5 flex-1 justify-center">
-                                <WeatherWidgetIcon condition={d.condition} size={20} />
-                                <span className="font-sans text-[11px] text-white/60 capitalize truncate max-w-[85px] hidden sm:inline">
-                                  {d.condition}
-                                </span>
-                              </div>
-                              <span className="font-sans text-[12px] text-white/70 tabular-nums text-right w-[80px]">
-                                <strong className="text-white font-semibold">{d.high}°</strong> / {d.low}°
-                              </span>
+                        {/* Complex: 3-Hour Breakdown (rendered in same style as full-width tile) */}
+                        {showHourlySection && weather.hourly && weather.hourly.length > 0 && (
+                          <div className="p-4 sm:p-5 rounded-[20px] bg-white/[0.04] border border-white/10 transition-all hover:border-white/20 space-y-3">
+                            <div className="flex items-center gap-2 text-white/60 text-[13px] font-sans font-medium">
+                              <Clock className="w-4 h-4 text-[#8a7cfb] shrink-0" aria-hidden="true" />
+                              <span>3-hour breakdown</span>
                             </div>
-                          ))}
-                        </div>
+                            <div className="grid grid-cols-4 gap-2 text-center">
+                              {weather.hourly.slice(0, 4).map((h, idx) => (
+                                <div
+                                  key={idx}
+                                  className="p-2.5 rounded-[14px] bg-white/[0.03] border border-white/5 flex flex-col items-center"
+                                >
+                                  <span className="font-sans text-[11px] text-white/60 tabular-nums">
+                                    {h.time}
+                                  </span>
+                                  <WeatherWidgetIcon condition={h.condition} size={22} className="my-1.5" />
+                                  <span className="font-sans text-[13px] font-bold text-white tabular-nums">
+                                    {h.temp}°
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Complex: 3-Day Forecast (rendered in same style as full-width tile) */}
+                        {showForecastSection && weather.threeDay && weather.threeDay.length > 0 && (
+                          <div className="p-4 sm:p-5 rounded-[20px] bg-white/[0.04] border border-white/10 transition-all hover:border-white/20 space-y-3">
+                            <div className="flex items-center gap-2 text-white/60 text-[13px] font-sans font-medium">
+                              <Calendar className="w-4 h-4 text-[#8a7cfb] shrink-0" aria-hidden="true" />
+                              <span>3-day forecast</span>
+                            </div>
+                            <div className="divide-y divide-white/[0.08]">
+                              {weather.threeDay.map((d, idx) => (
+                                <div
+                                  key={idx}
+                                  className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between text-[13px]"
+                                >
+                                  <span className="font-sans font-medium text-white/90 w-[70px]">
+                                    {d.day}
+                                  </span>
+                                  <div className="flex items-center gap-1.5 flex-1 justify-center">
+                                    <WeatherWidgetIcon condition={d.condition} size={20} />
+                                    <span className="font-sans text-[11px] text-white/60 capitalize truncate max-w-[85px] hidden sm:inline">
+                                      {d.condition}
+                                    </span>
+                                  </div>
+                                  <span className="font-sans text-[12px] text-white/70 tabular-nums text-right w-[80px]">
+                                    <strong className="text-white font-semibold">{d.high}°</strong> / {d.low}°
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -590,24 +614,12 @@ export const DashboardView: React.FC = () => {
                         <p className="font-sans text-[13px] text-white/60">
                           No extra details selected.
                         </p>
-                        <Link
-                          href="/preferences"
-                          className="font-sans text-[12px] text-[#8a7cfb] hover:underline mt-1 inline-block"
-                        >
-                          Customize weather cards
-                        </Link>
                       </div>
                     )}
 
-                    {/* Footer: Last Updated & Edit Link */}
-                    <div className="pt-3 border-t border-white/10 flex items-center justify-between font-sans text-[12px] text-white/50">
-                      <span>Last updated {weatherLastUpdated || "Just now"}</span>
-                      <Link
-                        href="/preferences"
-                        className="text-white/70 hover:text-white underline transition-colors"
-                      >
-                        Edit
-                      </Link>
+                    {/* Footer: Last Updated Only */}
+                    <div className="pt-3 border-t border-white/10 font-sans text-[12px] text-white/50">
+                      Last updated {weatherLastUpdated || "Just now"}
                     </div>
                   </div>
                 )}

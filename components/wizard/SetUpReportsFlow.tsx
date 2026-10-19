@@ -55,35 +55,8 @@ import { HOURLY_OPTIONS, formatHourOption } from "@/lib/time-utils";
 import { COUNTRIES } from "@/lib/geo";
 import { savePreferencesViaN8n } from "@/lib/n8n";
 
-export const WEATHER_ICONS: Record<WeatherTopicId, LucideIcon> = {
-  "current-temperature": Thermometer,
-  "high-low": ArrowUpDown,
-  "hourly-3h": Clock,
-  "forecast-3day": Calendar,
-  "rain-chance": CloudRain,
-  "thunderstorm-chance": CloudLightning,
-  cloudiness: Cloud,
-  "uv-index": Sun,
-  "air-quality": Wind,
-  wind: Compass,
-  humidity: Droplets,
-  "sun-times": Sunrise,
-};
-
-export const NEWS_ICONS: Record<NewsTopicId, LucideIcon> = {
-  politics: Landmark,
-  economy: TrendingUp,
-  health: HeartPulse,
-  environment: Leaf,
-  crime: Scale,
-  international: Globe,
-  education: GraduationCap,
-  science: Atom,
-  society: Users,
-  disasters: AlertTriangle,
-  technology: Cpu,
-  sports: Trophy,
-};
+import { WEATHER_ICONS, NEWS_ICONS } from "@/lib/icons";
+export { WEATHER_ICONS, NEWS_ICONS };
 
 export const SetUpReportsFlow: React.FC = () => {
   const router = useRouter();

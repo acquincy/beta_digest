@@ -357,6 +357,7 @@ export function generateCityWeather(
   const windUnit = isUS ? "mph" : "km/h";
 
   const currentTemp = isUS ? Math.round((baseC * 9) / 5 + 32) : baseC;
+  const feelsLike = currentTemp + ((seed % 5) - 2);
   const high = currentTemp + 5 + (seed % 4);
   const low = currentTemp - 6 - (seed % 4);
 
@@ -408,6 +409,7 @@ export function generateCityWeather(
     tempUnit,
     windUnit,
     currentTemp,
+    feelsLike,
     condition,
     high,
     low,

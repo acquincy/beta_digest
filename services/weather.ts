@@ -351,6 +351,7 @@ export async function fetchCityWeatherDataLive(
       const hourly = data.hourly || {};
 
       const currentTemp = toTemp(current.temperature_2m ?? 18);
+      const feelsLike = typeof current.apparent_temperature === "number" ? toTemp(current.apparent_temperature) : currentTemp;
       const condition = interpretWeatherCode(current.weather_code ?? 0);
       const high = toTemp(daily.temperature_2m_max?.[0] ?? (current.temperature_2m ?? 18) + 3);
       const low = toTemp(daily.temperature_2m_min?.[0] ?? (current.temperature_2m ?? 18) - 3);
@@ -413,6 +414,7 @@ export async function fetchCityWeatherDataLive(
         tempUnit,
         windUnit,
         currentTemp,
+        feelsLike,
         condition,
         high,
         low,
@@ -454,6 +456,7 @@ export async function fetchCityWeatherDataLive(
     tempUnit,
     windUnit,
     currentTemp: isUS ? 68 : 20,
+    feelsLike: isUS ? 69 : 21,
     condition: "Partly cloudy",
     high: isUS ? 73 : 23,
     low: isUS ? 57 : 14,
