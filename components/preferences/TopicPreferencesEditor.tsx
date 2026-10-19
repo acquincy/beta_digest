@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   Sliders,
   Sparkles,
-  ArrowLeft,
   Check,
   AlertCircle,
   Loader2,
@@ -310,7 +309,6 @@ export const TopicPreferencesEditor: React.FC = () => {
             <OutlineButton
               onClick={() => router.push("/dashboard")}
               disabled={saving}
-              leftIcon={<ArrowLeft className="w-4 h-4" aria-hidden="true" />}
             >
               Cancel
             </OutlineButton>

@@ -27,7 +27,7 @@ export default async function SignupPage() {
       <Suspense
         fallback={
           <div className="w-full max-w-[666px] mx-auto px-4 py-20">
-            <div className="w-full h-[400px] bg-white rounded-[40px] animate-pulse" />
+            <div className="w-full h-[400px] bg-[#141418]/85 border border-white/15 rounded-[40px] animate-pulse" />
           </div>
         }
       >

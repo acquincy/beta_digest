@@ -7,7 +7,8 @@ import { Check, AlertCircle, Loader2 } from "lucide-react";
 import { CanvasA } from "@/components/CanvasA";
 import { TopLeftLogo } from "@/components/TopLeftLogo";
 import { Footer } from "@/components/Footer";
-import { DarkButton, OutlineButton } from "@/components/primitives/Button";
+import { PrimaryButton, OutlineButton } from "@/components/primitives/Button";
+import { ThemedInput } from "@/components/primitives/ThemedInput";
 import { IconTile } from "@/components/primitives/IconTile";
 import { verifyViaApi, sendSignInLinkViaApi } from "@/lib/n8n";
 
@@ -23,7 +24,6 @@ function VerifyContent() {
     token ? "" : "No verification token provided."
   );
   const [destination, setDestination] = useState<string>("/onboarding");
-  const [countdown, setCountdown] = useState(3);
 
   // Recovery form state
   const [resendEmail, setResendEmail] = useState("");
@@ -83,20 +83,15 @@ function VerifyContent() {
     executeVerification();
   }, [token]);
 
-  // Handle countdown and redirect on success
+  // Handle redirect on success
   useEffect(() => {
     if (status !== "success") return;
 
-    const interval = setInterval(() => {
-      setCountdown((prev) => (prev > 1 ? prev - 1 : 1));
-    }, 1000);
-
     const timer = setTimeout(() => {
       router.push(destination);
-    }, 3000);
+    }, 2000);
 
     return () => {
-      clearInterval(interval);
       clearTimeout(timer);
     };
   }, [status, destination, router]);
@@ -121,20 +116,17 @@ function VerifyContent() {
   };
 
   return (
-    <div className="w-full max-w-[560px] bg-white rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-[var(--shadow-float)] step-enter flex flex-col items-center text-center">
+    <div className="w-full max-w-[560px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] p-8 md:p-12 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl step-enter flex flex-col items-center text-center">
       {status === "loading" && (
         <div className="flex flex-col items-center py-6">
-          <div
-            className="w-16 h-16 rounded-[20px] flex items-center justify-center mb-6 animate-spin"
-            style={{ backgroundColor: "var(--lime-tint)" }}
-          >
-            <Loader2 className="w-8 h-8 text-black" />
+          <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mb-6 bg-white/[0.08] border border-white/10">
+            <Loader2 className="w-8 h-8 text-white animate-spin" />
           </div>
-          <h1 className="font-display font-[700] text-[28px] md:text-[34px] leading-tight text-black">
+          <h1 className="font-display font-[600] text-[28px] md:text-[34px] leading-tight text-white tracking-tight">
             Verifying your account...
           </h1>
-          <p className="font-sans font-[400] text-[16px] text-[var(--text)] mt-3 max-w-sm">
-            Please wait a moment while we validate your one-time verification link and establish your persistent session.
+          <p className="font-sans font-[400] text-[16px] text-white/75 mt-3 max-w-sm">
+            Please wait a moment while we validate your verification link.
           </p>
         </div>
       )}
@@ -145,71 +137,66 @@ function VerifyContent() {
             <IconTile icon={Check} size={80} radius={24} iconSize={40} />
           </div>
 
-          <h1 className="font-display font-[700] text-[32px] md:text-[38px] leading-tight text-black">
+          <h1 className="font-display font-[600] text-[32px] md:text-[38px] leading-tight text-white tracking-tight">
             Account verified!
           </h1>
 
-          <p className="font-sans font-[400] text-[16px] md:text-[18px] text-[var(--text)] leading-relaxed mt-3 max-w-md">
-            Your device is now securely remembered. Redirecting you to Beta Digest.
+          <p className="font-sans font-[400] text-[16px] md:text-[18px] text-white/75 leading-relaxed mt-3 max-w-md">
+            Redirecting you to Beta Digest
           </p>
-
-          <div className="mt-8 flex items-center justify-center gap-2.5 text-[15px] font-[500] text-[var(--muted-text)]">
-            <Loader2 className="w-4 h-4 animate-spin text-black" />
-            <span>Continuing in {countdown} second{countdown === 1 ? "" : "s"}...</span>
-          </div>
         </div>
       )}
 
       {status === "error" && (
         <div className="flex flex-col items-center py-4 w-full">
-          <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mb-6 bg-red-50 text-red-600">
+          <div className="w-16 h-16 rounded-[20px] flex items-center justify-center mb-6 bg-red-500/10 border border-red-500/20 text-red-400">
             <AlertCircle className="w-8 h-8" />
           </div>
 
-          <h1 className="font-display font-[700] text-[28px] md:text-[32px] leading-tight text-black">
+          <h1 className="font-display font-[600] text-[28px] md:text-[32px] leading-tight text-white tracking-tight">
             Link expired or invalid
           </h1>
 
-          <p className="font-sans font-[400] text-[15px] md:text-[16px] text-[var(--text)] leading-relaxed mt-3 max-w-md">
+          <p className="font-sans font-[400] text-[15px] md:text-[16px] text-white/75 leading-relaxed mt-3 max-w-md">
             {errorMessage || "The link you followed has already been used or has expired."}
           </p>
 
           {resendSent ? (
-            <div className="mt-6 p-4 bg-[var(--lime-tint)] rounded-2xl text-black text-sm max-w-md">
+            <div className="mt-6 p-4 bg-emerald-950/40 text-emerald-300 border border-emerald-500/30 rounded-2xl text-sm max-w-md">
               A fresh sign-in link has been sent to your email. Please check your inbox.
             </div>
           ) : (
             <form onSubmit={handleRequestNewLink} className="mt-6 w-full max-w-md flex flex-col gap-3">
-              <p className="text-sm text-[var(--muted-text)] text-left">
+              <p className="text-sm text-white/70 text-left">
                 Enter your email address to receive a fresh sign-in link:
               </p>
               <div className="flex gap-2">
-                <input
+                <ThemedInput
                   type="email"
                   value={resendEmail}
                   onChange={(e) => setResendEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="flex-1 px-4 py-3 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:border-black"
+                  containerClassName="flex-1"
                 />
-                <button
+                <PrimaryButton
                   type="submit"
                   disabled={resendSending}
-                  className="px-5 py-3 rounded-xl bg-black text-white text-sm font-semibold hover:bg-neutral-800 disabled:opacity-50 flex items-center gap-2"
+                  className="px-5 h-[46px] text-sm font-semibold"
                 >
-                  {resendSending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {resendSending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                   <span>Send link</span>
-                </button>
+                </PrimaryButton>
               </div>
-              {resendError && <p className="text-xs text-red-600 text-left">{resendError}</p>}
+              {resendError && <p className="text-xs text-[var(--error)] text-left">{resendError}</p>}
             </form>
           )}
 
           <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
             <Link href="/signup" className="w-full sm:w-auto">
-              <DarkButton className="w-full sm:w-[200px] h-[52px]">
+              <PrimaryButton className="w-full sm:w-[200px] h-[52px]">
                 Create new account
-              </DarkButton>
+              </PrimaryButton>
             </Link>
             <Link href="/" className="w-full sm:w-auto">
               <OutlineButton className="w-full sm:w-[160px] h-[52px]">
@@ -234,7 +221,7 @@ export default function VerifyPage() {
       <main className="flex-grow flex items-center justify-center p-4 py-12 md:py-16">
         <Suspense
           fallback={
-            <div className="w-full max-w-[560px] h-[340px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+            <div className="w-full max-w-[560px] h-[340px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] animate-pulse" />
           }
         >
           <VerifyContent />

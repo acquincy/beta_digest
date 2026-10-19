@@ -30,7 +30,7 @@ export default async function OnboardingPage() {
           </p>
           <a
             href="/onboarding"
-            className="inline-block bg-black text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-neutral-800"
+            className="inline-block bg-white/[0.08] hover:bg-white hover:text-black border border-white text-white px-6 py-3 rounded-full text-sm font-medium transition-all duration-200"
           >
             Retry
           </a>

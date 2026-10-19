@@ -6,12 +6,15 @@ import { Smile } from "lucide-react";
 import { CanvasA } from "./CanvasA";
 import { TopLeftLogo } from "./TopLeftLogo";
 import { IconTile } from "./primitives/IconTile";
-import { DarkButton } from "./primitives/Button";
+import { PrimaryButton } from "./primitives/Button";
+import { ThemedInput } from "./primitives/ThemedInput";
 import { UnderlineInput } from "./primitives/UnderlineInput";
 import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { Preferences } from "@/lib/types";
 import { COUNTRIES, CITIES } from "@/lib/geo";
 import { cityRegex } from "@/lib/schemas";
+import { CustomSelect } from "./CustomSelect";
+import { clsx } from "clsx";
 
 export const BasicInfoFlow: React.FC = () => {
   const router = useRouter();
@@ -91,7 +94,7 @@ export const BasicInfoFlow: React.FC = () => {
           <TopLeftLogo />
         </header>
         <main className="flex-grow flex items-center justify-center p-4 py-8 md:py-12 w-full">
-          <div className="w-full max-w-[768px] h-[480px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+          <div className="w-full max-w-[768px] h-[480px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] animate-pulse" />
         </main>
       </div>
     );
@@ -112,88 +115,92 @@ export const BasicInfoFlow: React.FC = () => {
           <IconTile icon={Smile} size={100} radius={28} iconSize={52} />
         </div>
 
-        {/* B2 Sentence form in Red Hat Display 600 44px/62px, left aligned */}
+        {/* B2 Sentence form in headline display font, left aligned */}
         <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="font-display font-[600] text-[28px] leading-[44px] md:text-[44px] md:leading-[62px] text-white tracking-tight">
+          <div className="font-display font-[600] text-[clamp(24px,3.8vw,38px)] leading-[1.4] md:leading-[1.5] text-white tracking-tight">
             <span>My name is </span>
 
-            {/* Name underline input at 44px */}
-            <span className="inline-block align-baseline">
+            {/* Name underline input auto-sized to content */}
+            <span className="inline-grid items-baseline align-baseline relative">
+              <span
+                aria-hidden="true"
+                className="invisible col-start-1 row-start-1 font-display font-[600] text-[clamp(24px,3.8vw,38px)] leading-tight px-1 pb-0.5 whitespace-pre pointer-events-none select-none"
+                style={{ minWidth: "90px" }}
+              >
+                {name || "Alex"}
+              </span>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Alex"
-                className="w-[180px] md:w-[260px] bg-transparent border-0 border-b border-white/30 text-white font-display font-[600] text-[28px] md:text-[44px] leading-tight p-0 outline-none focus:outline-none focus:border-b-2 focus:border-white transition-colors"
-                style={{ verticalAlign: "baseline" }}
+                className={clsx(
+                  "col-start-1 row-start-1 w-full bg-transparent border-0 border-b-[2px] px-1 pb-0.5 font-display font-[600] text-[clamp(24px,3.8vw,38px)] leading-tight outline-none focus:outline-none transition-all duration-200",
+                  "border-white/30 hover:border-white/50 focus:border-[#6b62f2] focus:shadow-[0_2px_8px_-2px_rgba(107,98,242,0.6)]",
+                  "placeholder:text-white/40 placeholder:font-normal caret-[#6b62f2]",
+                  name.trim()
+                    ? "bg-gradient-to-r from-[#8ba8ff] via-[#6b62f2] to-[#c084fc] bg-clip-text text-transparent"
+                    : "text-white"
+                )}
+                style={{
+                  verticalAlign: "baseline",
+                  fieldSizing: "content",
+                } as React.CSSProperties}
                 required
               />
             </span>
+            <span className="font-display font-[600] text-[clamp(24px,3.8vw,38px)] text-white">,</span>
+            <span> </span>
 
-            <span className="text-[20px] font-sans font-normal text-white/70">, </span>
-            <span>I live in </span>
-
-            {/* City select control */}
-            <span className="relative inline-block align-baseline mr-2">
-              <select
-                value={citySelection}
-                onChange={handleCityChange}
-                disabled={!countryCode}
-                className="inline-flex items-center h-[44px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-3 pr-8 font-sans font-medium text-[16px] md:text-[18px] text-white cursor-pointer align-middle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-50 appearance-none"
-              >
-                <option value="" disabled className="bg-[#161616] text-white/50">
-                  Select city
-                </option>
-                {availableCities.map((c) => (
-                  <option key={c.name} value={c.name} className="bg-[#161616] text-white">
-                    {c.name}
-                  </option>
-                ))}
-                {countryCode && <option value="__other__" className="bg-[#161616] text-white">Other</option>}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white/70">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                </svg>
-              </div>
+            {/* Keep "I live in [city], [country]." together as a cohesive clause */}
+            <span className="inline whitespace-normal">
+              <span className="whitespace-nowrap inline-flex items-baseline align-baseline">
+                <span>I live in </span>
+                <CustomSelect
+                  id="city-select"
+                  name="city"
+                  variant="sentence"
+                  value={citySelection}
+                  onChange={handleCityChange}
+                  disabled={!countryCode}
+                  placeholder="Select city"
+                  searchable
+                  searchPlaceholder="Search cities..."
+                  className="font-display font-[600] text-[clamp(24px,3.8vw,38px)] leading-tight"
+                  options={[
+                    ...availableCities.map((c) => ({ value: c.name, label: c.name })),
+                    ...(countryCode ? [{ value: "__other__", label: "Other" }] : []),
+                  ]}
+                />
+                <span className="font-display font-[600] text-[clamp(24px,3.8vw,38px)] text-white">,</span>
+              </span>
+              <span> </span>
+              <span className="whitespace-nowrap inline-flex items-baseline align-baseline">
+                <CustomSelect
+                  id="country-select"
+                  name="country"
+                  variant="sentence"
+                  value={countryCode}
+                  onChange={handleCountryChange}
+                  placeholder="Select country"
+                  searchable
+                  searchPlaceholder="Search countries..."
+                  className="font-display font-[600] text-[clamp(24px,3.8vw,38px)] leading-tight"
+                  options={COUNTRIES.map((c) => ({ value: c.code, label: c.name }))}
+                />
+                <span className="font-display font-[600] text-[clamp(24px,3.8vw,38px)] text-white">.</span>
+              </span>
             </span>
-
-            <span className="text-[20px] font-sans font-normal text-white/70">, </span>
-
-            {/* Country select control */}
-            <span className="relative inline-block align-baseline">
-              <select
-                value={countryCode}
-                onChange={handleCountryChange}
-                className="inline-flex items-center h-[44px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-3 pr-8 font-sans font-medium text-[16px] md:text-[18px] text-white cursor-pointer align-middle transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 appearance-none"
-              >
-                <option value="" disabled className="bg-[#161616] text-white/50">
-                  Select country
-                </option>
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code} className="bg-[#161616] text-white">
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white/70">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                </svg>
-              </div>
-            </span>
-
-            <span className="text-[20px] font-sans font-normal text-white/70">.</span>
           </div>
 
           {/* Typed-city input below the sentence when Other is chosen */}
           {isOtherCity && (
-            <div className="mt-6 w-full">
-              <UnderlineInput
+            <div className="mt-6 w-full max-w-[400px]">
+              <ThemedInput
                 label="Your city"
                 placeholder="Enter your city"
                 value={customCity}
-                height={48}
+                height={46}
                 onChange={(e) => {
                   setCustomCity(e.target.value);
                   if (customCityError) setCustomCityError("");
@@ -204,15 +211,16 @@ export const BasicInfoFlow: React.FC = () => {
             </div>
           )}
 
-          {/* B4 Snow White full-width Continue button */}
+          {/* Continue button */}
           <div className="mt-10">
-            <DarkButton
+            <PrimaryButton
               type="submit"
               disabled={!canContinue}
-              className="w-full h-[54px] rounded-full !bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-sm"
+              showArrow
+              className="w-full h-[54px] text-[16px] font-medium"
             >
               Continue
-            </DarkButton>
+            </PrimaryButton>
           </div>
         </form>
       </div>

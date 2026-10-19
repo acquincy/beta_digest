@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import { ALL_IMAGE_CREDITS } from "@/lib/image-data";
-import { ArrowLeft } from "lucide-react";
 import { CanvasA } from "@/components/CanvasA";
 import { TopLeftLogo } from "@/components/TopLeftLogo";
 import { Footer } from "@/components/Footer";
@@ -24,9 +23,8 @@ export default function CreditsPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/70 hover:text-white transition-colors"
+              className="inline-flex items-center text-xs font-semibold text-white/70 hover:text-white transition-colors"
             >
-              <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
               Back to BetaDigest
             </Link>
           </div>

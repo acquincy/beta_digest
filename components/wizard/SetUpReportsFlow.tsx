@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { clsx } from "clsx";
 import {
-  Mail,
   CloudSun,
   Thermometer,
   ArrowUpDown,
@@ -41,6 +40,7 @@ import { GradientIcon } from "../primitives/IconTile";
 import { PrimaryButton, OutlineButton } from "../primitives/Button";
 import { Chip } from "../primitives/Chip";
 import { Stepper } from "./Stepper";
+import { CustomSelect } from "../CustomSelect";
 import {
   Preferences,
   WeatherTopicId,
@@ -49,11 +49,8 @@ import {
   NEWS_TOPIC_ORDER,
   WEATHER_TOPIC_LABELS,
   NEWS_TOPIC_LABELS,
-  CityWeatherData,
-  EditorialStory,
 } from "@/lib/types";
 import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wizard-store";
-import { mockService } from "@/lib/mock-service";
 import { HOURLY_OPTIONS, formatHourOption } from "@/lib/time-utils";
 import { COUNTRIES } from "@/lib/geo";
 import { savePreferencesViaN8n } from "@/lib/n8n";
@@ -94,43 +91,32 @@ export const SetUpReportsFlow: React.FC = () => {
 
   const [hydrated, setHydrated] = useState(false);
   const [prefs, setPrefs] = useState<Preferences>(INITIAL_PREFERENCES);
-  const [realWeather, setRealWeather] = useState<CityWeatherData | null>(null);
-  const [realStories, setRealStories] = useState<EditorialStory[]>([]);
+  const [lockedTopic, setLockedTopic] = useState<{ id: string; category: "weather" | "news" } | null>(null);
+  const lockedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleLockedClick = (id: string, category: "weather" | "news") => {
+    if (lockedTimeoutRef.current) {
+      clearTimeout(lockedTimeoutRef.current);
+    }
+    setLockedTopic({ id, category });
+    lockedTimeoutRef.current = setTimeout(() => {
+      setLockedTopic(null);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (lockedTimeoutRef.current) {
+        clearTimeout(lockedTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Load preferences strictly after mount
   useEffect(() => {
     const loaded = loadPreferences();
     setPrefs(loaded);
     setHydrated(true);
-
-    let mounted = true;
-    const city = loaded.city || "London";
-    const country = loaded.countryCode || "GB";
-
-    fetch(`/api/weather?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&format=full`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (mounted && data && typeof data.currentTemp === "number") {
-          setRealWeather(data);
-        }
-      })
-      .catch((err) => console.warn("Setup weather fetch error:", err));
-
-    const topicsParam = loaded.newsTopics && loaded.newsTopics.length > 0
-      ? loaded.newsTopics.join(",")
-      : "technology,economy,science";
-    fetch(`/api/news?topics=${encodeURIComponent(topicsParam)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (mounted && Array.isArray(data.stories) && data.stories.length > 0) {
-          setRealStories(data.stories);
-        }
-      })
-      .catch((err) => console.warn("Setup news fetch error:", err));
-
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   // Sync state to storage only after hydration
@@ -215,9 +201,6 @@ export const SetUpReportsFlow: React.FC = () => {
   const countryName = countryObj ? countryObj.name : "United States";
   const locationLabel = `${prefs.city}, ${countryName}`;
 
-  // Real live weather and news data with fallback
-  const weatherData = realWeather || mockService.getWeather(prefs.city, prefs.countryCode);
-  const stories = realStories.length > 0 ? realStories : mockService.getStories(prefs.newsTopics);
   if (!hydrated) {
     return (
       <div className="relative min-h-screen flex flex-col justify-between items-center overflow-x-hidden">
@@ -226,7 +209,7 @@ export const SetUpReportsFlow: React.FC = () => {
           <TopLeftLogo />
         </header>
         <main className="flex-grow flex items-center justify-center p-4 py-8 md:py-12 w-full">
-          <div className="w-full max-w-[768px] h-[520px] bg-white rounded-[32px] md:rounded-[40px] animate-pulse" />
+          <div className="w-full max-w-[768px] h-[520px] bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] animate-pulse" />
         </main>
       </div>
     );
@@ -271,9 +254,10 @@ export const SetUpReportsFlow: React.FC = () => {
             <p className="font-sans font-[400] text-[14px] leading-[20px] text-white/75 mt-1">
               What time would you like to receive your daily digest?
             </p>
-            <div className="mt-6 flex items-center gap-2 font-sans text-[16px] text-[#ededed]">
-              <span>Receive digests at</span>
-              <select
+            <div className="mt-6 flex items-center gap-2 font-sans text-[16px] text-[#ededed] flex-wrap sm:flex-nowrap">
+              <span className="whitespace-nowrap">Receive digests at</span>
+              <CustomSelect
+                variant="underline"
                 value={prefs.deliveryHour}
                 onChange={(e) =>
                   setPrefs((prev) => ({
@@ -281,14 +265,13 @@ export const SetUpReportsFlow: React.FC = () => {
                     deliveryHour: parseInt(e.target.value, 10),
                   }))
                 }
-                className="bg-transparent border-0 border-b border-white/30 font-semibold text-white p-0 pr-4 pb-0.5 outline-none focus:outline-none focus:border-b-2 focus:border-white cursor-pointer tabular-nums transition-colors"
-              >
-                {HOURLY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-[#161616] text-white">
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+                options={HOURLY_OPTIONS.map((opt) => ({
+                  value: opt.value,
+                  label: opt.label,
+                }))}
+                searchable
+                searchPlaceholder="Search delivery hour..."
+              />
             </div>
           </SectionCard>
         </CardShell>
@@ -302,7 +285,7 @@ export const SetUpReportsFlow: React.FC = () => {
               <OutlineButton onClick={() => setStep(1)}>Back</OutlineButton>
               <PrimaryButton
                 onClick={() => setStep(3)}
-                disabled={totalTopics === 0}
+                disabled={weatherTopics.length === 0 || newsTopics.length === 0}
               >
                 Continue
               </PrimaryButton>
@@ -329,13 +312,32 @@ export const SetUpReportsFlow: React.FC = () => {
                 <h2 className="font-sans font-[600] text-[18px] text-white">
                   Your weather
                 </h2>
-                <span className="font-sans font-[600] text-[14px] text-white/70 tabular-nums">
+                <span
+                  key={weatherTopics.length}
+                  className={clsx(
+                    "font-sans text-[14px] tabular-nums transition-all duration-200 inline-block",
+                    weatherTopics.length === 3
+                      ? "text-[#8a7cfb] font-bold scale-105"
+                      : "text-white/70 font-[600] scale-100"
+                  )}
+                >
                   ({weatherTopics.length}/3)
                 </span>
               </div>
-              <p className="font-sans font-[400] text-[14px] text-white/75 mb-4">
-                Choose up to 3 details
-              </p>
+              <div className="mb-4">
+                <p className="font-sans font-[400] text-[14px] text-white/75">
+                  Choose up to 3 details
+                </p>
+                <p className="font-sans font-[400] text-[13px] text-white/50 mt-0.5 transition-colors duration-200">
+                  {lockedTopic?.category === "weather" ? (
+                    <span className="text-[#8a7cfb] font-medium transition-colors">
+                      Deselect one to choose another
+                    </span>
+                  ) : (
+                    <span>{weatherTopics.length} of 3 selected.</span>
+                  )}
+                </p>
+              </div>
 
               <div
                 role="group"
@@ -345,26 +347,38 @@ export const SetUpReportsFlow: React.FC = () => {
                 {WEATHER_TOPIC_ORDER.map((topicId) => {
                   const isActive = weatherTopics.includes(topicId);
                   const isMax = weatherTopics.length >= 3 && !isActive;
+                  const isLockedShaking = lockedTopic?.id === topicId;
+                  const Icon = WEATHER_ICONS[topicId] || CloudSun;
 
                   return (
-                    <Chip
-                      key={topicId}
-                      size="onboarding"
-                      active={isActive}
-                      disabled={isMax}
-                      onToggle={() => toggleWeatherTopic(topicId)}
-                    >
-                      {WEATHER_TOPIC_LABELS[topicId]}
-                    </Chip>
+                    <div key={topicId} className="relative inline-flex">
+                      {isLockedShaking && (
+                        <div
+                          role="status"
+                          aria-live="polite"
+                          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-[8px] bg-[#22222a] border border-white/20 text-white text-[12px] font-sans font-medium whitespace-nowrap shadow-[0_4px_16px_rgba(0,0,0,0.6)] z-30 pointer-events-none transition-all duration-150 animate-in fade-in"
+                        >
+                          Deselect one to choose another
+                          <span className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#22222a]" />
+                        </div>
+                      )}
+                      <Chip
+                        size="onboarding"
+                        active={isActive}
+                        disabled={isMax}
+                        shaking={isLockedShaking}
+                        onToggle={() => toggleWeatherTopic(topicId)}
+                        onLockedClick={() => handleLockedClick(topicId, "weather")}
+                      >
+                        <span className="inline-flex items-center gap-1.5">
+                          <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                          <span>{WEATHER_TOPIC_LABELS[topicId]}</span>
+                        </span>
+                      </Chip>
+                    </div>
                   );
                 })}
               </div>
-
-              {weatherTopics.length >= 3 && (
-                <p className="text-[13px] text-white/70 mt-3">
-                  You&apos;ve reached the limit. Deselect one to choose another.
-                </p>
-              )}
             </SectionCard>
 
             {/* 2. Your news */}
@@ -373,13 +387,32 @@ export const SetUpReportsFlow: React.FC = () => {
                 <h2 className="font-sans font-[600] text-[18px] text-white">
                   Your news
                 </h2>
-                <span className="font-sans font-[600] text-[14px] text-white/70 tabular-nums">
+                <span
+                  key={newsTopics.length}
+                  className={clsx(
+                    "font-sans text-[14px] tabular-nums transition-all duration-200 inline-block",
+                    newsTopics.length === 5
+                      ? "text-[#8a7cfb] font-bold scale-105"
+                      : "text-white/70 font-[600] scale-100"
+                  )}
+                >
                   ({newsTopics.length}/5)
                 </span>
               </div>
-              <p className="font-sans font-[400] text-[14px] text-white/75 mb-4">
-                Choose up to 5 topics
-              </p>
+              <div className="mb-4">
+                <p className="font-sans font-[400] text-[14px] text-white/75">
+                  Choose up to 5 topics
+                </p>
+                <p className="font-sans font-[400] text-[13px] text-white/50 mt-0.5 transition-colors duration-200">
+                  {lockedTopic?.category === "news" ? (
+                    <span className="text-[#8a7cfb] font-medium transition-colors">
+                      Deselect one to choose another
+                    </span>
+                  ) : (
+                    <span>{newsTopics.length} of 5 selected.</span>
+                  )}
+                </p>
+              </div>
 
               <div
                 role="group"
@@ -389,32 +422,44 @@ export const SetUpReportsFlow: React.FC = () => {
                 {NEWS_TOPIC_ORDER.map((topicId) => {
                   const isActive = newsTopics.includes(topicId);
                   const isMax = newsTopics.length >= 5 && !isActive;
+                  const isLockedShaking = lockedTopic?.id === topicId;
+                  const Icon = NEWS_ICONS[topicId] || Landmark;
 
                   return (
-                    <Chip
-                      key={topicId}
-                      size="onboarding"
-                      active={isActive}
-                      disabled={isMax}
-                      onToggle={() => toggleNewsTopic(topicId)}
-                    >
-                      {NEWS_TOPIC_LABELS[topicId]}
-                    </Chip>
+                    <div key={topicId} className="relative inline-flex">
+                      {isLockedShaking && (
+                        <div
+                          role="status"
+                          aria-live="polite"
+                          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-[8px] bg-[#22222a] border border-white/20 text-white text-[12px] font-sans font-medium whitespace-nowrap shadow-[0_4px_16px_rgba(0,0,0,0.6)] z-30 pointer-events-none transition-all duration-150 animate-in fade-in"
+                        >
+                          Deselect one to choose another
+                          <span className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#22222a]" />
+                        </div>
+                      )}
+                      <Chip
+                        size="onboarding"
+                        active={isActive}
+                        disabled={isMax}
+                        shaking={isLockedShaking}
+                        onToggle={() => toggleNewsTopic(topicId)}
+                        onLockedClick={() => handleLockedClick(topicId, "news")}
+                      >
+                        <span className="inline-flex items-center gap-1.5">
+                          <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                          <span>{NEWS_TOPIC_LABELS[topicId]}</span>
+                        </span>
+                      </Chip>
+                    </div>
                   );
                 })}
               </div>
-
-              {newsTopics.length >= 5 && (
-                <p className="text-[13px] text-white/70 mt-3">
-                  You&apos;ve reached the limit. Deselect one to choose another.
-                </p>
-              )}
             </SectionCard>
           </div>
         </CardShell>
       )}
 
-      {/* STEP 3: Review your digest (REDESIGNED) */}
+      {/* STEP 3: Review your digest (Summary only) */}
       {currentStep === 3 && (
         <CardShell
           width="review"
@@ -431,339 +476,162 @@ export const SetUpReportsFlow: React.FC = () => {
             Review your digest
           </h1>
           <p className="font-sans font-[400] text-[16px] md:text-[18px] leading-[26px] text-white/75 mt-1">
-            Here&apos;s a preview of what lands in your inbox.
+            Check your choices before you join.
           </p>
 
-          {/* Two columns, 24px gap */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8 items-start">
-            {/* Left 340px summary SectionCard */}
-            <div className="lg:col-span-4 w-full">
-              <SectionCard className="divide-y divide-white/10">
-                {/* Delivery time row */}
-                <div className="py-4 first:pt-0 flex items-center justify-between">
-                  <div>
-                    <span className="font-sans font-[600] text-[14px] text-white">
-                      Delivery time
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="block text-[14px] text-white/70 underline hover:text-white cursor-pointer text-left mt-0.5 transition-colors"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                  <span className="font-sans font-[600] text-[14px] text-white tabular-nums">
-                    {deliveryTimeFormatted}
-                  </span>
+          <SectionCard className="divide-y divide-white/10 mt-8">
+            {/* Name (& email if collected) */}
+            <div className="py-4 first:pt-0 flex items-center justify-between">
+              <div>
+                <span className="font-sans font-[600] text-[14px] text-white">
+                  {prefs.email ? "Name & email" : "Name"}
+                </span>
+                <div className="font-sans text-[14px] text-white/85 mt-0.5 font-medium">
+                  {prefs.name || "Alex"}
                 </div>
-
-                {/* Location row */}
-                <div className="py-4 flex items-center justify-between">
-                  <div>
-                    <span className="font-sans font-[600] text-[14px] text-white">
-                      Location
-                    </span>
-                    <div className="font-sans text-[13px] text-white/75 mt-0.5">
-                      {locationLabel}
-                    </div>
-                  </div>
-                  <Link
-                    href="/basic-info"
-                    className="text-[14px] text-white/70 underline hover:text-white shrink-0 ml-3 transition-colors"
-                  >
-                    Edit
-                  </Link>
-                </div>
-
-                {/* Weather topics row */}
-                {weatherTopics.length > 0 && (
-                  <div className="py-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-sans font-[600] text-[14px] text-white">
-                          Weather topics
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setStep(2)}
-                          className="text-[14px] text-white/70 underline hover:text-white cursor-pointer transition-colors"
-                        >
-                          Edit
-                        </button>
-                      </div>
-                      <span className="font-sans text-[13px] text-white/70 tabular-nums">
-                        ({weatherTopics.length}/3)
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {weatherTopics.map((topId) => {
-                        const Icon = WEATHER_ICONS[topId] || CloudSun;
-                        return (
-                          <div
-                            key={topId}
-                            className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-white/10 bg-white/[0.04] text-white select-none"
-                          >
-                            <GradientIcon icon={Icon} size={16} />
-                            <span className="font-sans text-[13px] text-white font-medium">
-                              {WEATHER_TOPIC_LABELS[topId]}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                {prefs.email && (
+                  <div className="font-sans text-[13px] text-white/60 mt-0.5">
+                    {prefs.email}
                   </div>
                 )}
-
-                {/* News topics row */}
-                {newsTopics.length > 0 && (
-                  <div className="py-4 last:pb-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-sans font-[600] text-[14px] text-white">
-                          News topics
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setStep(2)}
-                          className="text-[14px] text-white/70 underline hover:text-white cursor-pointer transition-colors"
-                        >
-                          Edit
-                        </button>
-                      </div>
-                      <span className="font-sans text-[13px] text-white/70 tabular-nums">
-                        ({newsTopics.length}/5)
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {newsTopics.map((topId) => {
-                        const Icon = NEWS_ICONS[topId] || Landmark;
-                        return (
-                          <div
-                            key={topId}
-                            className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-white/10 bg-white/[0.04] text-white select-none"
-                          >
-                            <GradientIcon icon={Icon} size={16} />
-                            <span className="font-sans text-[13px] text-white font-medium">
-                              {NEWS_TOPIC_LABELS[topId]}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </SectionCard>
+              </div>
+              <Link
+                href="/basic-info"
+                className="text-[14px] text-white/70 underline hover:text-white shrink-0 ml-4 transition-colors"
+              >
+                Edit
+              </Link>
             </div>
 
-            {/* Right flexible email preview panel */}
-            <div className="lg:col-span-8 w-full flex flex-col">
-              <div className="w-full bg-[#161616] rounded-[24px] border border-white/10 overflow-hidden shadow-lg">
-                {/* Header band bg white/[0.04], padding 20px */}
-                <div className="bg-white/[0.03] border-b border-white/10 p-5 flex flex-col gap-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#181d30] flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
-                        <Image
-                          src="/logo-mark.png"
-                          alt="BetaDigest"
-                          width={24}
-                          height={24}
-                          className="w-6 h-6 object-contain"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-sans font-[600] text-[15px] text-white">
-                          BetaDigest &lt;dispatch@betadigest.com&gt;
-                        </div>
-                        <div className="font-sans text-[13px] text-white/75">
-                          To: {prefs.name}
-                        </div>
-                      </div>
-                    </div>
-
-                    <span className="font-sans text-[13px] text-white/70 tabular-nums">
-                      Thu, Oct 8 · {deliveryTimeFormatted}
-                    </span>
-                  </div>
-
-                  <h3 className="font-display font-[700] text-[20px] text-white mt-2">
-                    Your BetaDigest for Thursday, October 8
-                  </h3>
-                </div>
-
-                {/* Email Body padding 24px */}
-                <div className="p-6 flex flex-col gap-6">
-                  <div className="font-sans font-[500] text-[18px] text-white">
-                    Good morning, {prefs.name}
-                  </div>
-
-                  {/* Weather block (only if weather topics selected) */}
-                  {weatherTopics.length > 0 && (
-                    <div className="border-t border-white/10 pt-4">
-                      <h4 className="font-sans font-[700] text-[16px] text-white mb-3">
-                        Weather in {prefs.city}
-                      </h4>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {weatherTopics.map((topId) => {
-                          const Icon = WEATHER_ICONS[topId] || CloudSun;
-                          if (topId === "hourly-3h") {
-                            return (
-                              <div
-                                key={topId}
-                                className="sm:col-span-3 p-3.5 rounded-[16px] bg-white/[0.04] border border-white/10 flex flex-col gap-2"
-                              >
-                                <div className="flex items-center gap-1.5 font-sans font-[600] text-[13px] text-white">
-                                  <GradientIcon icon={Icon} size={15} />
-                                  <span>3-Hour Breakdown</span>
-                                </div>
-                                <div className="grid grid-cols-4 gap-2">
-                                  {weatherData.hourly.map((h, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="text-center font-sans text-[12px] tabular-nums text-white"
-                                    >
-                                      <div className="text-white/70">{h.time}</div>
-                                      <div className="font-bold">{h.temp}{weatherData.tempUnit}</div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          }
-
-                          if (topId === "forecast-3day") {
-                            return (
-                              <div
-                                key={topId}
-                                className="sm:col-span-3 p-3.5 rounded-[16px] bg-white/[0.04] border border-white/10 flex flex-col gap-2"
-                              >
-                                <div className="flex items-center gap-1.5 font-sans font-[600] text-[13px] text-white">
-                                  <GradientIcon icon={Icon} size={15} />
-                                  <span>3-Day Forecast</span>
-                                </div>
-                                <div className="grid grid-cols-3 gap-2">
-                                  {weatherData.threeDay.map((d, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="p-2 rounded-[12px] bg-white/[0.04] border border-white/5 text-center font-sans text-[12px] tabular-nums text-white"
-                                    >
-                                      <div className="font-semibold">{d.day}</div>
-                                      <div className="text-[11px] text-white/70 truncate">{d.condition}</div>
-                                      <div className="font-bold mt-1">
-                                        {d.high}° / {d.low}{weatherData.tempUnit}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          }
-
-                          let labelVal = "";
-                          switch (topId) {
-                            case "current-temperature":
-                              labelVal = `${weatherData.currentTemp}${weatherData.tempUnit} (${weatherData.condition})`;
-                              break;
-                            case "high-low":
-                              labelVal = `High ${weatherData.high}° / Low ${weatherData.low}°`;
-                              break;
-                            case "rain-chance":
-                              labelVal = `${weatherData.rainProb}% chance`;
-                              break;
-                            case "thunderstorm-chance":
-                              labelVal = `${weatherData.thunderstormProb}% chance`;
-                              break;
-                            case "cloudiness":
-                              labelVal = `${weatherData.cloudiness}%`;
-                              break;
-                            case "uv-index":
-                              labelVal = `${weatherData.uvIndex} (${weatherData.uvDescription})`;
-                              break;
-                            case "air-quality":
-                              labelVal = `AQI ${weatherData.airQuality} (${weatherData.airQualityDescription})`;
-                              break;
-                            case "wind":
-                              labelVal = weatherData.windFormatted;
-                              break;
-                            case "humidity":
-                              labelVal = `${weatherData.humidity}%`;
-                              break;
-                            case "sun-times":
-                              labelVal = `↑ ${weatherData.sunrise} · ↓ ${weatherData.sunset}`;
-                              break;
-                          }
-
-                          return (
-                            <div
-                              key={topId}
-                              className="p-3 rounded-[16px] bg-white/[0.04] border border-white/10 flex flex-col justify-between"
-                            >
-                              <div className="flex items-center gap-1.5 font-sans font-[500] text-[12px] text-white/70">
-                                <GradientIcon icon={Icon} size={14} />
-                                <span className="truncate">{WEATHER_TOPIC_LABELS[topId]}</span>
-                              </div>
-                              <div className="font-sans font-[700] text-[14px] text-white mt-2 tabular-nums">
-                                {labelVal}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* News block (only if news topics selected) */}
-                  {newsTopics.length > 0 && (
-                    <div className="border-t border-white/10 pt-4">
-                      <h4 className="font-sans font-[700] text-[16px] text-white mb-3">
-                        Top 5 stories
-                      </h4>
-
-                      <div className="space-y-4">
-                        {stories.map((story, idx) => (
-                          <div
-                            key={`${story.id}-${idx}`}
-                            className="flex flex-col gap-1.5 pb-4 border-b border-white/10 last:border-0"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="font-sans text-[12px] font-bold text-white/70 tabular-nums">
-                                0{idx + 1}
-                              </span>
-                              <span className="font-sans text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/10">
-                                {story.topicLabel}
-                              </span>
-                              <span className="text-[12px] text-white/70">
-                                · {story.source}
-                              </span>
-                            </div>
-
-                            <div className="font-sans font-[600] text-[16px] leading-snug text-white">
-                              {story.headline}
-                            </div>
-
-                            <p className="font-sans font-[400] text-[14px] leading-relaxed text-white/75">
-                              {story.summary}
-                            </p>
-
-                            <a
-                              href={story.url}
-                              className="font-sans font-[500] text-[14px] text-white underline hover:opacity-80 self-start"
-                            >
-                              Read full story
-                            </a>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+            {/* Delivery time */}
+            <div className="py-4 flex items-center justify-between">
+              <div>
+                <span className="font-sans font-[600] text-[14px] text-white">
+                  Delivery time
+                </span>
+                <div className="font-sans text-[14px] text-white/85 mt-0.5 font-medium tabular-nums">
+                  {deliveryTimeFormatted}
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="text-[14px] text-white/70 underline hover:text-white shrink-0 ml-4 transition-colors cursor-pointer"
+              >
+                Edit
+              </button>
             </div>
-          </div>
+
+            {/* Location */}
+            <div className="py-4 flex items-center justify-between">
+              <div>
+                <span className="font-sans font-[600] text-[14px] text-white">
+                  Location
+                </span>
+                <div className="font-sans text-[14px] text-white/85 mt-0.5 font-medium">
+                  {locationLabel}
+                </div>
+              </div>
+              <Link
+                href="/basic-info"
+                className="text-[14px] text-white/70 underline hover:text-white shrink-0 ml-4 transition-colors"
+              >
+                Edit
+              </Link>
+            </div>
+
+            {/* Weather topics */}
+            <div className="py-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-sans font-[600] text-[14px] text-white">
+                    Weather topics
+                  </span>
+                  {weatherTopics.length > 0 && (
+                    <span className="font-sans text-[13px] text-white/60 tabular-nums">
+                      ({weatherTopics.length}/3)
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="text-[14px] text-white/70 underline hover:text-white shrink-0 ml-4 transition-colors cursor-pointer"
+                >
+                  Edit
+                </button>
+              </div>
+
+              {weatherTopics.length > 0 ? (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {weatherTopics.map((topId) => {
+                    const Icon = WEATHER_ICONS[topId] || CloudSun;
+                    return (
+                      <div
+                        key={topId}
+                        className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-white/10 bg-white/[0.04] text-white select-none"
+                      >
+                        <GradientIcon icon={Icon} size={16} />
+                        <span className="font-sans text-[13px] text-white font-medium">
+                          {WEATHER_TOPIC_LABELS[topId]}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="font-sans text-[13px] text-white/50 italic mt-1">
+                  No weather topics selected
+                </div>
+              )}
+            </div>
+
+            {/* News topics */}
+            <div className="py-4 last:pb-0">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-sans font-[600] text-[14px] text-white">
+                    News topics
+                  </span>
+                  {newsTopics.length > 0 && (
+                    <span className="font-sans text-[13px] text-white/60 tabular-nums">
+                      ({newsTopics.length}/5)
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="text-[14px] text-white/70 underline hover:text-white shrink-0 ml-4 transition-colors cursor-pointer"
+                >
+                  Edit
+                </button>
+              </div>
+
+              {newsTopics.length > 0 ? (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {newsTopics.map((topId) => {
+                    const Icon = NEWS_ICONS[topId] || Landmark;
+                    return (
+                      <div
+                        key={topId}
+                        className="h-[30px] px-3 rounded-full flex items-center gap-1.5 border border-white/10 bg-white/[0.04] text-white select-none"
+                      >
+                        <GradientIcon icon={Icon} size={16} />
+                        <span className="font-sans text-[13px] text-white font-medium">
+                          {NEWS_TOPIC_LABELS[topId]}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="font-sans text-[13px] text-white/50 italic mt-1">
+                  No news topics selected
+                </div>
+              )}
+            </div>
+          </SectionCard>
         </CardShell>
       )}
       </main>

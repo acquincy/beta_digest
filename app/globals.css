@@ -139,6 +139,42 @@ body {
   outline-offset: 2px;
 }
 
+/* Themed Input Single Soft Ring & Dark Autofill */
+.themed-input {
+  outline: none !important;
+}
+
+.themed-input:focus,
+.themed-input:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: #6b62f2 !important;
+  box-shadow: 0 0 0 3px rgba(107, 98, 242, 0.35), 0 0 16px rgba(107, 98, 242, 0.18) !important;
+}
+
+.themed-input.themed-input-error:focus,
+.themed-input.themed-input-error:focus-visible {
+  border-color: #E64D51 !important;
+  box-shadow: 0 0 0 3px rgba(230, 77, 81, 0.25) !important;
+}
+
+input.themed-input:-webkit-autofill,
+input.themed-input:-webkit-autofill:hover,
+input.themed-input:-webkit-autofill:focus,
+input.themed-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #202020 inset !important;
+  -webkit-text-fill-color: #ededed !important;
+  caret-color: #ededed !important;
+  transition: background-color 5000s ease-in-out 0s;
+  border-radius: 12px;
+}
+
+input.themed-input:-webkit-autofill:focus,
+input.themed-input:-webkit-autofill:focus-visible {
+  -webkit-box-shadow: 0 0 0 1000px #202020 inset, 0 0 0 3px rgba(107, 98, 242, 0.35), 0 0 16px rgba(107, 98, 242, 0.18) !important;
+  border-color: #6b62f2 !important;
+}
+
 /* Transitions: 150-200ms on background-color, border-color, transform, opacity only */
 button,
 a,
@@ -197,6 +233,23 @@ select,
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Chip Shake Animation */
+@keyframes chip-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-3px);
+  }
+  40%, 80% {
+    transform: translateX(3px);
+  }
+}
+
+.animate-chip-shake {
+  animation: chip-shake 0.35s ease-in-out;
 }
 
 /* Translucent Frosted Main Dashboard Container */

@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { CanvasA } from "@/components/CanvasA";
 import { TopLeftLogo } from "@/components/TopLeftLogo";
 import { IconTile } from "@/components/primitives/IconTile";
 import { UnderlineInput } from "@/components/primitives/UnderlineInput";
-import { DarkButton } from "@/components/primitives/Button";
+import { PrimaryButton } from "@/components/primitives/Button";
 import { Footer } from "@/components/Footer";
 import { sendSignInLinkViaApi } from "@/lib/n8n";
 
@@ -70,10 +70,9 @@ export default function LoginPage() {
               <div className="pt-6 mt-6 border-t border-white/10 w-full">
                 <Link
                   href="/"
-                  className="font-sans font-[500] text-[15px] underline text-white hover:opacity-80 inline-flex items-center gap-1.5"
+                  className="font-sans font-[500] text-[15px] underline text-white hover:opacity-80 inline-flex items-center"
                 >
                   <span>Return to front page</span>
-                  <ArrowLeft className="w-4 h-4 rotate-180" aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -116,18 +115,21 @@ export default function LoginPage() {
                   required
                 />
 
-                <DarkButton type="submit" disabled={loading} className="w-full h-[54px] mt-2 flex items-center justify-center gap-2 !bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-sm">
+                <PrimaryButton
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-[54px] mt-2 flex items-center justify-center gap-2 font-medium"
+                >
                   {loading && <Loader2 className="w-5 h-5 animate-spin" />}
                   <span>{loading ? "Sending link..." : "Send sign-in link"}</span>
-                </DarkButton>
+                </PrimaryButton>
               </form>
 
               <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between text-[14px]">
                 <Link
                   href="/"
-                  className="font-sans text-white/70 hover:text-white inline-flex items-center gap-1 transition-colors"
+                  className="font-sans text-white/70 hover:text-white inline-flex items-center transition-colors"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>Back to home</span>
                 </Link>
                 <Link
