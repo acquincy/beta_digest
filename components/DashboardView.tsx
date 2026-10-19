@@ -1,36 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
 import {
-  SlidersHorizontal,
-  LogOut,
   X,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle,
-  RefreshCw,
-  Clock,
-  Calendar,
   ExternalLink,
-  Thermometer,
-  ArrowUpDown,
-  CloudRain,
-  CloudLightning,
-  Cloud,
-  Sun,
-  Wind,
-  Compass,
-  Droplets,
-  Sunrise,
-  type LucideIcon,
 } from "lucide-react";
 import { TopLeftLogo } from "./TopLeftLogo";
 import { CanvasB } from "./CanvasB";
-import { WeatherWidgetIcon } from "./WeatherWidgetIcon";
-import { SectionCard } from "./primitives/SectionCard";
-import { PrimaryButton, OutlineButton } from "./primitives/Button";
-import { WEATHER_ICONS } from "@/lib/icons";
+import { OutlineButton } from "./primitives/Button";
 import {
   Preferences,
   WeatherTopicId,
@@ -42,101 +21,7 @@ import { loadPreferences, savePreferences, parseDeliveryHour, INITIAL_PREFERENCE
 import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
 import { fetchDashboardViaN8n, N8nDashboardResult, N8nDashboardArticle, logoutViaApi } from "@/lib/n8n";
 import { COUNTRIES } from "@/lib/geo";
-import { clsx } from "clsx";
-
-interface CompactMetricConfig {
-  icon: LucideIcon;
-  label: string;
-  isAvailable?: (w: CityWeatherData) => boolean;
-  getValue: (w: CityWeatherData) => React.ReactNode;
-  getSecondary?: (w: CityWeatherData) => React.ReactNode;
-}
-
-const COMPACT_METRICS: Record<string, CompactMetricConfig> = {
-  "current-temperature": {
-    icon: Thermometer,
-    label: "Feels like",
-    isAvailable: (w) => typeof w.feelsLike === "number",
-    getValue: (w) => `${w.feelsLike}${w.tempUnit}`,
-    getSecondary: (w) => {
-      if (typeof w.feelsLike !== "number") return null;
-      const diff = w.feelsLike - w.currentTemp;
-      if (diff > 0) return `${diff}° warmer than actual`;
-      if (diff < 0) return `${Math.abs(diff)}° cooler than actual`;
-      return "Same as actual";
-    },
-  },
-  "high-low": {
-    icon: ArrowUpDown,
-    label: "Day's High / Low",
-    getValue: (w) => `${w.high}° / ${w.low}°`,
-    getSecondary: (w) => `Daily range (${w.tempUnit})`,
-  },
-  "rain-chance": {
-    icon: CloudRain,
-    label: "Rain chance",
-    getValue: (w) => `${w.rainProb}%`,
-    getSecondary: (w) => (w.rainProb > 40 ? "Precipitation likely" : "Low precipitation risk"),
-  },
-  "thunderstorm-chance": {
-    icon: CloudLightning,
-    label: "Thunderstorm",
-    getValue: (w) => `${w.thunderstormProb || 0}%`,
-    getSecondary: (w) =>
-      (w.thunderstormProb || 0) > 30 ? "Storm warning" : "Minimal storm activity",
-  },
-  cloudiness: {
-    icon: Cloud,
-    label: "Cloudiness",
-    getValue: (w) => `${w.cloudiness}%`,
-    getSecondary: (w) =>
-      w.cloudiness > 70
-        ? "Overcast skies"
-        : w.cloudiness > 30
-        ? "Scattered clouds"
-        : "Clear skies",
-  },
-  "uv-index": {
-    icon: Sun,
-    label: "UV index",
-    getValue: (w) => `${w.uvIndex}`,
-    getSecondary: (w) => (w.uvDescription ? `(${w.uvDescription})` : null),
-  },
-  "air-quality": {
-    icon: Wind,
-    label: "Air quality",
-    getValue: (w) => `AQI ${w.airQuality ?? 0}`,
-    getSecondary: (w) => {
-      const aqi = w.airQuality ?? 0;
-      const color =
-        aqi <= 50 ? "text-emerald-400" : aqi <= 100 ? "text-amber-400" : "text-rose-400";
-      return (
-        <span className={clsx("font-semibold", color)}>
-          {w.airQualityDescription || "Moderate"}
-        </span>
-      );
-    },
-  },
-  wind: {
-    icon: Compass,
-    label: "Wind",
-    getValue: (w) => `${w.windSpeed} ${w.windUnit}`,
-    getSecondary: (w) => (w.windDirection ? `Direction: ${w.windDirection}` : null),
-  },
-  humidity: {
-    icon: Droplets,
-    label: "Humidity",
-    getValue: (w) => `${w.humidity}%`,
-    getSecondary: (w) =>
-      w.humidity > 70 ? "Humid" : w.humidity < 35 ? "Dry" : "Comfortable",
-  },
-  "sun-times": {
-    icon: Sunrise,
-    label: "Sun times",
-    getValue: (w) => `${w.sunrise} / ${w.sunset}`,
-    getSecondary: () => "Sunrise & sunset",
-  },
-};
+import { DashboardBoard } from "./dashboard";
 
 export const DashboardView: React.FC = () => {
   const [hydrated, setHydrated] = useState(false);
@@ -364,18 +249,6 @@ export const DashboardView: React.FC = () => {
     });
   };
 
-  // Weather preference filters
-  const selectedWeatherTopics = prefs.weatherTopics || [];
-  const compactItems = selectedWeatherTopics.filter((t) => {
-    if (t === "hourly-3h" || t === "forecast-3day") return false;
-    const config = COMPACT_METRICS[t];
-    if (!config) return false;
-    if (config.isAvailable && !config.isAvailable(weather)) return false;
-    return true;
-  });
-  const showHourlySection = selectedWeatherTopics.includes("hourly-3h");
-  const showForecastSection = selectedWeatherTopics.includes("forecast-3day");
-
   return (
     <div className="relative min-h-screen text-[#ededed] flex flex-col pb-16">
       {/* Canvas B background */}
@@ -388,363 +261,27 @@ export const DashboardView: React.FC = () => {
 
       {/* Main Dashboard Card Shell */}
       <main className="relative z-10 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl p-6 sm:p-9 lg:p-10 transition-all duration-200">
-          
-          {/* Header Action Bar: Date, Greeting, Buttons */}
-          <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 pb-7 mb-8 border-b border-white/10">
-            <div>
-              <p className="font-sans text-[13px] text-white/60 mb-1">
-                {todayFormatted || "Daily Digest"}
-              </p>
-              <h1 className="font-display font-[600] text-[28px] sm:text-[36px] tracking-tight text-white leading-tight">
-                {prefs.name ? (
-                  <>
-                    Good morning,{" "}
-                    <span className="bg-gradient-to-r from-[#6b62f2] to-[#8a7cfb] bg-clip-text text-transparent">
-                      {prefs.name}
-                    </span>
-                  </>
-                ) : (
-                  "Good morning"
-                )}
-              </h1>
-            </div>
-
-            {/* Right Side Pill Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              <Link
-                href="/preferences"
-                className="h-[40px] px-5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-white text-[13px] font-medium transition-all duration-150 hover:-translate-y-[1px] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a7cfb] flex items-center gap-2 select-none cursor-pointer"
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-white/70" aria-hidden="true" />
-                <span>Edit preferences</span>
-              </Link>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  await logoutViaApi();
-                }}
-                className="h-[40px] px-5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-white/80 hover:text-white text-[13px] font-medium transition-all duration-150 hover:-translate-y-[1px] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a7cfb] flex items-center gap-2 select-none cursor-pointer"
-                aria-label="Sign out"
-              >
-                <LogOut className="w-3.5 h-3.5 text-white/70" aria-hidden="true" />
-                <span>Sign out</span>
-              </button>
-            </div>
-          </header>
-
-          {/* Asymmetric 2-Column Responsive Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8 items-start">
-            
-            {/* LEFT COLUMN: Weather Section (Sticky on desktop, fluid on mobile) */}
-            <aside className="w-full lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-48px)] flex flex-col space-y-3">
-              <div className="flex items-center justify-between px-1 shrink-0">
-                <h2 className="font-sans font-[600] text-[18px] text-white">
-                  Your weather
-                </h2>
-              </div>
-
-              {/* Weather Content Card */}
-              <SectionCard className="p-6 flex-1 min-h-0 lg:overflow-y-auto thin-scrollbar">
-                {weatherLoading && !realWeather ? (
-                  /* Weather Loading Skeleton */
-                  <div className="space-y-4 animate-pulse">
-                    <div className="h-6 w-36 bg-white/10 rounded-full" />
-                    <div className="h-20 w-full bg-white/[0.04] rounded-2xl" />
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                      <div className="h-24 bg-white/[0.03] rounded-[20px]" />
-                      <div className="h-24 bg-white/[0.03] rounded-[20px]" />
-                    </div>
-                  </div>
-                ) : weatherError && !realWeather ? (
-                  /* Weather Error State */
-                  <div className="flex flex-col items-center justify-center py-6 text-center">
-                    <AlertTriangle className="w-7 h-7 text-amber-400 mb-2" aria-hidden="true" />
-                    <p className="font-sans text-[14px] font-medium text-white mb-1">
-                      Weather data unavailable
-                    </p>
-                    <p className="font-sans text-[12px] text-white/60 mb-4 max-w-xs">
-                      {weatherError}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => fetchWeather(prefs.city || "Seattle", prefs.countryCode || "US")}
-                      className="h-[36px] px-4 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-white text-[12px] font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      <span>Retry</span>
-                    </button>
-                  </div>
-                ) : (
-                  /* Weather Loaded Content */
-                  <div className="space-y-5">
-                    {/* Hero Block: Location, Condition Icon, Condition Text, Temp, High/Low */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-sans text-[13px] font-medium text-white/60 truncate">
-                          {weather.city || prefs.city || "Seattle"}, {countryName}
-                        </div>
-                        <div className="font-sans font-[600] text-[16px] text-white capitalize mt-0.5">
-                          {weather.condition}
-                        </div>
-                        <div className="font-sans text-[12px] text-white/60 tabular-nums mt-1">
-                          H: <strong className="text-white font-medium">{weather.high}°</strong>
-                          {" · "}
-                          L: <strong className="text-white font-medium">{weather.low}°</strong>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-right shrink-0">
-                        <div className="p-1.5 rounded-2xl bg-white/[0.03] border border-white/10 shrink-0">
-                          <WeatherWidgetIcon condition={weather.condition} size={42} />
-                        </div>
-                        <div className="font-sans font-[700] text-[36px] sm:text-[40px] text-white tracking-tight leading-none tabular-nums">
-                          {weather.currentTemp}{weather.tempUnit}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Tiles under divider with no heading */}
-                    {(compactItems.length > 0 ||
-                      (showHourlySection && weather.hourly?.length) ||
-                      (showForecastSection && weather.threeDay?.length)) && (
-                      <div className="pt-4 border-t border-white/10 space-y-3">
-                        {/* 2-Column Grid of Compact Tiles */}
-                        {compactItems.length > 0 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {compactItems.map((topId, index) => {
-                              const config = COMPACT_METRICS[topId];
-                              if (!config) return null;
-                              const Icon = config.icon;
-                              const secondary = config.getSecondary ? config.getSecondary(weather) : null;
-                              const isOddLast = compactItems.length % 2 !== 0 && index === compactItems.length - 1;
-                              const spanClass = isOddLast || compactItems.length === 1 ? "sm:col-span-2" : "";
-
-                              return (
-                                <div
-                                  key={topId}
-                                  className={clsx(
-                                    "p-4 sm:p-5 rounded-[20px] bg-white/[0.04] border border-white/10 flex flex-col justify-between transition-all hover:border-white/20",
-                                    spanClass
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2 text-white/60 text-[13px] font-sans font-medium">
-                                    <Icon className="w-4 h-4 text-[#8a7cfb] shrink-0" aria-hidden="true" />
-                                    <span className="truncate">{config.label}</span>
-                                  </div>
-                                  <div className="mt-2.5">
-                                    <div className="font-sans font-[700] text-[24px] sm:text-[26px] text-white tracking-tight leading-none tabular-nums">
-                                      {config.getValue(weather)}
-                                    </div>
-                                    {secondary && (
-                                      <div className="font-sans text-[12px] text-white/50 font-normal mt-1.5 truncate">
-                                        {secondary}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-
-                        {/* Complex: 3-Hour Breakdown (rendered in same style as full-width tile) */}
-                        {showHourlySection && weather.hourly && weather.hourly.length > 0 && (
-                          <div className="p-4 sm:p-5 rounded-[20px] bg-white/[0.04] border border-white/10 transition-all hover:border-white/20 space-y-3">
-                            <div className="flex items-center gap-2 text-white/60 text-[13px] font-sans font-medium">
-                              <Clock className="w-4 h-4 text-[#8a7cfb] shrink-0" aria-hidden="true" />
-                              <span>3-hour breakdown</span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-2 text-center">
-                              {weather.hourly.slice(0, 4).map((h, idx) => (
-                                <div
-                                  key={idx}
-                                  className="p-2.5 rounded-[14px] bg-white/[0.03] border border-white/5 flex flex-col items-center"
-                                >
-                                  <span className="font-sans text-[11px] text-white/60 tabular-nums">
-                                    {h.time}
-                                  </span>
-                                  <WeatherWidgetIcon condition={h.condition} size={22} className="my-1.5" />
-                                  <span className="font-sans text-[13px] font-bold text-white tabular-nums">
-                                    {h.temp}°
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Complex: 3-Day Forecast (rendered in same style as full-width tile) */}
-                        {showForecastSection && weather.threeDay && weather.threeDay.length > 0 && (
-                          <div className="p-4 sm:p-5 rounded-[20px] bg-white/[0.04] border border-white/10 transition-all hover:border-white/20 space-y-3">
-                            <div className="flex items-center gap-2 text-white/60 text-[13px] font-sans font-medium">
-                              <Calendar className="w-4 h-4 text-[#8a7cfb] shrink-0" aria-hidden="true" />
-                              <span>3-day forecast</span>
-                            </div>
-                            <div className="divide-y divide-white/[0.08]">
-                              {weather.threeDay.map((d, idx) => (
-                                <div
-                                  key={idx}
-                                  className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between text-[13px]"
-                                >
-                                  <span className="font-sans font-medium text-white/90 w-[70px]">
-                                    {d.day}
-                                  </span>
-                                  <div className="flex items-center gap-1.5 flex-1 justify-center">
-                                    <WeatherWidgetIcon condition={d.condition} size={20} />
-                                    <span className="font-sans text-[11px] text-white/60 capitalize truncate max-w-[85px] hidden sm:inline">
-                                      {d.condition}
-                                    </span>
-                                  </div>
-                                  <span className="font-sans text-[12px] text-white/70 tabular-nums text-right w-[80px]">
-                                    <strong className="text-white font-semibold">{d.high}°</strong> / {d.low}°
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* If user selected no details, show gentle nudge */}
-                    {selectedWeatherTopics.length === 0 && (
-                      <div className="pt-3 border-t border-white/10 text-center py-2">
-                        <p className="font-sans text-[13px] text-white/60">
-                          No extra details selected.
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Footer: Last Updated Only */}
-                    <div className="pt-3 border-t border-white/10 font-sans text-[12px] text-white/50">
-                      Last updated {weatherLastUpdated || "Just now"}
-                    </div>
-                  </div>
-                )}
-              </SectionCard>
-            </aside>
-
-            {/* RIGHT COLUMN: News Section */}
-            <section className="w-full space-y-4">
-              <div className="flex items-center justify-between mb-2 px-1">
-                <h2 className="font-sans font-[600] text-[18px] text-white">
-                  Top 5 stories
-                </h2>
-                <span className="font-sans text-[13px] text-white/60">
-                  Curated morning dispatch
-                </span>
-              </div>
-
-              {/* News List Container */}
-              <SectionCard className="p-6 sm:p-8">
-                {newsLoading && stories.length === 0 ? (
-                  /* News Loading Skeleton */
-                  <div className="divide-y divide-white/10 space-y-5 animate-pulse">
-                    {[1, 2, 3].map((n) => (
-                      <div key={n} className="pt-5 first:pt-0 space-y-2.5">
-                        <div className="h-4 w-32 bg-white/10 rounded-full" />
-                        <div className="h-6 w-4/5 bg-white/[0.06] rounded-xl" />
-                        <div className="h-4 w-full bg-white/[0.04] rounded-md" />
-                      </div>
-                    ))}
-                  </div>
-                ) : newsError && stories.length === 0 ? (
-                  /* News Error State */
-                  <div className="flex flex-col items-center justify-center py-10 text-center">
-                    <AlertTriangle className="w-8 h-8 text-amber-400 mb-2" aria-hidden="true" />
-                    <p className="font-sans text-[15px] font-medium text-white mb-1">
-                      Unable to load stories
-                    </p>
-                    <p className="font-sans text-[13px] text-white/60 mb-4 max-w-sm">
-                      {newsError}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => fetchNews(prefs.newsTopics)}
-                      className="h-[38px] px-5 rounded-full bg-white text-black font-semibold text-[13px] inline-flex items-center gap-2 transition hover:bg-white/90 cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      <span>Retry</span>
-                    </button>
-                  </div>
-                ) : stories.length === 0 ? (
-                  /* News Empty State */
-                  <div className="flex flex-col items-center justify-center py-10 text-center">
-                    <p className="font-sans text-[15px] font-medium text-white mb-1">
-                      No stories found for your selected topics
-                    </p>
-                    <p className="font-sans text-[13px] text-white/60 mb-4">
-                      Try adding more categories in your preferences.
-                    </p>
-                    <Link
-                      href="/preferences"
-                      className="h-[38px] px-5 rounded-full bg-white text-black font-semibold text-[13px] inline-flex items-center gap-2 hover:bg-white/90 transition"
-                    >
-                      <span>Choose topics</span>
-                    </Link>
-                  </div>
-                ) : (
-                  /* News Stories List */
-                  <div className="divide-y divide-white/10">
-                    {stories.map((story, i) => (
-                      <article
-                        key={story.id || i}
-                        role="button"
-                        tabIndex={0}
-                        ref={(el) => {
-                          triggerButtonRefs.current[i] = el;
-                        }}
-                        onClick={() => openStoryModal(i)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            openStoryModal(i);
-                          }
-                        }}
-                        className="py-5 first:pt-0 last:pb-0 -mx-3 px-3 rounded-2xl group cursor-pointer transition-all duration-150 hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a7cfb]"
-                        aria-label={`Open story: ${story.headline}`}
-                      >
-                        {/* Meta row: Index, Category Pill, Source, Timestamp */}
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className="font-sans text-[12px] font-medium text-white/40 tabular-nums">
-                            0{i + 1}
-                          </span>
-                          <span className="h-[24px] px-2.5 rounded-full text-[11px] font-medium bg-white/[0.06] border border-white/10 text-white/90 select-none inline-flex items-center">
-                            {story.topicLabel}
-                          </span>
-                          <span className="font-sans text-[12px] text-white/50">
-                            · {story.source}
-                          </span>
-                          <span className="font-sans text-[12px] text-white/40">
-                            · {story.timestamp}
-                          </span>
-                        </div>
-
-                        {/* Headline: Sans-serif font */}
-                        <h3 className="font-sans font-[600] text-[17px] sm:text-[19px] text-white leading-snug group-hover:text-white/90 transition-colors mb-2">
-                          {story.headline}
-                        </h3>
-
-                        {/* Summary: Line-clamped to 2 lines */}
-                        <p className="font-sans font-[400] text-[13.5px] leading-relaxed text-white/70 line-clamp-2 mb-3">
-                          {story.summary}
-                        </p>
-
-                        {/* Read full story action */}
-                        <div className="font-sans font-[500] text-[13px] text-white/80 group-hover:text-white inline-flex items-center gap-1.5 transition-colors">
-                          <span>Read full story</span>
-                          <ExternalLink className="w-3 h-3 text-white/60 group-hover:text-white transition-colors" aria-hidden="true" />
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </SectionCard>
-            </section>
-          </div>
-        </div>
+        <DashboardBoard
+          userName={prefs.name}
+          dateLabel={todayFormatted || "Daily Digest"}
+          weather={weather}
+          cityName={weather.city || prefs.city || "Seattle"}
+          countryName={countryName}
+          weatherTopics={prefs.weatherTopics}
+          stories={stories}
+          weatherLastUpdated={weatherLastUpdated}
+          weatherLoading={weatherLoading && !realWeather}
+          weatherError={weatherError && !realWeather ? weatherError : null}
+          newsLoading={newsLoading && stories.length === 0}
+          newsError={newsError && stories.length === 0 ? newsError : null}
+          onRetryWeather={() => fetchWeather(prefs.city || "Seattle", prefs.countryCode || "US")}
+          onRetryNews={() => fetchNews(prefs.newsTopics)}
+          onStoryClick={openStoryModal}
+          onSignOut={async () => {
+            await logoutViaApi();
+          }}
+          triggerButtonRefs={triggerButtonRefs}
+        />
       </main>
 
       {/* News Preview Modal Dialog */}
@@ -808,7 +345,7 @@ export const DashboardView: React.FC = () => {
               <span className="h-[24px] px-2.5 rounded-full text-[11px] font-medium bg-white/[0.06] border border-white/10 text-white/90">
                 {selectedStory.topicLabel}
               </span>
-              <span className="font-sans text-[12px] text-white/60">
+              <span className="font-sans text-[12px] text-white/50">
                 {selectedStory.source} · {selectedStory.timestamp}
               </span>
             </div>
@@ -821,33 +358,30 @@ export const DashboardView: React.FC = () => {
               {selectedStory.headline}
             </h2>
 
-            {/* Full Summary */}
-            <p className="font-sans font-[400] text-[14px] sm:text-[15px] text-white/75 leading-relaxed mb-6">
-              {selectedStory.summary}
-            </p>
+            {/* Enriched Story Content */}
+            <div className="font-sans font-[400] text-[14px] sm:text-[15px] text-white/80 leading-relaxed mb-6 space-y-3 max-h-[50vh] overflow-y-auto pr-1">
+              {selectedStory.summary.split("\n\n").map((paragraph, pIdx) => (
+                <p key={pIdx}>{paragraph}</p>
+              ))}
+            </div>
 
             {/* Modal Footer Buttons */}
-            <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-3">
-              <span className="font-sans text-[12px] text-white/50">
-                Dispatched via {selectedStory.source}
-              </span>
-              <div className="flex items-center gap-2.5">
-                <OutlineButton
-                  size="sm"
-                  onClick={closeStoryModal}
-                >
-                  Close
-                </OutlineButton>
-                <a
-                  href={selectedStory.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="h-[40px] px-5 text-[14px] inline-flex items-center justify-center font-sans font-[500] rounded-full select-none whitespace-nowrap bg-white text-black hover:bg-white hover:text-black hover:shadow-[0_4px_16px_rgba(255,255,255,0.2)] hover:-translate-y-[1px] active:scale-[0.97] transition-all duration-150 cursor-pointer"
-                >
-                  <span>Read on {selectedStory.source}</span>
-                  <ExternalLink className="w-3.5 h-3.5 ml-1.5 text-black shrink-0" aria-hidden="true" />
-                </a>
-              </div>
+            <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-2.5">
+              <OutlineButton
+                size="sm"
+                onClick={closeStoryModal}
+              >
+                Close
+              </OutlineButton>
+              <a
+                href={selectedStory.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-[40px] px-5 text-[14px] inline-flex items-center justify-center font-sans font-[500] rounded-full select-none whitespace-nowrap bg-white text-black hover:bg-white hover:text-black hover:shadow-[0_4px_16px_rgba(255,255,255,0.2)] hover:-translate-y-[1px] active:scale-[0.97] transition-all duration-150 cursor-pointer"
+              >
+                <span>Read full article</span>
+                <ExternalLink className="w-3.5 h-3.5 ml-1.5 text-black shrink-0" aria-hidden="true" />
+              </a>
             </div>
           </div>
         </div>

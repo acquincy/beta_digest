@@ -407,7 +407,7 @@ export const LandingPage: React.FC = () => {
           aria-label="Get Started"
           className="relative w-full py-28 px-6 text-center flex flex-col items-center overflow-hidden"
         >
-          {/* Radial Sunrise Dawn Spotlight Accent behind CTA */}
+          {/* Soft Ambient Spotlight Accent behind CTA */}
           <div
             className="absolute pointer-events-none"
             style={{
@@ -416,17 +416,19 @@ export const LandingPage: React.FC = () => {
               top: "10%",
               left: "50%",
               transform: "translateX(-50%)",
-              background: "radial-gradient(ellipse at center, rgba(201, 136, 104, 0.28) 0%, rgba(107, 98, 242, 0.12) 50%, transparent 75%)",
+              background:
+                "radial-gradient(ellipse at center, rgba(107, 98, 242, 0.20) 0%, rgba(155, 75, 127, 0.10) 50%, transparent 75%)",
               zIndex: 0,
             }}
             aria-hidden="true"
           />
 
-          {/* Sunrise Dawn Glow Strip */}
+          {/* Ambient Accent Glow Strip */}
           <div
             className="w-full max-w-[400px] h-[1px] mb-12"
             style={{
-              background: "linear-gradient(90deg, transparent, rgba(238, 164, 122, 0.6) 50%, transparent)",
+              background:
+                "linear-gradient(90deg, transparent, rgba(107, 98, 242, 0.4) 50%, transparent)",
             }}
             aria-hidden="true"
           />
