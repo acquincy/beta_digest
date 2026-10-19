@@ -7,8 +7,8 @@ import { Globe, X, Rocket } from "lucide-react";
 import { CanvasA } from "./CanvasA";
 import { TopLeftLogo } from "./TopLeftLogo";
 import { IconTile } from "./primitives/IconTile";
-import { DarkButton, OutlineButton, Button } from "./primitives/Button";
-import { UnderlineInput } from "./primitives/UnderlineInput";
+import { PrimaryButton, OutlineButton } from "./primitives/Button";
+import { ThemedInput } from "./primitives/ThemedInput";
 import { Checkbox } from "./primitives/Checkbox";
 import { Footer } from "./Footer";
 import { COUNTRIES, CITIES } from "@/lib/geo";
@@ -16,6 +16,7 @@ import { loadPreferences, savePreferences, INITIAL_PREFERENCES } from "@/lib/wiz
 import { cityRegex } from "@/lib/schemas";
 import { signupViaN8n } from "@/lib/n8n";
 import { VerificationWaitingCard } from "./VerificationWaitingCard";
+import { CustomSelect } from "./CustomSelect";
 
 export const SignupFlow: React.FC = () => {
   const router = useRouter();
@@ -257,28 +258,16 @@ export const SignupFlow: React.FC = () => {
                 >
                   Country
                 </label>
-                <div className="relative">
-                  <select
-                    id="country-select"
-                    value={countryCode}
-                    onChange={handleCountryChange}
-                    className="w-full h-[46px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-4 font-sans font-medium text-[14px] text-white cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 appearance-none"
-                  >
-                    <option value="" disabled className="bg-[#161616] text-white/50">
-                      Select your country
-                    </option>
-                    {COUNTRIES.map((c) => (
-                      <option key={c.code} value={c.code} className="bg-[#161616] text-white">
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/70">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                    </svg>
-                  </div>
-                </div>
+                <CustomSelect
+                  id="country-select"
+                  name="country"
+                  value={countryCode}
+                  onChange={handleCountryChange}
+                  placeholder="Select your country"
+                  searchable
+                  searchPlaceholder="Search countries..."
+                  options={COUNTRIES.map((c) => ({ value: c.code, label: c.name }))}
+                />
               </div>
 
               {/* S3 City Selector */}
@@ -289,40 +278,30 @@ export const SignupFlow: React.FC = () => {
                 >
                   City
                 </label>
-                <div className="relative">
-                  <select
-                    id="city-select"
-                    value={citySelection}
-                    onChange={handleCityChange}
-                    disabled={!countryCode}
-                    className="w-full h-[46px] rounded-xl bg-[#202020] hover:bg-[#252525] border border-white/10 px-4 font-sans font-medium text-[14px] text-white cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
-                  >
-                    <option value="" disabled className="bg-[#161616] text-white/50">
-                      Select your city
-                    </option>
-                    {availableCities.map((c) => (
-                      <option key={c.name} value={c.name} className="bg-[#161616] text-white">
-                        {c.name}
-                      </option>
-                    ))}
-                    {countryCode && <option value="__other__" className="bg-[#161616] text-white">Other</option>}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white/70">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                    </svg>
-                  </div>
-                </div>
+                <CustomSelect
+                  id="city-select"
+                  name="city"
+                  value={citySelection}
+                  onChange={handleCityChange}
+                  disabled={!countryCode}
+                  placeholder="Select your city"
+                  searchable
+                  searchPlaceholder="Search cities..."
+                  options={[
+                    ...availableCities.map((c) => ({ value: c.name, label: c.name })),
+                    ...(countryCode ? [{ value: "__other__", label: "Other" }] : []),
+                  ]}
+                />
               </div>
 
-              {/* Typed Other City Underline Input */}
+              {/* Typed Other City Input */}
               {isOtherCity && (
-                <div className="mt-2 w-full">
-                  <UnderlineInput
+                <div className="mt-1 w-full">
+                  <ThemedInput
                     label="Your city"
                     placeholder="Enter your city"
                     value={customCity}
-                    height={44}
+                    height={46}
                     onChange={(e) => {
                       setCustomCity(e.target.value);
                       if (cityError) setCityError("");
@@ -336,14 +315,15 @@ export const SignupFlow: React.FC = () => {
 
             {/* S4 Continue button */}
             <div className="mt-8 flex justify-center">
-              <DarkButton
+              <PrimaryButton
                 type="button"
                 onClick={handleS1Continue}
                 disabled={!canContinueS1}
-                className="w-[156px] h-[52px] !bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-sm"
+                showArrow
+                className="w-[160px] h-[52px]"
               >
                 Continue
-              </DarkButton>
+              </PrimaryButton>
             </div>
           </div>
         )}
@@ -374,12 +354,12 @@ export const SignupFlow: React.FC = () => {
               We just need your name and email to create your account.
             </p>
 
-            <form onSubmit={handleS2Submit} noValidate className="mt-8 flex flex-col">
-              <UnderlineInput
+            <form onSubmit={handleS2Submit} noValidate className="mt-8 flex flex-col gap-5">
+              <ThemedInput
                 label="First name*"
                 placeholder="Alex"
                 value={name}
-                height={52}
+                height={46}
                 onChange={(e) => {
                   setName(e.target.value);
                   if (nameError) setNameError("");
@@ -390,14 +370,12 @@ export const SignupFlow: React.FC = () => {
                 required
               />
 
-              <div className="h-6" />
-
-              <UnderlineInput
+              <ThemedInput
                 label="Email*"
                 type="email"
                 placeholder="reader@betadigest.com"
                 value={email}
-                height={52}
+                height={46}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (emailError) setEmailError("");
@@ -444,15 +422,14 @@ export const SignupFlow: React.FC = () => {
                   Back
                 </OutlineButton>
 
-                {isFormValid ? (
-                  <DarkButton type="submit" disabled={submitting} className="!bg-white !text-black hover:!bg-[#eaeaea] font-medium shadow-sm">
-                    {submitting ? "Sending verification..." : "Join free"}
-                  </DarkButton>
-                ) : (
-                  <Button disabled type="button">
-                    Join free
-                  </Button>
-                )}
+                <PrimaryButton
+                  type="submit"
+                  disabled={!isFormValid || submitting}
+                  showArrow
+                  className="w-[150px]"
+                >
+                  {submitting ? "Sending verification..." : "Join free"}
+                </PrimaryButton>
               </div>
             </form>
           </div>

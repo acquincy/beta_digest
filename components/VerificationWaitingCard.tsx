@@ -222,15 +222,6 @@ export const VerificationWaitingCard: React.FC<VerificationWaitingCardProps> = (
         </div>
       )}
 
-      {/* Live Listening Indicator */}
-      {!isVerified && (
-        <div className="mt-6 flex items-center gap-2.5 px-4 py-2 bg-white/[0.04] rounded-full border border-white/10">
-          <RotateCw className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
-          <span className="font-sans text-[13px] font-[500] text-white/70">
-            Listening for email verification confirmation...
-          </span>
-        </div>
-      )}
 
       {resendStatus && (
         <div className="mt-4 p-3 bg-emerald-950/40 text-emerald-300 border border-emerald-500/30 rounded-[14px] text-sm font-sans max-w-md">
