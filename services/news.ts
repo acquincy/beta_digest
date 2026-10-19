@@ -116,8 +116,8 @@ export async function fetchStoriesForTopic(topic: NewsTopicId): Promise<Editoria
           const headline = cleanHtml(item.title) || "Global Headline Update";
           const rawSummary = item.contentSnippet || item.summary || item.content || headline;
           let summary = cleanHtml(rawSummary);
-          if (summary.length > 200) {
-            summary = summary.slice(0, 197) + "...";
+          if (summary.length > 800) {
+            summary = summary.slice(0, 797) + "...";
           }
 
           return {

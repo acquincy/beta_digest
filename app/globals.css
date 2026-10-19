@@ -26,10 +26,23 @@
   --text-muted: rgba(255, 255, 255, 0.75);
   --text-muted-sm: rgba(255, 255, 255, 0.60);
   --canvas: transparent;
-  --dawn-blue: #2a54b8;
-  --dawn-lavender: #857593;
-  --dawn-peach: #c98868;
-  --dawn-glow: rgba(238, 164, 122, 0.45);
+  
+  /* Site-Wide Harmonic Background Palette Tokens */
+  --bg-indigo-base: #0d0c2b;
+  --bg-violet-mid: #3f3c66;
+  --bg-plum-rose: #45263f;
+  --bg-gradient-fallback: linear-gradient(135deg, #0d0c2b 0%, #3f3c66 50%, #45263f 100%);
+  --bg-gradient-oklch: linear-gradient(
+    135deg in oklch,
+    oklch(0.18 0.06 280) 0%,
+    oklch(0.38 0.07 285) 50%,
+    oklch(0.32 0.06 335) 100%
+  );
+
+  --dawn-blue: #0d0c2b;
+  --dawn-lavender: #3f3c66;
+  --dawn-peach: #45263f;
+  --dawn-glow: rgba(107, 98, 242, 0.25);
   --dawn-surface: rgba(20, 20, 24, 0.85);
   --chip-off: #1c1c1c;
   --white: #FFFFFF;
@@ -102,11 +115,22 @@
 
 html {
   font-family: var(--font-body);
-  background-color: #2a54b8;
+  background-color: #0d0c2b;
   color: var(--text);
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Site-Wide Background Gradient Layer */
+.site-bg-gradient {
+  background: var(--bg-gradient-fallback);
+}
+
+@supports (background: linear-gradient(in oklch, red, blue)) {
+  .site-bg-gradient {
+    background: var(--bg-gradient-oklch);
+  }
 }
 
 body {
