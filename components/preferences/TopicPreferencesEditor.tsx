@@ -270,10 +270,10 @@ export const TopicPreferencesEditor: React.FC = () => {
 
       setSaveSuccess(true);
 
-      // 3. Return to the dashboard to view the updated profile
+      // 3. Return to the dashboard to view the updated profile with fresh load
       setTimeout(() => {
-        router.push("/dashboard");
-      }, 500);
+        window.location.href = "/dashboard";
+      }, 400);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to update preferences. Please try again.";
       setErrorMessage(msg);

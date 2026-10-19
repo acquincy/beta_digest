@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTop5StoriesLive } from "@/services/news";
 import { NewsTopicId } from "@/lib/types";
+import { withPrivateCacheHeaders } from "@/lib/security";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -16,9 +19,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const stories = await getTop5StoriesLive(topics);
-    return NextResponse.json({ stories });
+    return withPrivateCacheHeaders(NextResponse.json({ stories }));
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to fetch live news";
-    return NextResponse.json({ error: message, stories: [] }, { status: 500 });
+    return withPrivateCacheHeaders(
+      NextResponse.json({ error: message, stories: [] }, { status: 500 })
+    );
   }
 }
