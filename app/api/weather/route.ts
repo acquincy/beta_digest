@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWeather, geocodeCity, fetchCityWeatherDataLive } from "@/services/weather";
+import { withPrivateCacheHeaders } from "@/lib/security";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -9,10 +12,12 @@ export async function GET(request: NextRequest) {
   if (query) {
     try {
       const results = await geocodeCity(query);
-      return NextResponse.json({ results });
+      return withPrivateCacheHeaders(NextResponse.json({ results }));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Geocoding error";
-      return NextResponse.json({ error: message }, { status: 500 });
+      return withPrivateCacheHeaders(
+        NextResponse.json({ error: message }, { status: 500 })
+      );
     }
   }
 
@@ -24,10 +29,12 @@ export async function GET(request: NextRequest) {
   if (format === "full" || (!searchParams.has("lat") && !searchParams.has("lon"))) {
     try {
       const weatherData = await fetchCityWeatherDataLive(city, country);
-      return NextResponse.json(weatherData);
+      return withPrivateCacheHeaders(NextResponse.json(weatherData));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to fetch city weather";
-      return NextResponse.json({ error: message }, { status: 500 });
+      return withPrivateCacheHeaders(
+        NextResponse.json({ error: message }, { status: 500 })
+      );
     }
   }
 
@@ -36,9 +43,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const weather = await fetchWeather(lat, lon, city, country);
-    return NextResponse.json(weather);
+    return withPrivateCacheHeaders(NextResponse.json(weather));
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Weather fetch failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return withPrivateCacheHeaders(
+      NextResponse.json({ error: message }, { status: 500 })
+    );
   }
 }

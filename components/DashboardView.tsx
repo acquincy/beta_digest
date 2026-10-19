@@ -1,22 +1,36 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   SlidersHorizontal,
-  CloudSun,
   LogOut,
-  ArrowRight,
   X,
-  FileText,
-  Wind,
-  Droplets,
+  ChevronLeft,
+  ChevronRight,
+  AlertTriangle,
+  RefreshCw,
+  Clock,
+  Calendar,
+  ExternalLink,
+  Thermometer,
+  ArrowUpDown,
   CloudRain,
+  CloudLightning,
+  Cloud,
   Sun,
+  Wind,
+  Compass,
+  Droplets,
+  Sunrise,
+  type LucideIcon,
 } from "lucide-react";
 import { TopLeftLogo } from "./TopLeftLogo";
 import { CanvasB } from "./CanvasB";
 import { WeatherWidgetIcon } from "./WeatherWidgetIcon";
+import { SectionCard } from "./primitives/SectionCard";
+import { PrimaryButton, OutlineButton } from "./primitives/Button";
+import { WEATHER_ICONS } from "@/lib/icons";
 import {
   Preferences,
   WeatherTopicId,
@@ -27,123 +41,257 @@ import {
 import { loadPreferences, savePreferences, parseDeliveryHour, INITIAL_PREFERENCES } from "@/lib/wizard-store";
 import { generateCityWeather, getTop5Stories } from "@/lib/mock-service";
 import { fetchDashboardViaN8n, N8nDashboardResult, N8nDashboardArticle, logoutViaApi } from "@/lib/n8n";
+import { COUNTRIES } from "@/lib/geo";
+import { clsx } from "clsx";
+
+interface CompactMetricConfig {
+  icon: LucideIcon;
+  label: string;
+  getValue: (w: CityWeatherData) => React.ReactNode;
+}
+
+const COMPACT_METRICS: Record<string, CompactMetricConfig> = {
+  "current-temperature": {
+    icon: Thermometer,
+    label: "Current temp",
+    getValue: (w) => `${w.currentTemp}${w.tempUnit}`,
+  },
+  "high-low": {
+    icon: ArrowUpDown,
+    label: "Day's High / Low",
+    getValue: (w) => `H: ${w.high}° · L: ${w.low}°`,
+  },
+  "rain-chance": {
+    icon: CloudRain,
+    label: "Rain chance",
+    getValue: (w) => `${w.rainProb}%`,
+  },
+  "thunderstorm-chance": {
+    icon: CloudLightning,
+    label: "Thunderstorm",
+    getValue: (w) => `${w.thunderstormProb || 0}%`,
+  },
+  cloudiness: {
+    icon: Cloud,
+    label: "Cloudiness",
+    getValue: (w) => `${w.cloudiness}%`,
+  },
+  "uv-index": {
+    icon: Sun,
+    label: "UV index",
+    getValue: (w) => (
+      <span className="flex items-center gap-1.5">
+        <span>{w.uvIndex}</span>
+        {w.uvDescription && (
+          <span className="text-[11px] font-normal text-white/60 truncate">({w.uvDescription})</span>
+        )}
+      </span>
+    ),
+  },
+  "air-quality": {
+    icon: Wind,
+    label: "Air quality",
+    getValue: (w) => {
+      const aqi = w.airQuality ?? 0;
+      const color =
+        aqi <= 50 ? "text-emerald-400" : aqi <= 100 ? "text-amber-400" : "text-rose-400";
+      return (
+        <span className="flex items-center gap-1.5 flex-wrap">
+          <span>AQI {aqi}</span>
+          {w.airQualityDescription && (
+            <span className={clsx("text-[11px] font-semibold", color)}>
+              · {w.airQualityDescription}
+            </span>
+          )}
+        </span>
+      );
+    },
+  },
+  wind: {
+    icon: Compass,
+    label: "Wind",
+    getValue: (w) => w.windFormatted || `${w.windSpeed} ${w.windUnit}`,
+  },
+  humidity: {
+    icon: Droplets,
+    label: "Humidity",
+    getValue: (w) => `${w.humidity}%`,
+  },
+  "sun-times": {
+    icon: Sunrise,
+    label: "Sun times",
+    getValue: (w) => (
+      <span className="text-[12px] truncate">
+        ↑ {w.sunrise} · ↓ {w.sunset}
+      </span>
+    ),
+  },
+};
 
 export const DashboardView: React.FC = () => {
   const [hydrated, setHydrated] = useState(false);
   const [prefs, setPrefs] = useState<Preferences>(INITIAL_PREFERENCES);
-  const [selectedStory, setSelectedStory] = useState<EditorialStory | null>(null);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState<number | null>(null);
 
-  const [n8nDigest, setN8nDigest] = useState<N8nDashboardResult | null>(null);
+  // Data states
   const [realWeather, setRealWeather] = useState<CityWeatherData | null>(null);
-  const [realStories, setRealStories] = useState<EditorialStory[]>([]);
+  const [weatherLoading, setWeatherLoading] = useState(true);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+  const [weatherLastUpdated, setWeatherLastUpdated] = useState<string>("");
 
-  // Load preferences strictly after mount
+  const [realStories, setRealStories] = useState<EditorialStory[]>([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [newsError, setNewsError] = useState<string | null>(null);
+
+  const [n8nStories, setN8nStories] = useState<EditorialStory[]>([]);
+
+  // Focus restoration ref for modal accessibility
+  const triggerButtonRefs = useRef<(HTMLElement | null)[]>([]);
+  const modalCloseBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  // 1. Fetch live weather function
+  const fetchWeather = useCallback(async (city: string, country: string) => {
+    setWeatherLoading(true);
+    setWeatherError(null);
+    try {
+      const res = await fetch(
+        `/api/weather?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&format=full&t=${Date.now()}`
+      );
+      if (!res.ok) throw new Error(`Weather fetch failed (HTTP ${res.status})`);
+      const data = await res.json();
+      if (data && typeof data.currentTemp === "number") {
+        setRealWeather(data);
+        const now = new Date();
+        setWeatherLastUpdated(
+          now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+        );
+      } else {
+        throw new Error("Invalid weather payload");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to load weather";
+      setWeatherError(msg);
+      // Fallback deterministic weather so the UI never breaks
+      setRealWeather(generateCityWeather(city, country));
+    } finally {
+      setWeatherLoading(false);
+    }
+  }, []);
+
+  // 2. Fetch live news stories function
+  const fetchNews = useCallback(async (topics: NewsTopicId[]) => {
+    setNewsLoading(true);
+    setNewsError(null);
+    try {
+      const topicsParam = topics.length > 0 ? topics.join(",") : "technology,economy,science";
+      const res = await fetch(`/api/news?topics=${encodeURIComponent(topicsParam)}&t=${Date.now()}`);
+      if (!res.ok) throw new Error(`News fetch failed (HTTP ${res.status})`);
+      const data = await res.json();
+      if (data && Array.isArray(data.stories) && data.stories.length > 0) {
+        setRealStories(data.stories);
+      } else {
+        setRealStories([]);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to load news";
+      setNewsError(msg);
+      setRealStories(getTop5Stories(topics));
+    } finally {
+      setNewsLoading(false);
+    }
+  }, []);
+
+  // 3. Initial load on mount
   useEffect(() => {
     const loaded = loadPreferences();
     setPrefs(loaded);
     setHydrated(true);
 
-    let mounted = true;
-
-    // Fetch real live weather from Open-Meteo API
     const city = loaded.city || "Seattle";
     const country = loaded.countryCode || "US";
-    fetch(`/api/weather?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&format=full`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (mounted && data && typeof data.currentTemp === "number") {
-          setRealWeather(data);
-        }
-      })
-      .catch((err) => console.warn("Live weather fetch error:", err));
+    fetchWeather(city, country);
+    fetchNews(loaded.newsTopics);
 
-    // Fetch real live news stories from RSS feeds
-    const topicsParam = loaded.newsTopics && loaded.newsTopics.length > 0
-      ? loaded.newsTopics.join(",")
-      : "technology,economy,science";
-    fetch(`/api/news?topics=${encodeURIComponent(topicsParam)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (mounted && Array.isArray(data.stories) && data.stories.length > 0) {
-          setRealStories(data.stories);
-        }
-      })
-      .catch((err) => console.warn("Live news fetch error:", err));
+    let mounted = true;
 
+    // Fetch n8n remote dashboard data (syncs user preferences from database)
     fetchDashboardViaN8n()
       .then((data: N8nDashboardResult | null) => {
-        if (mounted && data) {
-          if (data.weekly_digest || data.weather) {
-            setN8nDigest(data);
-          }
-          if (data.user && typeof data.user === "object") {
-            const u = data.user as Record<string, unknown>;
-            setPrefs((prev) => {
-              const candidateCity = typeof u.city === "string" && u.city.trim() ? u.city.trim() : "";
-              const candidateCountry = typeof u.country_code === "string" && u.country_code.trim() ? u.country_code.trim().toUpperCase() : "";
+        if (!mounted || !data) return;
 
-              const resolvedCity = (candidateCity && candidateCity !== "Seattle")
-                ? candidateCity
-                : (prev.city && prev.city !== "Seattle")
-                ? prev.city
-                : (candidateCity || prev.city || "");
+        // If n8n returns weekly digest articles, store as fallback
+        if (data.weekly_digest && typeof data.weekly_digest === "object" && Array.isArray(data.weekly_digest.articles)) {
+          const parsed = data.weekly_digest.articles.map((art: N8nDashboardArticle, idx: number) => ({
+            id: `n8n-${idx}`,
+            topic: (art.category?.toLowerCase() || "technology") as NewsTopicId,
+            topicLabel: art.category ? art.category.toUpperCase() : "GENERAL",
+            headline: art.title || "Daily Digest Story",
+            summary: art.summary || "",
+            source: art.source || "Beta Digest Wire",
+            timestamp: art.published_at ? "Today" : "Recently",
+            url: art.url || "#",
+          }));
+          setN8nStories(parsed);
+        }
 
-              const resolvedCountry = (candidateCountry && candidateCountry !== "US")
-                ? candidateCountry
-                : (prev.countryCode && prev.countryCode !== "US")
-                ? prev.countryCode
-                : (candidateCountry || prev.countryCode || "");
+        // Sync fresh remote user preferences from DB if available
+        if (data.user && typeof data.user === "object") {
+          const u = data.user as Record<string, unknown>;
+          const dbCity = typeof u.city === "string" && u.city.trim() ? u.city.trim() : "";
+          const dbCountry = typeof u.country_code === "string" && u.country_code.trim() ? u.country_code.trim().toUpperCase() : "";
+          const dbWeather = Array.isArray(u.weather_categories) && u.weather_categories.length > 0 ? (u.weather_categories as WeatherTopicId[]) : null;
+          const dbNews = Array.isArray(u.news_categories) && u.news_categories.length > 0 ? (u.news_categories as NewsTopicId[]) : null;
 
-              const updated: Preferences = {
-                ...prev,
-                name: typeof u.name === "string" && u.name ? u.name : prev.name,
-                city: resolvedCity,
-                countryCode: resolvedCountry,
-                newsTopics: Array.isArray(u.news_categories) && u.news_categories.length > 0 ? (u.news_categories as NewsTopicId[]) : prev.newsTopics,
-                weatherTopics: Array.isArray(u.weather_categories) && u.weather_categories.length > 0 ? (u.weather_categories as WeatherTopicId[]) : prev.weatherTopics,
-                deliveryHour: typeof u.send_time === "string" ? parseDeliveryHour(u.send_time) : prev.deliveryHour,
-              };
-              savePreferences(updated);
-              return updated;
-            });
-          }
+          setPrefs((prev) => {
+            const resolvedCity = dbCity && dbCity !== "Seattle" ? dbCity : prev.city || dbCity || "Seattle";
+            const resolvedCountry = dbCountry && dbCountry !== "US" ? dbCountry : prev.countryCode || dbCountry || "US";
+            const resolvedWeather = dbWeather || prev.weatherTopics;
+            const resolvedNews = dbNews || prev.newsTopics;
+
+            const updated: Preferences = {
+              ...prev,
+              name: typeof u.name === "string" && u.name ? u.name : prev.name,
+              city: resolvedCity,
+              countryCode: resolvedCountry,
+              weatherTopics: resolvedWeather,
+              newsTopics: resolvedNews,
+              deliveryHour: typeof u.send_time === "string" ? parseDeliveryHour(u.send_time) : prev.deliveryHour,
+            };
+
+            savePreferences(updated);
+
+            // If remote categories differ from current, re-fetch live news & weather
+            if (JSON.stringify(resolvedNews) !== JSON.stringify(prev.newsTopics)) {
+              fetchNews(resolvedNews);
+            }
+            if (resolvedCity !== prev.city || resolvedCountry !== prev.countryCode) {
+              fetchWeather(resolvedCity, resolvedCountry);
+            }
+
+            return updated;
+          });
         }
       })
       .catch((err: unknown) => {
-        console.warn("n8n dashboard fetch:", err);
+        console.warn("n8n dashboard background sync:", err);
       });
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [fetchWeather, fetchNews]);
 
-  const n8nStories: EditorialStory[] = React.useMemo(() => {
-    if (!n8nDigest?.weekly_digest || typeof n8nDigest.weekly_digest !== "object") return [];
-    const wd = n8nDigest.weekly_digest;
-    if (!Array.isArray(wd.articles) || wd.articles.length === 0) return [];
-    return wd.articles.map((art: N8nDashboardArticle, idx: number) => {
-      const topic = (art.category?.toLowerCase() || "technology") as NewsTopicId;
-      return {
-        id: `n8n-${idx}`,
-        topic,
-        topicLabel: art.category ? art.category.toUpperCase() : "GENERAL",
-        headline: art.title || "Daily Digest Story",
-        summary: art.summary || "",
-        source: art.source || "Beta Digest Wire",
-        timestamp: art.published_at ? "Today" : "Recently",
-        url: art.url || "#",
-      };
-    });
-  }, [n8nDigest]);
-
-  const weather = realWeather || generateCityWeather(prefs.city, prefs.countryCode);
+  // Derived weather and news
+  const weather = realWeather || generateCityWeather(prefs.city || "Seattle", prefs.countryCode || "US");
   const stories =
     realStories.length > 0
-      ? realStories
+      ? realStories.slice(0, 5)
       : n8nStories.length > 0
-      ? n8nStories
-      : getTop5Stories(prefs.newsTopics);
+      ? n8nStories.slice(0, 5)
+      : getTop5Stories(prefs.newsTopics).slice(0, 5);
+
+  const countryObj = COUNTRIES.find((c) => c.code === (weather.country || prefs.countryCode));
+  const countryName = countryObj ? countryObj.name : weather.country || "United States";
 
   const todayFormatted = hydrated
     ? new Intl.DateTimeFormat("en-US", {
@@ -151,226 +299,253 @@ export const DashboardView: React.FC = () => {
         month: "long",
         day: "numeric",
         year: "numeric",
-      })
-        .format(new Date())
-        .replace(/, ([A-Za-z]+ \d+)/, " · $1")
+      }).format(new Date())
     : "";
 
-  // Always convert temperature to Celsius
-  const toCelsius = (val: number | undefined | null): number | "—" => {
-    if (typeof val !== "number" || isNaN(val)) return "—";
-    const sourceUnit = weather.tempUnit || "";
-    if (sourceUnit.includes("C")) {
-      return Math.round(val);
+  const selectedStory = selectedStoryIndex !== null ? stories[selectedStoryIndex] : null;
+
+  // Modal accessibility: body scroll lock and focus management
+  useEffect(() => {
+    if (selectedStoryIndex !== null) {
+      document.body.style.overflow = "hidden";
+      modalCloseBtnRef.current?.focus();
+    } else {
+      document.body.style.overflow = "";
     }
-    return Math.round(((val - 32) * 5) / 9);
+  }, [selectedStoryIndex]);
+
+  // Keyboard navigation inside modal (Escape, ArrowLeft, ArrowRight)
+  const handleModalKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeStoryModal();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      prevStory();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      nextStory();
+    }
   };
 
-  const displayCurrentTemp = toCelsius(weather.currentTemp);
-  const displayHigh = toCelsius(weather.high);
-  const displayLow = toCelsius(weather.low);
-  const displaySpread =
-    typeof displayHigh === "number" && typeof displayLow === "number"
-      ? Math.abs(displayHigh - displayLow)
-      : "—";
+  const openStoryModal = (index: number) => {
+    setSelectedStoryIndex(index);
+  };
 
-  const displayThreeDay = (weather.threeDay || []).map((d) => ({
-    day: d.day,
-    condition: d.condition,
-    high: toCelsius(d.high),
-    low: toCelsius(d.low),
-  }));
+  const closeStoryModal = () => {
+    const prevIndex = selectedStoryIndex;
+    setSelectedStoryIndex(null);
+    if (prevIndex !== null && triggerButtonRefs.current[prevIndex]) {
+      triggerButtonRefs.current[prevIndex]?.focus();
+    }
+  };
 
-  const displayHourly = (weather.hourly || []).map((h) => ({
-    time: h.time,
-    condition: h.condition,
-    temp: toCelsius(h.temp),
-  }));
+  const prevStory = () => {
+    setSelectedStoryIndex((curr) => {
+      if (curr === null || curr <= 0) return curr;
+      return curr - 1;
+    });
+  };
 
-  const hasSecondaryWeather =
-    typeof weather.rainProb === "number" ||
-    typeof weather.uvIndex === "number" ||
-    typeof weather.airQuality === "number" ||
-    !!weather.windSpeed;
+  const nextStory = () => {
+    setSelectedStoryIndex((curr) => {
+      if (curr === null || curr >= stories.length - 1) return curr;
+      return curr + 1;
+    });
+  };
+
+  // Weather preference filters
+  const selectedWeatherTopics = prefs.weatherTopics || [];
+  const selectedCompactTopics = selectedWeatherTopics.filter(
+    (t) => t in COMPACT_METRICS && t !== "hourly-3h" && t !== "forecast-3day"
+  );
+  const showHourlySection = selectedWeatherTopics.includes("hourly-3h");
+  const showForecastSection = selectedWeatherTopics.includes("forecast-3day");
 
   return (
-    <div className="relative min-h-screen text-[var(--text)] flex flex-col pb-16">
+    <div className="relative min-h-screen text-[#ededed] flex flex-col pb-16">
       {/* Canvas B background */}
       <CanvasB showConcentricCircles={false} />
 
       {/* Top Utility Bar & Logo */}
-      <header className="relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-10 pt-7 pb-4 flex items-center justify-start">
+      <header className="relative z-10 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 pt-7 pb-4 flex items-center justify-start">
         <TopLeftLogo />
       </header>
 
-      {/* Translucent Frosted Main Dashboard Board */}
-      <main className="relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="main-glass-board p-6 sm:p-9 lg:p-11">
-          {/* Greeting & Header Action Bar */}
-          <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 pb-7 mb-8 border-b border-white/[0.16]">
+      {/* Main Dashboard Card Shell */}
+      <main className="relative z-10 w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-[#141418]/85 border border-white/15 rounded-[32px] md:rounded-[40px] shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl p-6 sm:p-9 lg:p-10 transition-all duration-200">
+          
+          {/* Header Action Bar: Date, Greeting, Buttons */}
+          <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 pb-7 mb-8 border-b border-white/10">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/75 mb-1.5">
-                {todayFormatted || "Daily Edition"}
+              <p className="font-sans text-[13px] text-white/60 mb-1">
+                {todayFormatted || "Daily Digest"}
               </p>
-              <h1 className="editorial-title text-[36px] sm:text-[42px] font-medium tracking-tight text-white leading-none">
-                {prefs.name ? `Hi, ${prefs.name}` : "Welcome back"}
+              <h1 className="font-display font-[600] text-[28px] sm:text-[36px] tracking-tight text-white leading-tight">
+                {prefs.name ? (
+                  <>
+                    Good morning,{" "}
+                    <span className="bg-gradient-to-r from-[#6b62f2] to-[#8a7cfb] bg-clip-text text-transparent">
+                      {prefs.name}
+                    </span>
+                  </>
+                ) : (
+                  "Good morning"
+                )}
               </h1>
             </div>
 
-            {/* Right Side: Action Buttons */}
+            {/* Right Side Pill Buttons */}
             <div className="flex flex-wrap items-center gap-2.5">
-              {/* Dark-Glass Edit Preferences Button */}
               <Link
                 href="/preferences"
-                className="dark-glass-pill px-4 py-2 text-[12px] font-medium text-white flex items-center gap-2 cursor-pointer"
+                className="h-[40px] px-5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-white text-[13px] font-medium transition-all duration-150 hover:-translate-y-[1px] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a7cfb] flex items-center gap-2 select-none cursor-pointer"
               >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-white/75" aria-hidden="true" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-white/70" aria-hidden="true" />
                 <span>Edit preferences</span>
               </Link>
 
-              {/* Dark-Glass Sign Out Button */}
               <button
                 type="button"
                 onClick={async () => {
                   await logoutViaApi();
                 }}
-                className="dark-glass-pill px-4 py-2 text-[12px] font-medium text-white/90 flex items-center gap-2 cursor-pointer"
+                className="h-[40px] px-5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-white/80 hover:text-white text-[13px] font-medium transition-all duration-150 hover:-translate-y-[1px] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a7cfb] flex items-center gap-2 select-none cursor-pointer"
                 aria-label="Sign out"
               >
-                <LogOut className="w-3.5 h-3.5 text-white/75" aria-hidden="true" />
+                <LogOut className="w-3.5 h-3.5 text-white/70" aria-hidden="true" />
                 <span>Sign out</span>
               </button>
             </div>
           </header>
 
-          {!hydrated ? (
-            /* Skeleton State while hydrating */
-            <div className="flex-grow flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-12 h-12 rounded-2xl dark-glass-panel flex items-center justify-center mb-4">
-                <FileText className="w-6 h-6 text-white/80" aria-hidden="true" />
+          {/* Asymmetric 2-Column Responsive Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8 items-start">
+            
+            {/* LEFT COLUMN: Weather Section (Respecting Saved Preferences) */}
+            <aside className="w-full space-y-4">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <h2 className="font-sans font-[600] text-[18px] text-white">
+                  Your weather
+                </h2>
+                <Link
+                  href="/preferences"
+                  className="font-sans text-[13px] text-white/60 hover:text-white underline transition-colors"
+                >
+                  Preferences
+                </Link>
               </div>
-              <h2 className="editorial-title text-[22px] font-medium text-white mb-2">
-                Loading your daily briefing...
-              </h2>
-              <p className="font-sans text-[14px] text-white/70 max-w-sm mb-6">
-                Gathering your personalized updates and local weather.
-              </p>
-              <div className="w-full max-w-[480px] dark-glass-panel p-5 flex flex-col gap-3 animate-pulse">
-                <div className="w-24 h-4 bg-white/10 rounded-full" />
-                <div className="w-full h-3.5 bg-white/[0.06] rounded-full" />
-                <div className="w-4/5 h-3.5 bg-white/[0.06] rounded-full" />
-              </div>
-            </div>
-          ) : (
-            /* Interior 2-Column Asymmetric Layout */
-            <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-7 lg:gap-8 items-start">
-              {/* LEFT RAIL (340px sticky on desktop): Weather Card */}
-              <aside className="lg:sticky lg:top-6 space-y-5">
-                <div>
-                  <div className="flex items-baseline justify-between mb-3 px-1">
-                    <h2 className="editorial-title text-[22px] font-medium tracking-tight text-white">
-                      Your weather · <span className="italic font-normal">{prefs.city || "Seattle"}</span>
-                    </h2>
+
+              {/* Weather Content Card */}
+              <SectionCard className="p-6">
+                {weatherLoading && !realWeather ? (
+                  /* Weather Loading Skeleton */
+                  <div className="space-y-4 animate-pulse">
+                    <div className="h-6 w-36 bg-white/10 rounded-full" />
+                    <div className="h-16 w-full bg-white/[0.04] rounded-2xl" />
+                    <div className="grid grid-cols-2 gap-2.5 pt-2">
+                      <div className="h-16 bg-white/[0.03] rounded-xl" />
+                      <div className="h-16 bg-white/[0.03] rounded-xl" />
+                    </div>
                   </div>
-
-                  {/* Deep Obsidian Dark-Glass Weather Panel */}
-                  <div className="dark-glass-panel p-6">
-                    {/* Top Status Row */}
-                    <div className="flex items-center justify-between font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-white/55 mb-3.5">
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-                        <span>CURRENT CONDITIONS</span>
-                      </span>
-                      <span className="text-white/40">{weather.city || prefs.city || "LOCAL"}</span>
-                    </div>
-
-                    {/* Widget Hero: Weather Icon + Condition + Large Temperature Display */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-2xl bg-white/[0.04] border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)]">
-                          <WeatherWidgetIcon condition={weather.condition} size={48} />
+                ) : weatherError && !realWeather ? (
+                  /* Weather Error State */
+                  <div className="flex flex-col items-center justify-center py-6 text-center">
+                    <AlertTriangle className="w-7 h-7 text-amber-400 mb-2" aria-hidden="true" />
+                    <p className="font-sans text-[14px] font-medium text-white mb-1">
+                      Weather data unavailable
+                    </p>
+                    <p className="font-sans text-[12px] text-white/60 mb-4 max-w-xs">
+                      {weatherError}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => fetchWeather(prefs.city || "Seattle", prefs.countryCode || "US")}
+                      className="h-[36px] px-4 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-white text-[12px] font-medium inline-flex items-center gap-1.5 transition cursor-pointer"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Retry</span>
+                    </button>
+                  </div>
+                ) : (
+                  /* Weather Loaded Content */
+                  <div className="space-y-5">
+                    {/* Hero Block: Location, Condition Icon, Condition Text, Temp, High/Low */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="font-sans text-[13px] font-medium text-white/60 truncate">
+                          {weather.city || prefs.city || "Seattle"}, {countryName}
                         </div>
-                        <div>
-                          <div className="text-[15px] font-medium text-white/95 capitalize leading-tight mb-1">
-                            {weather.condition}
-                          </div>
-                          <div className="font-mono text-[11px] text-white/60 tabular-nums">
-                            H: <strong className="text-white font-semibold">{displayHigh !== "—" ? `${displayHigh}°C` : "—"}</strong>
-                            {" · "}
-                            L: <strong className="text-white font-semibold">{displayLow !== "—" ? `${displayLow}°C` : "—"}</strong>
-                          </div>
+                        <div className="font-sans font-[600] text-[16px] text-white capitalize mt-0.5">
+                          {weather.condition}
+                        </div>
+                        <div className="font-sans text-[12px] text-white/60 tabular-nums mt-1">
+                          H: <strong className="text-white font-medium">{weather.high}°</strong>
+                          {" · "}
+                          L: <strong className="text-white font-medium">{weather.low}°</strong>
                         </div>
                       </div>
 
-                      <div className="text-right shrink-0">
-                        <span className="editorial-title text-[44px] sm:text-[48px] font-medium tracking-tight text-white leading-none tabular-nums">
-                          {displayCurrentTemp !== "—" ? `${displayCurrentTemp}°C` : "—"}
-                        </span>
-                        {displaySpread !== "—" && (
-                          <div className="font-mono text-[10px] text-white/50 mt-1 tabular-nums">
-                            Spread <span className="text-white/75 font-medium">{displaySpread}°</span>
-                          </div>
-                        )}
+                      <div className="flex items-center gap-2 text-right shrink-0">
+                        <div className="p-1.5 rounded-2xl bg-white/[0.03] border border-white/10 shrink-0">
+                          <WeatherWidgetIcon condition={weather.condition} size={42} />
+                        </div>
+                        <div className="font-sans font-[700] text-[36px] sm:text-[40px] text-white tracking-tight leading-none tabular-nums">
+                          {weather.currentTemp}{weather.tempUnit}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Atmospheric Parameters Strip (WeatherWidget.org style) */}
-                    <div className="mt-4 grid grid-cols-4 gap-1.5 py-2.5 px-1 bg-white/[0.03] border border-white/[0.08] rounded-xl text-center">
-                      <div className="flex flex-col items-center py-0.5">
-                        <span className="flex items-center gap-1 text-[9.5px] font-mono uppercase tracking-wider text-white/50">
-                          <Wind className="w-3 h-3 text-white/60" aria-hidden="true" />
-                          <span>Wind</span>
-                        </span>
-                        <span className="font-mono text-[11px] font-medium text-white/90 mt-1 tabular-nums truncate max-w-[65px]">
-                          {weather.windSpeed ? `${weather.windSpeed} ${weather.windUnit || "km/h"}` : "—"}
-                        </span>
+                    {/* Selected Compact Metrics (Max 3, rendered only if selected) */}
+                    {selectedCompactTopics.length > 0 && (
+                      <div className="pt-4 border-t border-white/10">
+                        <div className="font-sans text-[11px] font-semibold uppercase tracking-wider text-white/50 mb-2.5">
+                          Selected Details ({selectedCompactTopics.length}/3)
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {selectedCompactTopics.map((topId) => {
+                            const config = COMPACT_METRICS[topId];
+                            if (!config) return null;
+                            const Icon = config.icon;
+                            return (
+                              <div
+                                key={topId}
+                                className="p-3 rounded-[16px] bg-white/[0.04] border border-white/10 flex flex-col justify-between transition-all hover:border-white/20"
+                              >
+                                <div className="flex items-center gap-1.5 text-white/60 text-[12px] font-sans font-medium">
+                                  <Icon className="w-3.5 h-3.5 text-[#8a7cfb] shrink-0" aria-hidden="true" />
+                                  <span className="truncate">{config.label}</span>
+                                </div>
+                                <div className="font-sans text-[13.5px] font-[600] text-white mt-1.5 tabular-nums">
+                                  {config.getValue(weather)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="flex flex-col items-center py-0.5 border-l border-white/[0.06]">
-                        <span className="flex items-center gap-1 text-[9.5px] font-mono uppercase tracking-wider text-white/50">
-                          <Droplets className="w-3 h-3 text-sky-400/80" aria-hidden="true" />
-                          <span>Hum</span>
-                        </span>
-                        <span className="font-mono text-[11px] font-medium text-white/90 mt-1 tabular-nums">
-                          {typeof weather.humidity === "number" ? `${weather.humidity}%` : "—"}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-center py-0.5 border-l border-white/[0.06]">
-                        <span className="flex items-center gap-1 text-[9.5px] font-mono uppercase tracking-wider text-white/50">
-                          <CloudRain className="w-3 h-3 text-cyan-400/80" aria-hidden="true" />
-                          <span>Rain</span>
-                        </span>
-                        <span className="font-mono text-[11px] font-medium text-white/90 mt-1 tabular-nums">
-                          {typeof weather.rainProb === "number" ? `${weather.rainProb}%` : "0%"}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-center py-0.5 border-l border-white/[0.06]">
-                        <span className="flex items-center gap-1 text-[9.5px] font-mono uppercase tracking-wider text-white/50">
-                          <Sun className="w-3 h-3 text-amber-400/80" aria-hidden="true" />
-                          <span>UV</span>
-                        </span>
-                        <span className="font-mono text-[11px] font-medium text-white/90 mt-1 tabular-nums">
-                          {typeof weather.uvIndex === "number" ? weather.uvIndex : "—"}
-                        </span>
-                      </div>
-                    </div>
+                    )}
 
-                    {/* Hour-by-Hour Timeline Track (WeatherWidget.org Horizontal style) */}
-                    {displayHourly.length > 0 && (
-                      <div className="mt-4 pt-3.5 border-t border-white/[0.07]">
-                        <div className="flex items-center justify-between font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-white/55 mb-2">
-                          <span>HOURLY TIMELINE</span>
-                          <span className="text-white/40">TODAY</span>
+                    {/* 3-Hour Breakdown (rendered ONLY if selected in preferences) */}
+                    {showHourlySection && weather.hourly && weather.hourly.length > 0 && (
+                      <div className="pt-4 border-t border-white/10">
+                        <div className="flex items-center gap-1.5 font-sans text-[11px] font-semibold uppercase tracking-wider text-white/50 mb-2.5">
+                          <Clock className="w-3.5 h-3.5 text-[#8a7cfb]" aria-hidden="true" />
+                          <span>3-Hour Breakdown</span>
                         </div>
                         <div className="grid grid-cols-4 gap-1.5 text-center">
-                          {displayHourly.slice(0, 4).map((h, idx) => (
+                          {weather.hourly.slice(0, 4).map((h, idx) => (
                             <div
                               key={idx}
-                              className="flex flex-col items-center py-2 px-1 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] transition-colors"
+                              className="p-2 rounded-[14px] bg-white/[0.04] border border-white/10 flex flex-col items-center"
                             >
-                              <span className="font-mono text-[10px] text-white/55 tabular-nums mb-1">{h.time}</span>
-                              <WeatherWidgetIcon condition={h.condition} size={24} className="my-0.5" />
-                              <span className="font-mono text-[11px] font-medium text-white tabular-nums mt-0.5">
-                                {h.temp !== "—" ? `${h.temp}°C` : "—"}
+                              <span className="font-sans text-[11px] text-white/60 tabular-nums">
+                                {h.time}
+                              </span>
+                              <WeatherWidgetIcon condition={h.condition} size={22} className="my-1" />
+                              <span className="font-sans text-[12px] font-bold text-white tabular-nums">
+                                {h.temp}°
                               </span>
                             </div>
                           ))}
@@ -378,173 +553,287 @@ export const DashboardView: React.FC = () => {
                       </div>
                     )}
 
-                    {/* 3-Day Forecast Outlook (WeatherWidget.org Responsive multi-day style) */}
-                    <div className="mt-4 pt-3.5 border-t border-white/[0.07]">
-                      <div className="flex items-center justify-between font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-white/55 mb-2">
-                        <span>3-DAY OUTLOOK</span>
-                        <span className="text-white/40">HIGH / LOW</span>
-                      </div>
-
-                      <div className="divide-y divide-white/[0.06] text-[13px]">
-                        {displayThreeDay.map((d, i) => (
-                          <div
-                            key={i}
-                            className="py-2.5 first:pt-1 last:pb-0.5 flex items-center justify-between hover:bg-white/[0.02] px-1 rounded-lg transition-colors"
-                          >
-                            <span className="font-medium text-white/90 w-[80px] text-[13px]">{d.day}</span>
-                            <div className="flex items-center justify-center flex-1">
-                              <WeatherWidgetIcon condition={d.condition} size={22} />
-                              <span className="text-white/50 text-[11px] capitalize truncate max-w-[80px] ml-1.5 hidden sm:inline">
-                                {d.condition}
+                    {/* 3-Day Forecast Outlook (rendered ONLY if selected in preferences) */}
+                    {showForecastSection && weather.threeDay && weather.threeDay.length > 0 && (
+                      <div className="pt-4 border-t border-white/10">
+                        <div className="flex items-center gap-1.5 font-sans text-[11px] font-semibold uppercase tracking-wider text-white/50 mb-2.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#8a7cfb]" aria-hidden="true" />
+                          <span>3-Day Forecast</span>
+                        </div>
+                        <div className="divide-y divide-white/[0.08]">
+                          {weather.threeDay.map((d, idx) => (
+                            <div
+                              key={idx}
+                              className="py-2 first:pt-0 last:pb-0 flex items-center justify-between text-[13px]"
+                            >
+                              <span className="font-sans font-medium text-white/90 w-[70px]">
+                                {d.day}
+                              </span>
+                              <div className="flex items-center gap-1.5 flex-1 justify-center">
+                                <WeatherWidgetIcon condition={d.condition} size={20} />
+                                <span className="font-sans text-[11px] text-white/60 capitalize truncate max-w-[85px] hidden sm:inline">
+                                  {d.condition}
+                                </span>
+                              </div>
+                              <span className="font-sans text-[12px] text-white/70 tabular-nums text-right w-[80px]">
+                                <strong className="text-white font-semibold">{d.high}°</strong> / {d.low}°
                               </span>
                             </div>
-                            <span className="font-mono text-[12px] text-white/60 tabular-nums text-right w-[85px]">
-                              <strong className="text-white font-semibold">{d.high !== "—" ? `${d.high}°C` : "—"}</strong>
-                              {" "}/{" "}
-                              <span>{d.low !== "—" ? `${d.low}°C` : "—"}</span>
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Secondary Information Footer (Sunrise/Sunset & AQI) */}
-                    {(weather.sunrise || weather.sunset || typeof weather.airQuality === "number") && (
-                      <div className="mt-3.5 pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-white/50 px-1">
-                        {weather.sunrise && weather.sunset ? (
-                          <span className="flex items-center gap-1.5">
-                            <Sun className="w-3 h-3 text-amber-300/70" aria-hidden="true" />
-                            <span>{weather.sunrise} - {weather.sunset}</span>
-                          </span>
-                        ) : (
-                          <span />
-                        )}
-                        {typeof weather.airQuality === "number" && (
-                          <span className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-white/70">
-                            AQI {weather.airQuality}
-                          </span>
-                        )}
+                          ))}
+                        </div>
                       </div>
                     )}
-                  </div>
-                </div>
-              </aside>
 
-              {/* RIGHT COLUMN (1fr width): Unified Top 5 Stories Section */}
-              <section>
-                <div className="flex items-baseline justify-between gap-3 mb-3 px-1">
-                  <h2 className="editorial-title text-[22px] font-medium tracking-tight text-white">
-                    Your top 5 stories
-                  </h2>
-                  <span className="font-mono text-[11px] text-white/70">
-                    Curated morning briefing
-                  </span>
-                </div>
-
-                {/* Strictly Unified Dark-Glass Stories Container */}
-                <div className="dark-glass-panel divide-y divide-white/[0.08] px-6 sm:px-8">
-                  {stories.slice(0, 5).map((story, i) => (
-                    <article
-                      key={story.id || i}
-                      onClick={() => setSelectedStory(story)}
-                      className="py-6 first:pt-6 last:pb-6 group cursor-pointer"
-                    >
-                      <div className="flex flex-wrap items-center gap-2.5 mb-2.5">
-                        <span className="font-mono text-[12px] font-medium text-white/45">
-                          {(i + 1).toString().padStart(2, "0")}
-                        </span>
-                        <span className="dark-category-pill font-mono px-3 py-0.5 text-[11px] font-medium">
-                          {story.topicLabel}
-                        </span>
-                        <span className="font-mono text-[11px] text-white/50">
-                          {story.source} · {story.timestamp}
-                        </span>
+                    {/* If user selected no details, show gentle nudge */}
+                    {selectedWeatherTopics.length === 0 && (
+                      <div className="pt-3 border-t border-white/10 text-center py-2">
+                        <p className="font-sans text-[13px] text-white/60">
+                          No extra details selected.
+                        </p>
+                        <Link
+                          href="/preferences"
+                          className="font-sans text-[12px] text-[#8a7cfb] hover:underline mt-1 inline-block"
+                        >
+                          Customize weather cards
+                        </Link>
                       </div>
+                    )}
 
-                      <h3 className="editorial-title text-[20px] sm:text-[22px] font-medium text-white group-hover:text-amber-200/95 transition leading-snug mb-2">
-                        {story.headline}
-                      </h3>
+                    {/* Footer: Last Updated & Edit Link */}
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-between font-sans text-[12px] text-white/50">
+                      <span>Last updated {weatherLastUpdated || "Just now"}</span>
+                      <Link
+                        href="/preferences"
+                        className="text-white/70 hover:text-white underline transition-colors"
+                      >
+                        Edit
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </SectionCard>
+            </aside>
 
-                      <p className="text-[13.5px] text-white/65 leading-relaxed mb-3.5">
-                        {story.summary}
-                      </p>
+            {/* RIGHT COLUMN: News Section */}
+            <section className="w-full space-y-4">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <h2 className="font-sans font-[600] text-[18px] text-white">
+                  Top 5 stories
+                </h2>
+                <span className="font-sans text-[13px] text-white/60">
+                  Curated morning dispatch
+                </span>
+              </div>
 
-                      <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-wider text-white/85 group-hover:text-white group-hover:translate-x-0.5 transition-all">
-                        <span>Read full story</span>
-                        <ArrowRight className="w-3 h-3 text-current" aria-hidden="true" />
-                      </span>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            </div>
-          )}
+              {/* News List Container */}
+              <SectionCard className="p-6 sm:p-8">
+                {newsLoading && stories.length === 0 ? (
+                  /* News Loading Skeleton */
+                  <div className="divide-y divide-white/10 space-y-5 animate-pulse">
+                    {[1, 2, 3].map((n) => (
+                      <div key={n} className="pt-5 first:pt-0 space-y-2.5">
+                        <div className="h-4 w-32 bg-white/10 rounded-full" />
+                        <div className="h-6 w-4/5 bg-white/[0.06] rounded-xl" />
+                        <div className="h-4 w-full bg-white/[0.04] rounded-md" />
+                      </div>
+                    ))}
+                  </div>
+                ) : newsError && stories.length === 0 ? (
+                  /* News Error State */
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <AlertTriangle className="w-8 h-8 text-amber-400 mb-2" aria-hidden="true" />
+                    <p className="font-sans text-[15px] font-medium text-white mb-1">
+                      Unable to load stories
+                    </p>
+                    <p className="font-sans text-[13px] text-white/60 mb-4 max-w-sm">
+                      {newsError}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => fetchNews(prefs.newsTopics)}
+                      className="h-[38px] px-5 rounded-full bg-white text-black font-semibold text-[13px] inline-flex items-center gap-2 transition hover:bg-white/90 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Retry</span>
+                    </button>
+                  </div>
+                ) : stories.length === 0 ? (
+                  /* News Empty State */
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <p className="font-sans text-[15px] font-medium text-white mb-1">
+                      No stories found for your selected topics
+                    </p>
+                    <p className="font-sans text-[13px] text-white/60 mb-4">
+                      Try adding more categories in your preferences.
+                    </p>
+                    <Link
+                      href="/preferences"
+                      className="h-[38px] px-5 rounded-full bg-white text-black font-semibold text-[13px] inline-flex items-center gap-2 hover:bg-white/90 transition"
+                    >
+                      <span>Choose topics</span>
+                    </Link>
+                  </div>
+                ) : (
+                  /* News Stories List */
+                  <div className="divide-y divide-white/10">
+                    {stories.map((story, i) => (
+                      <article
+                        key={story.id || i}
+                        role="button"
+                        tabIndex={0}
+                        ref={(el) => {
+                          triggerButtonRefs.current[i] = el;
+                        }}
+                        onClick={() => openStoryModal(i)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openStoryModal(i);
+                          }
+                        }}
+                        className="py-5 first:pt-0 last:pb-0 -mx-3 px-3 rounded-2xl group cursor-pointer transition-all duration-150 hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a7cfb]"
+                        aria-label={`Open story: ${story.headline}`}
+                      >
+                        {/* Meta row: Index, Category Pill, Source, Timestamp */}
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span className="font-sans text-[12px] font-medium text-white/40 tabular-nums">
+                            0{i + 1}
+                          </span>
+                          <span className="h-[24px] px-2.5 rounded-full text-[11px] font-medium bg-white/[0.06] border border-white/10 text-white/90 select-none inline-flex items-center">
+                            {story.topicLabel}
+                          </span>
+                          <span className="font-sans text-[12px] text-white/50">
+                            · {story.source}
+                          </span>
+                          <span className="font-sans text-[12px] text-white/40">
+                            · {story.timestamp}
+                          </span>
+                        </div>
+
+                        {/* Headline: Sans-serif font */}
+                        <h3 className="font-sans font-[600] text-[17px] sm:text-[19px] text-white leading-snug group-hover:text-white/90 transition-colors mb-2">
+                          {story.headline}
+                        </h3>
+
+                        {/* Summary: Line-clamped to 2 lines */}
+                        <p className="font-sans font-[400] text-[13.5px] leading-relaxed text-white/70 line-clamp-2 mb-3">
+                          {story.summary}
+                        </p>
+
+                        {/* Read full story action */}
+                        <div className="font-sans font-[500] text-[13px] text-white/80 group-hover:text-white inline-flex items-center gap-1.5 transition-colors">
+                          <span>Read full story</span>
+                          <ExternalLink className="w-3 h-3 text-white/60 group-hover:text-white transition-colors" aria-hidden="true" />
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </SectionCard>
+            </section>
+          </div>
         </div>
       </main>
 
-      {/* Article Preview Modal */}
-      {selectedStory && (
+      {/* News Preview Modal Dialog */}
+      {selectedStory && selectedStoryIndex !== null && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-150"
-          onClick={() => setSelectedStory(null)}
+          aria-labelledby="story-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150"
+          onClick={closeStoryModal}
+          onKeyDown={handleModalKeyDown}
         >
           <div
-            className="modal-glass-board w-full max-w-lg p-6 sm:p-8"
+            className="bg-[#141418]/95 border border-white/15 rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-[0_24px_64px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-2xl w-full max-w-lg relative transition-all duration-150 animate-in zoom-in-95"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-2.5 text-[12px] flex-wrap">
-                <span className="font-mono font-medium text-white/55">
-                  {stories.findIndex((s) => s === selectedStory) >= 0
-                    ? (stories.findIndex((s) => s === selectedStory) + 1).toString().padStart(2, "0")
-                    : "01"}
+            {/* Header: Pagination Controls & Close */}
+            <div className="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="font-sans text-[12px] font-medium text-white/60 tabular-nums">
+                  Story {selectedStoryIndex + 1} of {stories.length}
                 </span>
-                <span className="dark-category-pill font-mono px-3 py-1 text-[11px]">
-                  {selectedStory.topicLabel}
-                </span>
-                <span className="font-mono text-[11px] text-white/55">
-                  {selectedStory.source} · {selectedStory.timestamp}
-                </span>
+
+                {/* Prev & Next Controls */}
+                <div className="flex items-center gap-1 ml-2">
+                  <button
+                    type="button"
+                    onClick={prevStory}
+                    disabled={selectedStoryIndex === 0}
+                    aria-label="Previous story"
+                    className="p-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed text-white transition cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextStory}
+                    disabled={selectedStoryIndex === stories.length - 1}
+                    aria-label="Next story"
+                    className="p-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed text-white transition cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+
+              {/* Close Button */}
               <button
+                ref={modalCloseBtnRef}
                 type="button"
-                onClick={() => setSelectedStory(null)}
-                className="p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                onClick={closeStoryModal}
+                className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a7cfb]"
                 aria-label="Close story preview"
               >
                 <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
-            <h3 className="editorial-title text-[24px] sm:text-[27px] font-medium text-white leading-snug mb-3.5">
+            {/* Story Meta */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="h-[24px] px-2.5 rounded-full text-[11px] font-medium bg-white/[0.06] border border-white/10 text-white/90">
+                {selectedStory.topicLabel}
+              </span>
+              <span className="font-sans text-[12px] text-white/60">
+                {selectedStory.source} · {selectedStory.timestamp}
+              </span>
+            </div>
+
+            {/* Headline: Sans-serif */}
+            <h2
+              id="story-modal-title"
+              className="font-sans font-[600] text-[20px] sm:text-[23px] text-white leading-snug mb-3.5"
+            >
               {selectedStory.headline}
-            </h3>
-            <p className="text-[14px] text-white/75 leading-relaxed mb-6">
+            </h2>
+
+            {/* Full Summary */}
+            <p className="font-sans font-[400] text-[14px] sm:text-[15px] text-white/75 leading-relaxed mb-6">
               {selectedStory.summary}
             </p>
 
-            <div className="pt-4 border-t border-white/[0.1] flex items-center justify-between flex-wrap gap-3">
-              <span className="font-mono text-[11px] text-white/50">
+            {/* Modal Footer Buttons */}
+            <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-3">
+              <span className="font-sans text-[12px] text-white/50">
                 Dispatched via {selectedStory.source}
               </span>
               <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setSelectedStory(null)}
-                  className="dark-glass-pill px-4 py-1.5 text-[12px] font-medium text-white/80 hover:text-white cursor-pointer"
+                <OutlineButton
+                  size="sm"
+                  onClick={closeStoryModal}
                 >
                   Close
-                </button>
+                </OutlineButton>
                 <a
                   href={selectedStory.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-1.5 rounded-full text-[12px] font-semibold bg-white text-[#111115] hover:bg-white/90 transition inline-flex items-center gap-1.5 cursor-pointer"
+                  className="h-[40px] px-5 text-[14px] inline-flex items-center justify-center font-sans font-[500] rounded-full select-none whitespace-nowrap bg-white text-black hover:bg-white hover:text-black hover:shadow-[0_4px_16px_rgba(255,255,255,0.2)] hover:-translate-y-[1px] active:scale-[0.97] transition-all duration-150 cursor-pointer"
                 >
                   <span>Read on {selectedStory.source}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-current" aria-hidden="true" />
+                  <ExternalLink className="w-3.5 h-3.5 ml-1.5 text-black shrink-0" aria-hidden="true" />
                 </a>
               </div>
             </div>
