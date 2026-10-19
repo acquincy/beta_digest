@@ -57,7 +57,7 @@ export const NEWS_TOPIC_ORDER: NewsTopicId[] = [
 ];
 
 export const WEATHER_TOPIC_LABELS: Record<WeatherTopicId, string> = {
-  "current-temperature": "Current temperature",
+  "current-temperature": "Feels like",
   "high-low": "Day's high/low",
   "hourly-3h": "3-hour breakdown",
   "forecast-3day": "3-day forecast",
@@ -119,6 +119,7 @@ export interface CityWeatherData {
   tempUnit: "°F" | "°C";
   windUnit: "mph" | "km/h";
   currentTemp: number;
+  feelsLike?: number;
   condition: string;
   high: number;
   low: number;

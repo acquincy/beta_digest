@@ -95,6 +95,7 @@ export function sanitizePreferences(raw: unknown): Preferences {
   } else if (Array.isArray(rec.weatherDetails)) {
     // Map legacy labels if present
     const legacyLabelMap: Record<string, WeatherTopicId> = {
+      "Feels like": "current-temperature",
       "Current temperature": "current-temperature",
       "Day's high/low temp": "high-low",
       "3-hour breakdown": "hourly-3h",
